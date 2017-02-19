@@ -3,11 +3,13 @@ import java.io.*;
 
 
 public class Lab2 {
-	static int numHU = 5;
+	static int numHU = 10;
 	
 	static ArrayList<String> content = null;
 	static HashMap<Character, Integer> map = null;
 	static double bias = -1;
+	static double[][] inToHu_mo = new double[numHU][358];
+	static double[][] huToOut_mo = new double[3][numHU+1];
 	static double[][] table = new double[17][21];
 	static double[] huOutput = new double[numHU];
 	static double[] output = new double[3];
@@ -22,21 +24,25 @@ public class Lab2 {
 	static ArrayList<int[]> teacherForTest = null;
 	static ArrayList<int[]> predictionForTest = null;
 	static ArrayList<String> test = null;
-	
+	static ArrayList<int[]> teacherForTune = null;
+	static ArrayList<int[]> predictionForTune = null;
+	static ArrayList<String> tune = null;
 	public static void main(String[] args){
 		setup();
 		initWeight();
 		input(args[0]);
 		int epoch = 0;
-		while(epoch < 800){
+		while(epoch<500){
 			// every str is a protein
 			run(content, prediction, false);
 			run(test, predictionForTest, true);
+			run(tune, predictionForTune, true);
 			
-			/* test
-			System.out.print("train: ");
-			testTrain();
+
 			
+			
+//			System.out.print("train: ");
+//			testTrain();
 			double count = 0;
 			double correct = 0;
 			for(int i = 0 ; i < predictionForTest.size(); i++){
@@ -45,12 +51,33 @@ public class Lab2 {
 					count++;
 				}
 			}
-			System.out.print("test: ");
-			System.out.println(correct/count);
-			System.out.println();
-			*/
+//			System.out.print("test: ");
+//			System.out.println(correct/count);
+			double testRate = correct/count;
+			
+			count = 0;
+			correct = 0;
+			for(int i = 0 ; i < predictionForTune.size(); i++){
+				for(int j = 0; j < predictionForTune.get(i).length; j++){
+					if(predictionForTune.get(i)[j]==teacherForTune.get(i)[j]) correct++;
+					count++;
+				}
+			}
+//			System.out.print("tune: ");
+//			System.out.println(correct/count);
+//			System.out.println();
+			double tuneRate = correct/count;
+			
+			if(testRate>=0.58&&tuneRate>=0.58&&epoch >= 50){
+				System.out.println(epoch);
+				break;
+			}
+		
+			
 			epoch++;
 		}
+		
+		
 		for(int i = 0; i <predictionForTest.size();i++){
 			for(int j = 0; j < predictionForTest.get(i).length; j++){
 				int ret = predictionForTest.get(i)[j];
@@ -68,7 +95,9 @@ public class Lab2 {
 	}
 	public static void run(ArrayList<String> content, ArrayList<int[]> prediction, boolean testFlag){
 		for(int l = 0; l < content.size(); l++){
+			//System.out.println(l);
 			String str = content.get(l);
+			//System.out.println(str);
 			String[] amino = str.split("-");
 			for(int i = 0; i < amino.length; i++){
 				int offset1 = i-8;
@@ -91,6 +120,7 @@ public class Lab2 {
 						table[j][20] = 1;
 					}
 					for(int j = num; j < 17; j++){
+						//System.out.println(amino[j-num].charAt(0));
 						table[j][map.get(amino[j-num].charAt(0))] = 1; 
 					}
 				}
@@ -108,6 +138,15 @@ public class Lab2 {
 						table[j][map.get(amino[i-8+j].charAt(0))] = 1;
 					}
 				}
+				
+//				for(int index1 = 0; index1 < table.length; index1++){
+//					int number = 0;
+//					for(int index2 = 0; index2 < table[0].length; index2++){
+//						System.out.print(table[index1][index2]+" ");
+//					}
+//					System.out.println();
+//				}
+				
 
 
 				prediction.get(l)[i] = 	forward(l,i);
@@ -138,28 +177,36 @@ public class Lab2 {
 				}
 			}
 		}
+
 		System.out.println(correct/count);
 	}
 	//public static double 
 	public static void backward(int protein, int amino){
 	
 		double[] deltaI = new double[3];
-		for(int i = 0; i < 3; i++) deltaI[i] = output[i]*(1-output[i])*(teacher.get(protein)[amino]-output[i]);
-		double[] deltaJ = new double[numHU];
-//		for(int i = 0; i < numHU; i++){
-//			if(huOutput[i]>0){
-//				for(int j = 0; j < 3; j++){
-//					deltaJ[i]+= huToOut[j][i]*deltaI[j];
-//				}
-//			}
-//		}
-		for(int i = 0 ; i < numHU;i++) {
-			for(int j = 0; j < 3;j++){
-				deltaJ[i] += deltaI[j]*huToOut[j][i];
-			}
-			deltaJ[i] = deltaJ[i]*huOutput[i]*(1-huOutput[i]);
+		for(int i = 0; i < 3; i++){
+			int offset = 0;
+			if(teacher.get(protein)[amino]==i) offset = 1;
+			deltaI[i] = output[i]*(1-output[i])*(offset-output[i]);
 		}
-		//update weight
+		double[] deltaJ = new double[numHU];
+		// rectify
+		for(int i = 0; i < numHU; i++){
+			if(huOutput[i]>0){
+				for(int j = 0; j < 3; j++){
+					deltaJ[i]+= huToOut[j][i]*deltaI[j];
+				}
+			}
+		}
+		// sigmoid
+//		for(int i = 0 ; i < numHU;i++) {
+//			for(int j = 0; j < 3;j++){
+//				deltaJ[i] += deltaI[j]*huToOut[j][i];
+//			}
+//			deltaJ[i] = deltaJ[i]*huOutput[i]*(1-huOutput[i]);
+//		}
+		
+		// update weight
 		for(int i = 0; i < 3; i++){
 			for(int j = 0; j < numHU; j++){
 				huToOut[i][j] += 0.1*deltaI[i]*huOutput[j];
@@ -170,10 +217,54 @@ public class Lab2 {
 			for(int k = 0; k < 357; k++){
 				int row = k/21;
 				int col = k%21;
-				inToHu[j][k] +=0.1*deltaJ[j]*table[row][col];
+				inToHu[j][k] +=0.1*deltaJ[j]*table[row][col]; 
 			}
 			inToHu[j][357] +=0.1*deltaJ[j]*(-1);
 		}
+		
+		// update weight with weight decay
+//		for(int i = 0; i < 3; i++){
+//			for(int j = 0; j < numHU; j++){
+//				huToOut[i][j] += 0.1*deltaI[i]*huOutput[j] - 0.05*huToOut[i][j];
+//			}
+//			huToOut[i][numHU] += 0.1*deltaI[i]*(-1) - 0.05*huToOut[i][numHU];
+//		}
+//		for(int j = 0; j < numHU; j++){
+//			for(int k = 0; k < 357; k++){
+//				int row = k/21;
+//				int col = k%21;
+//				inToHu[j][k] +=0.1*deltaJ[j]*table[row][col] - 0.05*inToHu[j][k]; 
+//			}
+//			inToHu[j][357] +=0.1*deltaJ[j]*(-1) - 0.05*inToHu[j][357];
+//		}
+		
+		
+		
+		
+		// update weight with momentum
+//		for(int i = 0; i < 3; i++){
+//			for(int j = 0; j < numHU; j++){
+//				double update = 0.01*deltaI[i]*huOutput[j] + 0.9*huToOut_mo[i][j];
+//				huToOut[i][j] += update;
+//				huToOut_mo[i][j] = update;
+//			}
+//			double update = 0.01*deltaI[i]*(-1) + 0.9*huToOut_mo[i][numHU];
+//			huToOut[i][numHU] += update;
+//			huToOut_mo[i][numHU] = update;
+//		}
+//		for(int j = 0; j < numHU; j++){
+//			for(int k = 0; k < 357; k++){
+//				int row = k/21;
+//				int col = k%21;
+//				double update = 0.01*deltaJ[j]*table[row][col]+0.9*inToHu_mo[j][k];
+//				inToHu[j][k] += update;
+//				inToHu_mo[j][k] = update;
+//				
+//			}
+//			double update = 0.01*deltaJ[j]*-1+0.9*inToHu_mo[j][357];
+//			inToHu[j][357] += update;
+//			inToHu_mo[j][357] = update;
+//		}
 	}
 	
 	
@@ -187,7 +278,7 @@ public class Lab2 {
 				}
 			}
 			output_hu += -1*inToHu[k][357];
-			huOutput[k] = sigmoid(output_hu);
+			huOutput[k] = rectify(output_hu);
 		}
 		
 		// from hu to output
@@ -269,6 +360,9 @@ public class Lab2 {
 		test = new ArrayList<String>();
 		teacherForTest = new ArrayList<int[]>();
 		predictionForTest = new ArrayList<int[]>();
+		tune = new ArrayList<String>();
+		teacherForTune = new ArrayList<int[]>();
+		predictionForTune = new ArrayList<int[]>();
 		while(in.hasNext()){
 			String line = in.nextLine();
 			if(line.length()==0) continue;
@@ -276,9 +370,9 @@ public class Lab2 {
 			if(line.startsWith("<")||line.startsWith("end")){
 				if(element.length()!=0){
 					if((count)%5==0){
-						
+						tune.add(element);
 					}
-					else if((count-1)%5 == 0){
+					else if((count-1)%5 == 0 && count!=1){
 						test.add(element);
 					}
 					else content.add(element);
@@ -308,6 +402,15 @@ public class Lab2 {
 			}
 			teacherForTest.add(label);
 			predictionForTest.add(new int[amino.length]);
+		}
+		for(String str:tune){
+			String[] amino = str.split("-");
+			int[] label = new int[amino.length];
+			for(int i = 0; i < amino.length; i++){
+				label[i] = l.get(amino[i].charAt(2));
+			}
+			teacherForTune.add(label);
+			predictionForTune.add(new int[amino.length]);
 		}
 		
 	}
