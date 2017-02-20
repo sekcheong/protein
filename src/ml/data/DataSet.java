@@ -1,7 +1,6 @@
 package ml.data;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -11,60 +10,111 @@ public class DataSet implements Iterable<Instance> {
 
 	private class InstanceIterator implements Iterator<Instance> {
 
-		private int _protenCount = 0;
-		private int _aminoCount = 0;
-		private int _windowSize =0;
-		private List<List<AminoAcid>> _proteins;
+		// the window position of the amino acids in the current protein
+		private int _currWindow = 0;
+		// the window size
+		private int _windowSize = 0;
 
-		public InstanceIterator(List<List<AminoAcid>> proteins, int windowSize) {
-			_windowSize = windowSize;
+		private int _count = 0;
+		private int _total = 0;
+
+		private List<AminoAcid> _currProtein;
+		private int _currProteinPos = 0;
+		private int _currAminoPos = 0;
+		private Instance _instance;
+
+		private List<List<AminoAcid>> _proteins;
+		private List<AminoAcid> _paddings;
+
+		public InstanceIterator(List<List<AminoAcid>> proteins, List<AminoAcid> paddings, Instance inst, int totalInstances) {
 			_proteins = proteins;
+			_windowSize = paddings.size() * 2 + 1;
+			_paddings = paddings;
+			_total = totalInstances;
+			_instance = inst;
 		}
 
 		@Override
 		public boolean hasNext() {
-			if (_proteins.size() < 1) return false;
-
-			if (_protenCount == _proteins.size()) {
-				if (_aminoCount == _proteins.get(_proteins.size() - 1).size()) {
-					return false;
-				}
-			}
-
-			return true;
+			return (_count < _total);
 		}
 
 		@Override
 		public Instance next() {
-			// TODO Auto-generated method stub
-			return null;
+
+			if (_currProtein == null) {
+				_currProtein = new ArrayList<AminoAcid>();
+				_currProtein.addAll(_paddings);
+				_currProtein.addAll(_proteins.get(_currProteinPos));
+				_currProtein.addAll(_paddings);
+				_currProteinPos++;
+				_currAminoPos = 0;
+			}
+
+			Instance inst = getOneInstance(_currAminoPos, _currProtein, _windowSize);
+			_currAminoPos++;
+
+			if (_currAminoPos == _proteins.get(_currProteinPos).size()) {
+				_currProtein = null;
+			}
+			_count++;
+			return inst;
+		}
+
+		private Instance getOneInstance(int index, List<AminoAcid> protein, int windowSize) {
+			int cols = AminoAcid.primaryLabelCount();
+			Instance inst = new Instance(windowSize * cols);
+			for (int i = 0; i < windowSize; i++) {
+				AminoAcid a = protein.get(index+i);
+				int[] oneHot = a.primaryOneHot();
+				for (int j=0; j<cols; j++) {
+					inst.features[i*cols+j] = oneHot[j];
+				}
+			}
+			inst.target = protein.get(index + windowSize / 2).secondary();
+			return inst;
 		}
 
 	}
-	
-	
-	private int _windowSize = 1;
-	private List<List<AminoAcid>> _proteins;
+
+	private int _windowSize;
 	private int _instanceCount = 0;
 
-	
-	public DataSet(List<List<AminoAcid>> proteins, int windowSize) {
+	private List<List<AminoAcid>> _dataSet;
+	private List<List<AminoAcid>> _proteins;
+	private List<AminoAcid> _paddings;
+	private Instance _instance;
+
+	public DataSet(List<List<AminoAcid>> proteins, int windowSize) throws Exception {
+
+		if ((windowSize % 2) == 0) throw new Exception("DataSet(): windowSize must be a odd number.");
+
 		_windowSize = windowSize;
-		_proteins = proteins;
 		_instanceCount = 0;
-		
-		for (List<AminoAcid> p : _proteins) {
+
+		// creates the padding vector
+		int paddingCount = _windowSize / 2;
+		_paddings = new ArrayList<AminoAcid>();
+		for (int i = 0; i < paddingCount; i++) {
+			_paddings.add(AminoAcid.padding);
+		}
+
+		_proteins = proteins;
+		for (List<AminoAcid> p : proteins) {
+			List<AminoAcid> m = new ArrayList<AminoAcid>();
 			_instanceCount += p.size();
 		}
+
+		_instance = new Instance(_windowSize * AminoAcid.primaryLabelCount());
+
 	}
-	
 
 	public List<DataSet> Split(double ratio) {
 
 		List<List<AminoAcid>> src = new ArrayList<List<AminoAcid>>(_proteins);
 		List<List<AminoAcid>> dest = new ArrayList<List<AminoAcid>>();
 
-		//Collections.shuffle(src);
+		// Collections.shuffle(src);
 
 		int target = (int) (_instanceCount * ratio);
 		int size = 0;
@@ -72,38 +122,37 @@ public class DataSet implements Iterable<Instance> {
 
 		while (true) {
 			List<AminoAcid> p = src.remove(0);
-			dest.add(p);			
+			dest.add(p);
 			size = size + p.size();
 			if (size >= target) break;
 		}
 
-		DataSet s1 = new DataSet(dest, this._windowSize);
-		DataSet s2 = new DataSet(src, this._windowSize);
-
-		Trace.log("s1:", s1.instanceCount());
-		Trace.log("s2:", s2.instanceCount());
-
 		List<DataSet> s = new ArrayList<DataSet>();
-		s.add(s1);
-		s.add(s2);
-
+		try {
+			DataSet s1 = new DataSet(dest, this._windowSize);
+			DataSet s2 = new DataSet(src, this._windowSize);
+			Trace.log("s1:", s1.instanceCount());
+			Trace.log("s2:", s2.instanceCount());
+			s.add(s1);
+			s.add(s2);
+		}
+		catch (Exception ex) {
+			ex.printStackTrace();
+		}
 		return s;
 	}
 
-	
 	public int size() {
 		return _proteins.size();
 	}
 
-	
 	public int instanceCount() {
 		return _instanceCount;
 	}
 
-	
 	@Override
-	public Iterator<Instance> iterator() {		
-		return new InstanceIterator(_proteins, _windowSize);
+	public Iterator<Instance> iterator() {
+		return new InstanceIterator(_proteins, _paddings, _instance, _instanceCount);
 	}
 
 }

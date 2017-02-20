@@ -29,10 +29,10 @@ public class AminoAcid {
 	private static HashMap<String, Integer> _secondaryLabelToCat = new HashMap<String, Integer>();
 
 	// one hot encoding for the primary structure
-	public static int[][] _primaryOneHot = new int[21][21];
+	public static int[][] _primaryOneHot = new int[_primaryLabels.length][_primaryLabels.length];
 
 	// one hot encoding for the secondary structure
-	public static int[][] _secondaryOneHot = new int[3][3];
+	public static int[][] _secondaryOneHot = new int[_secondaryLabels.length][_secondaryLabels.length];
 
 	public static AminoAcid padding = new AminoAcid();
 
@@ -74,14 +74,18 @@ public class AminoAcid {
 		return _second;
 	}
 
-	public int[] primaryOneHot(int primaryCat) {
-		return _primaryOneHot[primaryCat];
+	public int[] primaryOneHot() {
+		return _primaryOneHot[this.primary()];
 	}
 
-	public int[] secondaryOneHot(int primaryCat) {
-		return _secondaryOneHot[primaryCat];
+	public int[] secondaryOneHot() {
+		return _secondaryOneHot[this.secondary()];
 	}
 
+	public static int primaryLabelCount() {
+		return _primaryLabels.length;
+	}
+	
 	public static String primaryLabel(int cat) {
 		return _primaryLabels[cat];
 	}

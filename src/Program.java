@@ -3,6 +3,7 @@ import java.util.List;
 
 import ml.data.AminoAcid;
 import ml.data.DataSet;
+import ml.data.Instance;
 import ml.io.DataReader;
 import ml.learner.nerual.Neuron;
 import ml.utils.misc.DataShuffler;
@@ -19,6 +20,11 @@ public class Program {
 			List<List<AminoAcid>> val = reader.Read();
 			DataSet dataSet = new DataSet(val, 17);			
 			List<DataSet> subSets = dataSet.Split(0.2);
+			
+			for (Instance i:dataSet) {
+				Trace.log(i);
+			}
+			
 		}
 		catch (Exception ex) {
 			ex.printStackTrace();
