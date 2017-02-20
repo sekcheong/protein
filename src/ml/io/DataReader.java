@@ -42,7 +42,7 @@ public class DataReader {
 			line = line.trim();
 			
 			//skip comment line
-			if (line.startsWith("#")) {
+			if (line.startsWith("#") || line.startsWith("//")) {
 				continue;
 			}
 

@@ -9,6 +9,10 @@ public class Protein {
 	
 	public int length() {		
 		return _aminos.size();		
-	}	
+	}
+	
+	public AminoAcid[] aminoAcids() {
+		return _aminos.toArray(new AminoAcid[_aminos.size()]);
+	}
 	
 }

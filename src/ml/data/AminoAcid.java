@@ -95,7 +95,11 @@ public class AminoAcid {
 	}
 
 	public String toString() {
-		return id + ": " + _primaryLabels[this._first] + " " + _secondaryLabels[this._second];
+		return _primaryLabels[this._first] + " " + _secondaryLabels[this._second];
+	}
+
+	public static int secondaryLabelCount() {
+		return _secondaryLabels.length;
 	}
 
 }
