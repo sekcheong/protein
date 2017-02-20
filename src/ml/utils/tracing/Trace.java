@@ -7,7 +7,7 @@ public class Trace {
 	
 	public static void Write(String format, Object...args) {
 		if (!Trace.enabled) return;
-		System.out.printf(format,args);		
+		System.out.printf((String) format, args);		
 	}
 	
 	public static void WriteLine(String format, Object...args) {
@@ -16,9 +16,22 @@ public class Trace {
 		System.out.println();
 	}
 	
-	public static void Error(String format, Object...args) {
+	
+	public static void log(Object msg, Object... moreMsgs) {
 		if (!Trace.enabled) return;
-		System.err.printf(format,args);
+		System.out.print(msg);
+		for (Object s:moreMsgs) {
+			System.out.print(" " + s);
+		}
+		System.out.println();
+	}
+
+	public static void Error(Object msg, Object... moreMsgs) {
+		if (!Trace.enabled) return;
+		System.out.print(msg);
+		for (Object s:moreMsgs) {
+			System.out.print(" " + s);
+		}
 		System.err.println();
 	}
 }

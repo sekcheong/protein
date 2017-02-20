@@ -2,18 +2,20 @@ package ml.utils.console;
 
 public class Console {
 
-	public static void log(String msg, String... moreMsgs) {
+	public static void log(Object msg, Object... moreMsgs) {
 		System.out.print(msg);
-		for (String s:moreMsgs) {
+		for (Object s:moreMsgs) {
 			System.out.print(" " + s);
 		}
+		System.out.println();
 	}
 
-	public static void Error(String msg, String... moreMsgs) {
+	public static void Error(Object msg, Object... moreMsgs) {
 		System.out.print(msg);
-		for (String s:moreMsgs) {
+		for (Object s:moreMsgs) {
 			System.out.print(" " + s);
 		}
+		System.err.println();
 	}
 	
 	

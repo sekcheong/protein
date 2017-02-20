@@ -7,71 +7,79 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import ml.data.AminoAcid;
+import ml.utils.console.Console;
+import ml.utils.tracing.Trace;
+
 public class DataReader {
 
 	private BufferedReader _buffReader = null;
 
-	public DataReader(String fileName) throws FileNotFoundException {
+	public DataReader(String fileName) throws Exception {
 		FileReader freader = new FileReader(fileName);
 		_buffReader = new BufferedReader(freader);
 	}
 
-	public void Read() throws IOException {
-		List<List<String>> proteins = new ArrayList<List<String>>();
-		List<String> aminos = null;
+	public List<List<AminoAcid>> Read() throws Exception {
 
+		List<List<AminoAcid>> proteins = new ArrayList<List<AminoAcid>>();
+		List<AminoAcid> protein = null;
+		
 		int lineNo = 0;
-		int count = 0;
-
+		
 		while (true) {
-			String line;
-
-			line = _buffReader.readLine();
+						
+			String line = _buffReader.readLine();
 			lineNo++;
 			
 			if (line == null) {
-				if (aminos != null) {
-					proteins.add(aminos);
+				if (protein != null) {
+					proteins.add(protein);
 				}
 				break;
 			}
 			
 			line = line.trim();
 			
+			//skip comment line
 			if (line.startsWith("#")) {
 				continue;
 			}
 
-			if (line.startsWith("<>")) {
-				count++;
-				if (aminos != null) {
-					proteins.add(aminos);
+			//starts of a new protein sequence
+			if (line.startsWith("<>")) {				
+				if (protein != null) {
+					proteins.add(protein);
 				}
-				aminos = new ArrayList<String>();
+				protein = new ArrayList<AminoAcid>();
 				continue;
 			}
 			
-			if (line.toUpperCase().startsWith("END") || line.toUpperCase().startsWith("<END>")) {
+			//skip the end of protein mark
+			if (line.toUpperCase().startsWith("END")|| line.toUpperCase().startsWith("<END") || line.toUpperCase().startsWith("<END>")) {
 				continue;
 			}
 
+			// parse the primary and secondary structure line
 			if (line.length() > 0) {
-				aminos.add(line);
+				try {
+					AminoAcid amino = new AminoAcid(line);
+					protein.add(amino);
+				}
+				catch (Exception ex) {
+					Console.Error("Unable to process sequence at line ", lineNo, ":", line);
+				}
 			}
-			else {
-				System.out.println("Line: " + lineNo + " is blank.");
-			}
-
-		}
-
+		}		
 		
-//		int total = 0;
-//		for (int i = 0; i < examples.size(); i++) {
-//			System.out.println(i + ": " + examples.get(i).size() + examples.get(i));
-//			total = total + examples.size();
-//		}
-//
-//		System.out.println("#" + examples.size() + ": " + count + " : " + total);
-
+		int count = 0;
+		for (List<AminoAcid> p : proteins) {
+			count += p.size();
+		}
+		
+		Trace.log("Total proteins:", proteins.size());
+		Trace.log("Total amino   :", count);
+		
+		return proteins;
 	}
 }
