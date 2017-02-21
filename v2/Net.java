@@ -131,7 +131,9 @@ public class Net {
   public void train() {
     logNetwork();
     this.curEpochs = 0;
+    
     double error = computeError();
+    
     while (curEpochs<numEpochs && error>errorCriterion) {
       for (int i=0; i<trainingData.length; i++) {
         feedforward(trainingData[i]);

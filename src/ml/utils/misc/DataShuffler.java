@@ -5,7 +5,7 @@ import java.io.FileWriter;
 import java.util.List;
 import ml.data.AminoAcid;
 import ml.io.DataReader;
-import ml.learner.nerual.Neuron;
+import ml.learner.nerualnet.Neuron;
 
 public class DataShuffler {
 

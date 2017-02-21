@@ -1,4 +1,4 @@
-package ml.learner.nerual;
+package ml.learner.nerualnet;
 
 public class Neuron {
 	public void ComputeError() {

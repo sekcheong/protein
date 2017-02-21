@@ -5,7 +5,7 @@ import ml.data.AminoAcid;
 import ml.data.DataSet;
 import ml.data.Instance;
 import ml.io.DataReader;
-import ml.learner.nerual.Neuron;
+import ml.learner.nerualnet.Neuron;
 import ml.utils.misc.DataShuffler;
 import ml.utils.tracing.Trace;
 
