@@ -1,12 +1,11 @@
 
 import java.util.List;
 
-import ml.data.AminoAcid;
+import ml.data.Amino;
 import ml.data.DataSet;
 import ml.data.Instance;
 import ml.io.DataReader;
-import ml.learner.nerualnet.Neuron;
-import ml.utils.misc.DataShuffler;
+import ml.utils.DataShuffler;
 import ml.utils.tracing.Trace;
 
 public class Program {
@@ -23,16 +22,16 @@ public class Program {
 			long startTime = System.currentTimeMillis();
 						
 			reader = new DataReader(args[0]);			
-			List<List<AminoAcid>> val = reader.Read();
+			List<List<Amino>> val = reader.Read();
 			
 			DataSet dataSet = new DataSet(val, 17);			
 			DataSet[] subSets = dataSet.Split(0.2);
-			train = subSets[0].getInstances();
-			tune = subSets[1].getInstances();
+			train = subSets[0].instances();
+			tune = subSets[1].instances();
 			
 			Trace.log("");
 			Trace.log("Data Set Valid    ?", dataSet.verifyInstances());
-			Trace.log("Feature Length    :", dataSet.getInstances()[0].feature.length);
+			Trace.log("Feature Length    :", dataSet.instances()[0].feature.length);
 			Trace.log("");
 			Trace.log("Training Set Valid?", subSets[1].verifyInstances());
 			Trace.log("Training Size     :", train.length);
@@ -42,6 +41,7 @@ public class Program {
 
 			long endTime = System.currentTimeMillis();
 			long elapsedTime = endTime - startTime;
+			
 			Trace.log("");			
 			Trace.log("Loading Time      :", elapsedTime / (1000) + "." + (elapsedTime % 1000)+"s");
 		}

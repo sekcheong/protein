@@ -1,11 +1,11 @@
-package ml.utils.misc;
+package ml.utils;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.util.List;
-import ml.data.AminoAcid;
+import ml.data.Amino;
 import ml.io.DataReader;
-import ml.learner.nerualnet.Neuron;
+
 
 public class DataShuffler {
 
@@ -18,14 +18,14 @@ public class DataShuffler {
 		try {
 			
 			reader = new DataReader(srcFile);
-			List<List<AminoAcid>> val = reader.Read();
+			List<List<Amino>> val = reader.Read();
 			file = new FileWriter(destFile);
 			writer = new BufferedWriter(file);
 			
-			for (List<AminoAcid> p:val) {
+			for (List<Amino> p:val) {
 				writer.write("<>");
 				writer.newLine();
-				for (AminoAcid a:p) {
+				for (Amino a:p) {
 					writer.write(a.toString());
 					writer.newLine();
 				}

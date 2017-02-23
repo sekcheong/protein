@@ -14,14 +14,28 @@ public class Instance {
 		target = new double[targetSize];
 	}		
 	
-	public String toString() {	
+	
+	private String formatVector(double[] v) {
 		StringBuffer sb = new StringBuffer();
+		
 		sb.append("[");
-		for (int i=0; i<feature.length; i++) {
-			sb.append(feature[i]).append(" ");
+		for (int i=0; i<v.length; i++) {
+			if (i>0) sb.append(" ");
+			sb.append(v[i]);
 		}
 		sb.append("]");
-		sb.append("=").append(target);
+		
+		return sb.toString();
+	}
+	
+	
+	public String toString() {	
+		StringBuffer sb = new StringBuffer();
+		
+		sb.append("x = ").append(formatVector(feature));
+		sb.append("\n");		
+		sb.append("t = ").append(target);
+		
 		return sb.toString();
 	}
 }

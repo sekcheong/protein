@@ -2,7 +2,7 @@ package ml.data;
 
 import java.util.HashMap;
 
-public class AminoAcid {
+public class Amino {
 
 	private static int total = 0;
 
@@ -34,7 +34,7 @@ public class AminoAcid {
 	// one hot encoding for the secondary structure
 	public static int[][] _secondaryOneHot = new int[_secondaryLabels.length][_secondaryLabels.length];
 
-	public static AminoAcid padding = new AminoAcid();
+	public static Amino padding = new Amino();
 
 	static {
 
@@ -49,7 +49,7 @@ public class AminoAcid {
 		}
 	}
 
-	public AminoAcid() {
+	public Amino() {
 		// use the 21st value to indicate unknown acid
 		this._first = _primaryLabels.length - 1;
 		this._second = 0;
@@ -57,7 +57,7 @@ public class AminoAcid {
 		total++;
 	}
 
-	public AminoAcid(String code) {
+	public Amino(String code) {
 		code = code.trim();
 		String[] pieces = code.split("\\s+");
 		this._first = _primaryLabelToCat.get(pieces[0].toUpperCase());

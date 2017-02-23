@@ -1,4 +1,4 @@
-package ml.utils.console;
+package ml.utils;
 
 public class Console {
 

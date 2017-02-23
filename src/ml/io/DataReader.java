@@ -7,8 +7,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import ml.data.AminoAcid;
-import ml.utils.console.Console;
+import ml.data.Amino;
+import ml.utils.Console;
 import ml.utils.tracing.Trace;
 
 public class DataReader {
@@ -20,10 +20,10 @@ public class DataReader {
 		_buffReader = new BufferedReader(freader);
 	}
 
-	public List<List<AminoAcid>> Read() throws Exception {
+	public List<List<Amino>> Read() throws Exception {
 
-		List<List<AminoAcid>> proteins = new ArrayList<List<AminoAcid>>();
-		List<AminoAcid> protein = null;
+		List<List<Amino>> proteins = new ArrayList<List<Amino>>();
+		List<Amino> protein = null;
 		
 		int lineNo = 0;
 		
@@ -51,7 +51,7 @@ public class DataReader {
 				if (protein != null) {
 					proteins.add(protein);
 				}
-				protein = new ArrayList<AminoAcid>();
+				protein = new ArrayList<Amino>();
 				continue;
 			}
 			
@@ -63,7 +63,7 @@ public class DataReader {
 			// parse the primary and secondary structure line
 			if (line.length() > 0) {
 				try {
-					AminoAcid amino = new AminoAcid(line);
+					Amino amino = new Amino(line);
 					protein.add(amino);
 				}
 				catch (Exception ex) {
@@ -73,7 +73,7 @@ public class DataReader {
 		}		
 		
 		int count = 0;
-		for (List<AminoAcid> p : proteins) {
+		for (List<Amino> p : proteins) {
 			count += p.size();
 		}
 		

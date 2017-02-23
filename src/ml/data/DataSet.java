@@ -8,16 +8,16 @@ import ml.utils.tracing.Trace;
 
 public class DataSet {
 
-	private List<List<AminoAcid>> _dataSet;
-	private List<List<AminoAcid>> _proteins;
-	private List<AminoAcid> _paddings;
+	private List<List<Amino>> _dataSet;
+	private List<List<Amino>> _proteins;
+	private List<Amino> _paddings;
 	private List<Instance> _instances = null;
 
 	private int _windowSize;
 	private int _size = 0;
 
 	
-	public DataSet(List<List<AminoAcid>> proteins, int windowSize) throws Exception {
+	public DataSet(List<List<Amino>> proteins, int windowSize) throws Exception {
 
 		if ((windowSize % 2) == 0) throw new Exception("DataSet(): windowSize must be a odd number.");
 
@@ -26,13 +26,13 @@ public class DataSet {
 
 		// creates the padding vector
 		int paddingCount = _windowSize / 2;
-		_paddings = new ArrayList<AminoAcid>();
+		_paddings = new ArrayList<Amino>();
 		for (int i = 0; i < paddingCount; i++) {
-			_paddings.add(AminoAcid.padding);
+			_paddings.add(Amino.padding);
 		}
 
 		_proteins = proteins;
-		for (List<AminoAcid> p : proteins) {
+		for (List<Amino> p : proteins) {
 			_size += p.size();
 		}
 	}
@@ -43,12 +43,12 @@ public class DataSet {
 	}
 
 	
-	private Instance createInstance(AminoAcid[] window) {
+	private Instance createInstance(Amino[] window) {
 		Instance inst = new Instance();
-		int cols = AminoAcid.primaryLabelCount();
+		int cols = Amino.primaryLabelCount();
 		double[] features = new double[window.length * cols];
-		double[] target = new double[AminoAcid.secondaryLabelCount()];
-		AminoAcid center = window[window.length / 2];
+		double[] target = new double[Amino.secondaryLabelCount()];
+		Amino center = window[window.length / 2];
 
 		for (int i = 0; i < window.length; i++) {
 			int[] v = window[i].primaryOneHot();
@@ -70,11 +70,11 @@ public class DataSet {
 	
 
 	private List<Instance> createInstances() {
-		AminoAcid[] window = new AminoAcid[_windowSize];
+		Amino[] window = new Amino[_windowSize];
 		List<Instance> insts = new ArrayList<Instance>();
 
-		for (List<AminoAcid> p : _proteins) {
-			List<AminoAcid> m = new ArrayList<AminoAcid>();
+		for (List<Amino> p : _proteins) {
+			List<Amino> m = new ArrayList<Amino>();
 			int size = p.size();
 			m.addAll(_paddings);
 			m.addAll(p);
@@ -93,7 +93,7 @@ public class DataSet {
 	}
 
 	
-	private void logWindow(AminoAcid[] window) {
+	private void logWindow(Amino[] window) {
 		StringBuffer sb = new StringBuffer();
 		for (int i = 0; i < window.length; i++) {
 			sb.append(window[i].toString()).append(", ");
@@ -113,14 +113,14 @@ public class DataSet {
 	private void logInstance(Instance inst) {
 		StringBuffer sb = new StringBuffer();
 		String primary = null;
-		int cols = AminoAcid.primaryLabelCount();
+		int cols = Amino.primaryLabelCount();
 
 		sb.append("[");
 
 		for (int i = 0; i < _windowSize; i++) {
 			int cat = findValue(inst.feature, 1, i * cols, cols);
 			if (cat > -1) {
-				primary = AminoAcid.primaryLabel(cat);
+				primary = Amino.primaryLabel(cat);
 				sb.append(primary);
 			}
 			else {
@@ -129,7 +129,7 @@ public class DataSet {
 		}
 
 		int cat = findValue(inst.target, 1, 0, inst.target.length);
-		String secondary = AminoAcid.secondaryLabel(cat);
+		String secondary = Amino.secondaryLabel(cat);
 
 		sb.append("] = ").append(secondary);
 
@@ -138,20 +138,20 @@ public class DataSet {
 
 	
 	public boolean verifyInstances() {
-		List<AminoAcid> src = new ArrayList<AminoAcid>();
+		List<Amino> src = new ArrayList<Amino>();
 
-		for (List<AminoAcid> a : _proteins) {
+		for (List<Amino> a : _proteins) {
 			src.addAll(a);
 		}
 
-		int cols = AminoAcid.primaryLabelCount();
+		int cols = Amino.primaryLabelCount();
 		int first = 0;
 		int second = 0;
-		for (Instance inst : this.getInstances()) {
+		for (Instance inst : this.instances()) {
 			first = findValue(inst.feature, 1, (_windowSize / 2) * cols, cols);
 			second = findValue(inst.target, 1, 0, inst.target.length);
 			//Trace.log(AminoAcid.primaryLabel(first) + " " + AminoAcid.secondaryLabel(second));
-			AminoAcid acid = src.remove(0);
+			Amino acid = src.remove(0);
 			if (acid.primary()!=first || acid.secondary()!=second) {
 				Trace.Error("Corrupted");
 				return false;
@@ -161,7 +161,7 @@ public class DataSet {
 	}
 
 	
-	public Instance[] getInstances() {
+	public Instance[] instances() {
 		Instance[] ret;
 		if (_instances == null) {
 			List<Instance> insts = createInstances();
@@ -173,8 +173,8 @@ public class DataSet {
 	
 
 	public DataSet[] Split(double ratio) {
-		List<List<AminoAcid>> src = new ArrayList<List<AminoAcid>>(_proteins);
-		List<List<AminoAcid>> dest = new ArrayList<List<AminoAcid>>();
+		List<List<Amino>> src = new ArrayList<List<Amino>>(_proteins);
+		List<List<Amino>> dest = new ArrayList<List<Amino>>();
 		DataSet[] ret = new DataSet[2];
 		
 		int target = (int) (_size * ratio);
@@ -182,7 +182,7 @@ public class DataSet {
 		//Trace.log("target:", target);
 
 		while (true) {
-			List<AminoAcid> p = src.remove(0);
+			List<Amino> p = src.remove(0);
 			dest.add(p);
 			size = size + p.size();
 			if (size >= target) break;
