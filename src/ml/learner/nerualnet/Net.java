@@ -1,7 +1,5 @@
 package ml.learner.nerualnet;
 
-import ml.learner.nerualnet.layers.*;
-
 public class Net {
 
 	// W[L,j,i] are weight matrices where L is the layer number, j is the
@@ -12,7 +10,7 @@ public class Net {
 	// neuron of layer L
 	private double[][] I = null;
 
-	// Y[L,j] are vectors whose elements denote the output of the j-th
+	// Y[L,j] are vectors whose elements denote the output of the j_th
 	// neuron of layer the
 	private double[][] Y = null;
 
@@ -22,11 +20,6 @@ public class Net {
 	// the new error
 	private double E;
 
-	// private List<AbstractLayer> _layers = new ArrayList<AbstractLayer>();
-
-	private AbstractLayer[] _layers = new AbstractLayer[5];
-	private int _layerCount = 0;
-
 	private int _epoch;
 
 	// the target error rate
@@ -35,65 +28,40 @@ public class Net {
 	// the learning rate
 	private double _eta;
 
+	private Layer[] _layers;
+	private int _layerCount;
+	
+	
 	public Net(int layers) {
-		W = new double[layers][][];
+		_layers = new Layer[layers];
+		_layerCount=0;
 	}
 	
 
-	private void addLayer(AbstractLayer layer) {
-
-		if (_layerCount == _layers.length) {
-			this.expandLayers();
-		}
-		
+	public void addLayer(Layer layer) {
 		_layers[_layerCount] = layer;
-		_layerCount++;
+		layer.index(_layerCount);
 		layer.net(this);
+		_layerCount++;
 	}
 
 	
-	private void expandLayers() {
-		AbstractLayer[] newLayers = new AbstractLayer[_layerCount * 2];
-		for (int i = 0; i < _layers.length; i++) {
-			newLayers[i] = _layers[i];
-		}
-		_layers = newLayers;
-	}
-	
-	
-	private void trimLayers() {
-		if (_layerCount==_layers.length) return;
-		AbstractLayer[] newLayers = new AbstractLayer[_layerCount];
-		for (int i = 0; i < _layerCount; i++) {
-			newLayers[i] = _layers[i];
-		}
-		_layers = newLayers;
-	}
-	
-	
-	public AbstractLayer[] layers() {
-		trimLayers();
+	public Layer[] layers() {
 		return _layers;
 	}
-	
-
-	public void inputLayer(InputLayer layer) {
-		addLayer(layer);
-	}
 
 	
-	public void addHiddenLayer(HiddenLayer layer) {
-		addLayer(layer);
+	public double[][][] W() {
+		return this.W;
 	}
-
 	
-	public void outputLayer(OutputLayer layer) {
-		addLayer(layer);
-	}
-
 	
 	public void initialize() {
-
+		W = new double[_layers.length][][];
+		W[0] = new double[_layers[0].inputs()][];		
+		for (int i=1; i<_layers.length; i++) {
+			W[i] = new double[_layers[i].units()][_layers[i-1].units()];
+		}
 	}
 
 }
