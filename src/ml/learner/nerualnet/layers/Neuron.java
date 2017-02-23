@@ -1,9 +1,13 @@
 package ml.learner.nerualnet.layers;
 
-public class Unit {
+public class Neuron {
 	
+	private int _index;
 	
-
+	public Neuron(int index) {
+		_index=index;
+	}
+	
 	private double computOutput() {
 		return 0;
 	}
@@ -18,6 +22,10 @@ public class Unit {
 
 	public void updateWeights() {
 		
+	}
+	
+	public int index() {
+		return _index;
 	}
 
 }

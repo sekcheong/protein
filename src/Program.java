@@ -4,7 +4,10 @@ import ml.data.Amino;
 import ml.data.DataSet;
 import ml.data.Instance;
 import ml.io.DataReader;
-//import ml.utils.DataShuffler;
+import ml.learner.nerualnet.Net;
+import ml.learner.nerualnet.layers.HiddenLayer;
+import ml.learner.nerualnet.layers.InputLayer;
+import ml.learner.nerualnet.layers.OutputLayer;
 import ml.utils.tracing.StopWatch;
 import ml.utils.tracing.Trace;
 
@@ -47,5 +50,23 @@ public class Program {
 		catch (Exception ex) {
 			ex.printStackTrace();
 		}
+		
+		//create a neural network with one input layer, one hidden layer, and one output layer
+		Net neuralNet = new Net(3);
+		
+		//create the input layer has 18 inputs including the bias
+		InputLayer input = new InputLayer(18);
+		
+		//create the hidden layer with 18 inputs and 20 units
+		HiddenLayer hidden = new HiddenLayer(18, 20);
+		
+		//create the output layer with 20 inputs and 3 output units
+		OutputLayer output = new OutputLayer(20, 3);
+	
+		neuralNet.inputLayer(input);
+		neuralNet.addHiddenLayer(hidden);
+		neuralNet.outputLayer(output);
+		
 	}
+	
 }

@@ -1,10 +1,9 @@
 package ml.learner.nerualnet.layers;
 
-public class OutputLayer extends AbstractLayer {
+public class OutputLayer extends HiddenLayer {
 
-	public OutputLayer(int units, int inputs) {
-		super(units, inputs);
-		// TODO Auto-generated constructor stub
+	public OutputLayer(int inputs, int units) {
+		super(inputs, units);
 	}
-
+	
 }

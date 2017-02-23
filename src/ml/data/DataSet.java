@@ -1,7 +1,6 @@
 package ml.data;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import ml.utils.tracing.Trace;

@@ -7,16 +7,14 @@ import ml.learner.nerualnet.activation.ActivationFunction;
 public abstract class AbstractLayer {	
 	private Net _net;		
 	private WeightInitializer _weightInitializer = null;
-	private ActivationFunction _activationFunc = null;
+	public ActivationFunction g = null;
 	
 	private int _index;
-	private int _units;
 	private int _inputs;
 	
 	
-	public AbstractLayer(int inputs, int units) {
+	public AbstractLayer(int inputs) {
 		_inputs = inputs;
-		_units = units;
 	}
 	
 	
@@ -31,12 +29,7 @@ public abstract class AbstractLayer {
 	
 	
 	public void activationFunction(ActivationFunction activateFunc) {
-		_activationFunc = activateFunc;
-	}
-	
-	
-	public ActivationFunction activationFunction() {
-		return _activationFunc;
+		this.g = activateFunc;
 	}
 	
 	
@@ -47,11 +40,6 @@ public abstract class AbstractLayer {
 	
 	public void net(Net net) {
 		_net = net;
-	}
-	
-	
-	public int units() {
-		return _units;
 	}
 	
 	
