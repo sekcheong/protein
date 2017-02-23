@@ -61,7 +61,8 @@ public class Net {
 		W[0] = new double[_layers[0].inputs()][];		
 		for (int i=1; i<_layers.length; i++) {
 			W[i] = new double[_layers[i].units()][_layers[i-1].units()];
-		}
+			_layers[i-1].initWeight();
+		}		
 	}
 
 }
