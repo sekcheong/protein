@@ -1,4 +1,6 @@
-package ml.learner.nerualnet;
+package ml.learner.nerualnet.activation;
+
+import ml.learner.nerualnet.layers.AbstractLayer;
 
 public class SigmoidActivation implements ActivationFunction {
 
@@ -15,7 +17,7 @@ public class SigmoidActivation implements ActivationFunction {
 	}
 
 	@Override
-	public void layer(Layer layer) {
+	public void layer(AbstractLayer layer) {
 		// TODO Auto-generated method stub
 		
 	}

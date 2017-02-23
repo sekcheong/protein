@@ -1,6 +1,8 @@
 package ml.learner.nerualnet;
 
+import ml.learner.nerualnet.layers.AbstractLayer;
+
 public interface WeightInitializer {	
-	public void layer(Layer layer);
+	public void layer(AbstractLayer layer);
 	public void initialize();
 }
