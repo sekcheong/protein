@@ -78,7 +78,7 @@ public class DataReader {
 		}
 		
 		Trace.log("Total proteins:", proteins.size());
-		Trace.log("Total amino   :", count);
+		Trace.log("Total aminos  :", count);
 		
 		return proteins;
 	}

@@ -1,12 +1,10 @@
 
 import java.util.List;
-import java.util.Timer;
-
 import ml.data.Amino;
 import ml.data.DataSet;
 import ml.data.Instance;
 import ml.io.DataReader;
-import ml.utils.DataShuffler;
+//import ml.utils.DataShuffler;
 import ml.utils.tracing.StopWatch;
 import ml.utils.tracing.Trace;
 
