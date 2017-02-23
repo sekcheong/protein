@@ -54,8 +54,8 @@ public class Program {
 		// use default weight initializer
 		WeightInitializer weightInit = new DefaultWeightInitializer();
 
-		// create a neural network with one input layer, one hidden layer, and
-		// one output layer
+		// create a neural network with one input layer, one hidden 
+		// layer, and output layer
 		Net neuralNet = new Net(3);
 
 		// create the input layer has 18 inputs including the bias

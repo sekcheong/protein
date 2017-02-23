@@ -2,6 +2,7 @@ package ml.learner.nerualnet.config;
 
 import ml.learner.nerualnet.Layer;
 import ml.learner.nerualnet.Net;
+import ml.utils.tracing.Trace;
 
 public class DefaultWeightInitializer implements WeightInitializer {
 
@@ -11,8 +12,10 @@ public class DefaultWeightInitializer implements WeightInitializer {
 	@Override
 	public void initializeWeights(Layer layer) {
 
-		if (layer.index() == 0) { return; }
-
+		Trace.log("DefaultWeightInitializer.initializeWeights() [begin]");
+		
+		if (layer.index() == 0) { return; }		
+		
 		double[][][] W = layer.net().W();
 
 		// get layer the initializer belongs to
@@ -31,6 +34,9 @@ public class DefaultWeightInitializer implements WeightInitializer {
 				W[L][j][i] = Math.random() * 0.3;
 			}
 		}
+		
+		Trace.log("DefaultWeightInitializer.initializeWeights()", "Layer:", L);
+		Trace.log("DefaultWeightInitializer.initializeWeights() [end]");
 	}
 
 }

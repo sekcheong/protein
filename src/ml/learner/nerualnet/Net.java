@@ -11,14 +11,17 @@ public class Net {
 	private double[][] I = null;
 
 	// Y[L,j] are vectors whose elements denote the output of the j_th
-	// neuron of layer the
+	// neuron of layer L
 	private double[][] Y = null;
 
-	// the previous error
+	// the error for previous example
 	private double oldE;
 
-	// the new error
+	// the error for the current example
 	private double E;
+	
+	// the cumulative error rate after k_th example 
+	private double Em;
 
 	private int _epoch;
 
@@ -61,8 +64,8 @@ public class Net {
 		W[0] = new double[_layers[0].inputs()][];		
 		for (int i=1; i<_layers.length; i++) {
 			W[i] = new double[_layers[i].units()][_layers[i-1].units()];
-			_layers[i-1].initWeight();
-		}		
+			_layers[i].initWeight();
+		}
 	}
 
 }
