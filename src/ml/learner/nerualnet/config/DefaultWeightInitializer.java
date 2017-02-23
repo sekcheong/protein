@@ -31,7 +31,7 @@ public class DefaultWeightInitializer implements WeightInitializer {
 		// connecting from L-1 layer to L
 		for (int j = 0; j < J; j++) {
 			for (int i = 0; i < I; i++) {
-				W[L][j][i] = Math.random() * 0.3;
+				W[L][j][i] = Math.random() * 0.2;
 			}
 		}
 		

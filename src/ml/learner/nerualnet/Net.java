@@ -1,10 +1,14 @@
 package ml.learner.nerualnet;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Net {
 
+	private static double BIAS = -1.0;
 	// W[L,j,i] are weight matrices where L is the layer number, j is the
 	// j_th neuron of L, and i is the i_th neuron of layer L-1
-	private double[][][] W = null;
+	public double[][][] W = null;
 
 	// I[L,j] are vectors whose element denote weighted input of j_th
 	// neuron of layer L
@@ -19,8 +23,8 @@ public class Net {
 
 	// the error for the current example
 	private double E;
-	
-	// the cumulative error rate after k_th example 
+
+	// the cumulative error rate after k_th example
 	private double Em;
 
 	private int _epoch;
@@ -32,39 +36,69 @@ public class Net {
 	private double _eta;
 
 	private Layer[] _layers;
-	private int _layerCount;
-	
-	
-	public Net(int layers) {
-		_layers = new Layer[layers];
-		_layerCount=0;
-	}
-	
 
+	private List<Layer> _tempLayers = new ArrayList<Layer>();
+	
+	public Net() {
+		
+	}
+
+	
 	public void addLayer(Layer layer) {
-		_layers[_layerCount] = layer;
-		layer.index(_layerCount);
+		layer.index(_tempLayers.size());
+		_tempLayers.add(layer);
 		layer.net(this);
-		_layerCount++;
 	}
-
 	
+
 	public Layer[] layers() {
+		if (_layers == null) {
+			_layers = _tempLayers.toArray(new Layer[_tempLayers.size()]);
+		}
 		return _layers;
 	}
-
 	
+
 	public double[][][] W() {
 		return this.W;
+	}
+
+	
+	private void setBias(double[][][] w) {
+		for (int l=1; l<w.length; l++) {
+			for (int j=0; j<w[l].length; j++) {
+				w[l][j][0] = BIAS;
+			}
+		}
+		w[0][0][0] = BIAS;
 	}
 	
 	
 	public void initialize() {
+		
+		Layer layres[] = this.layers();
+		
+		// creates the weight matrices and set the initial weights
 		W = new double[_layers.length][][];
-		W[0] = new double[_layers[0].inputs()][];		
-		for (int i=1; i<_layers.length; i++) {
-			W[i] = new double[_layers[i].units()][_layers[i-1].units()];
-			_layers[i].initWeight();
+
+		// creates the input layer
+		W[0] = new double[layres[0].inputs()][1];
+		
+		// create and initialize hidden layer weight matrices
+		for (int l = 1; l < layres.length; l++) {
+			
+			W[l] = new double[layres[l].units()][];
+			
+			for (int j = 0; j < layres[l].units(); j++) {
+				W[l][j] = new double[layres[l - 1].units()];
+			}	
+			layres[l].initWeight();
+		}
+		
+		setBias(W);
+		
+		for (int l = 0; l < layres.length; l++) {
+			layres[l].printWeightMatrix();
 		}
 	}
 

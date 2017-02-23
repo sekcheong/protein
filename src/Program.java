@@ -50,30 +50,35 @@ public class Program {
 		catch (Exception ex) {
 			ex.printStackTrace();
 		}
-		
+
 		// use default weight initializer
 		WeightInitializer weightInit = new DefaultWeightInitializer();
 
-		// create a neural network with one input layer, one hidden 
+		// create a neural network with one input layer, one hidden
 		// layer, and output layer
-		Net neuralNet = new Net(3);
+		Net neuralNet = new Net();
 
 		// create the input layer has 18 inputs including the bias
 		Layer input = new Layer(18, 18);
 		input.weightInitializer(weightInit);
 
-		// create the hidden layer with 18 inputs and 20 units
-		Layer hidden = new Layer(18, 20);
+		// create the hidden layer with 18 inputs and 21 units
+		Layer hidden = new Layer(18, 21);
 		hidden.weightInitializer(weightInit);
-
-		// create the output layer with 20 inputs and 3 output units
-		Layer output = new Layer(20, 3);
-		output.weightInitializer(weightInit);
 		
+		// create the hidden layer with 18 inputs and 21 units
+		Layer hidden2 = new Layer(21, 21);
+		hidden2.weightInitializer(weightInit);
+
+		// create the output layer with 21 inputs and 3 output units
+		Layer output = new Layer(21, 3);
+		output.weightInitializer(weightInit);
+
 		neuralNet.addLayer(input);
 		neuralNet.addLayer(hidden);
+		neuralNet.addLayer(hidden2);
 		neuralNet.addLayer(output);
-		
+
 		neuralNet.initialize();
 
 	}
