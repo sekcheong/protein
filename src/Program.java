@@ -1,11 +1,13 @@
 
 import java.util.List;
+import java.util.Timer;
 
 import ml.data.Amino;
 import ml.data.DataSet;
 import ml.data.Instance;
 import ml.io.DataReader;
 import ml.utils.DataShuffler;
+import ml.utils.tracing.StopWatch;
 import ml.utils.tracing.Trace;
 
 public class Program {
@@ -19,7 +21,7 @@ public class Program {
 
 		try {
 			
-			long startTime = System.currentTimeMillis();
+			StopWatch watch = StopWatch.start();
 						
 			reader = new DataReader(args[0]);			
 			List<List<Amino>> val = reader.Read();
@@ -39,11 +41,10 @@ public class Program {
 			Trace.log("Tuning Set Valid  ?", subSets[0].verifyInstances());
 			Trace.log("Tuning Size       :", tune.length);
 
-			long endTime = System.currentTimeMillis();
-			long elapsedTime = endTime - startTime;
-			
-			Trace.log("");			
-			Trace.log("Loading Time      :", elapsedTime / (1000) + "." + (elapsedTime % 1000)+"s");
+			watch.stop();
+
+			Trace.log("");
+			Trace.log("Loading Time      :", watch.elapsedTime() + "s");
 		}
 		catch (Exception ex) {
 			ex.printStackTrace();
