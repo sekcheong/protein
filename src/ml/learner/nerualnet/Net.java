@@ -5,7 +5,9 @@ import java.util.List;
 
 public class Net {
 
+	// the bias term
 	private static double BIAS = -1.0;
+	
 	// W[L,j,i] are weight matrices where L is the layer number, j is the
 	// j_th neuron of L, and i is the i_th neuron of layer L-1
 	public double[][][] W = null;
