@@ -15,7 +15,7 @@ public class Sigmoid implements Function {
 	}
 
 	@Override
-	public void computeDiff(double[] x, double[] y) {
+	public void diff(double[] x, double[] y) {
 		for (int i = 0; i < x.length; i++) {
 			y[i] = 1 / (1 + Math.exp(-x[i]));
 			y[i] = y[i] * (1 - y[i]);
@@ -23,7 +23,7 @@ public class Sigmoid implements Function {
 	}
 
 	@Override
-	public double computeDiff(double x) {
+	public double diff(double x) {
 		double y = 1 / (1 + Math.exp(-x));
 		return y * (1 - y);
 	}

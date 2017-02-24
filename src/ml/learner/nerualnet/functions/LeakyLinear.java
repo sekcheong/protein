@@ -25,14 +25,14 @@ public class LeakyLinear implements Function {
 	}
 
 	@Override
-	public void computeDiff(double[] x, double[] y) {
+	public void diff(double[] x, double[] y) {
 		for (int i = 0; i < x.length; i++) {
 			y[i] = (x[i] < 0) ? -_slope : 1;
 		}
 	}
 
 	@Override
-	public double computeDiff(double x) {
+	public double diff(double x) {
 		return (x < 0) ? -_slope : 1;
 	}
 }

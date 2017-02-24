@@ -15,7 +15,7 @@ public class HyperbolicTangent implements Function {
 	}
 
 	@Override
-	public void computeDiff(double[] x, double[] y) {
+	public void diff(double[] x, double[] y) {
 		for (int i = 0; i < x.length; i++) {
 			y[i] = Math.tanh(x[i]);
 			y[i] = 1 - y[i] * y[i];
@@ -23,7 +23,7 @@ public class HyperbolicTangent implements Function {
 	}
 
 	@Override
-	public double computeDiff(double x) {
+	public double diff(double x) {
 		double y = Math.tanh(x);
 		return 1 - y * y;
 	}
