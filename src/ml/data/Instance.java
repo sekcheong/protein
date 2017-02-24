@@ -20,9 +20,7 @@ public class Instance {
 	public String toString() {	
 		StringBuffer sb = new StringBuffer();
 		
-		sb.append("x = ").append(Format.vector(features));
-		sb.append("\n");		
-		sb.append("t = ").append(target);
+		sb.append("(").append(Format.vector(features)).append(",").append(Format.vector(target)).append(")");
 		
 		return sb.toString();
 	}

@@ -6,6 +6,8 @@ import ml.data.Instance;
 import ml.io.DataReader;
 import ml.learner.nerualnet.Layer;
 import ml.learner.nerualnet.Net;
+import ml.learner.nerualnet.functions.Linear;
+import ml.learner.nerualnet.functions.Sigmoid;
 import ml.learner.neuralnet.initializers.DefaultWeightInitializer;
 import ml.learner.neuralnet.initializers.WeightInitializer;
 import ml.utils.tracing.StopWatch;
@@ -33,19 +35,19 @@ public class Program {
 			tune = subSets[1].instances();
 
 			Trace.log("");
-			Trace.log("Data Set Valid    :", dataSet.verifyInstances());
-			Trace.log("Feature Length    :", dataSet.instances()[0].features.length);
+			Trace.log("Data set valid    :", dataSet.verifyInstances());
+			Trace.log("Feature length    :", dataSet.instances()[0].features.length);
 			Trace.log("");
-			Trace.log("Training Set Valid:", subSets[1].verifyInstances());
-			Trace.log("Training Size     :", train.length);
+			Trace.log("Training set valid:", subSets[1].verifyInstances());
+			Trace.log("Training size     :", train.length);
 			Trace.log("");
-			Trace.log("Tuning Set Valid  :", subSets[0].verifyInstances());
-			Trace.log("Tuning Size       :", tune.length);
+			Trace.log("Tuning set valid  :", subSets[0].verifyInstances());
+			Trace.log("Tuning size       :", tune.length);
 
 			watch.stop();
 
 			Trace.log("");
-			Trace.log("Loading Time      :", watch.elapsedTime() + "s");
+			Trace.log("Loading time      :", watch.elapsedTime() + "s");
 		}
 		catch (Exception ex) {
 			ex.printStackTrace();
@@ -59,20 +61,22 @@ public class Program {
 		Net neuralNet = new Net();
 
 		// create the input layer has 18 inputs including the bias unit
-		Layer input = new Layer(18);
-		input.weightInitializer(weightInit);
-
+		Layer input = new Layer(4);
+			
 		// create the first hidden layer with 17 inputs and 20 units
-		Layer hidden1 = new Layer(18, 20);
+		Layer hidden1 = new Layer(4,8);
 		hidden1.weightInitializer(weightInit);
-
+		hidden1.activationFunction(new Sigmoid());
+		
 		// create the second hidden layer with 20 inputs and 20 units
-		Layer hidden2 = new Layer(20, 20);
+		Layer hidden2 = new Layer(8, 8);
 		hidden2.weightInitializer(weightInit);
-
+		hidden2.activationFunction(new Sigmoid());
+		
 		// create the output layer with 20 inputs and 3 output units
-		Layer output = new Layer(20, 3);
+		Layer output = new Layer(8, 3);
 		output.weightInitializer(weightInit);
+		output.activationFunction(new Linear());
 
 		neuralNet.addLayer(input);
 		neuralNet.addLayer(hidden1);

@@ -1,15 +1,20 @@
 package ml.learner.nerualnet;
 
+import ml.learner.nerualnet.functions.Function;
 import ml.learner.neuralnet.initializers.WeightInitializer;
 import ml.utils.Format;
 import ml.utils.tracing.Trace;
 
 public class Layer {
+	
 	private Net _net;
+	private WeightInitializer _weightInit;
+	private Function _activationFunc;
+	
 	private int _index;
 	private int _inputs;
 	private int _units;
-	private WeightInitializer _weightInit;
+	
 
 	public Layer(int inputs) {
 		this.init(inputs, inputs);
@@ -50,6 +55,14 @@ public class Layer {
 
 	public void weightInitializer(WeightInitializer init) {
 		_weightInit = init;
+	}
+	
+	public void activationFunction(Function func) {
+		_activationFunc = func;
+	}
+	
+	public Function activationFunction() {
+		return _activationFunc;
 	}
 
 	public void printWeightMatrix(double[][] W) {

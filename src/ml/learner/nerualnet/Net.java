@@ -3,44 +3,25 @@ package ml.learner.nerualnet;
 import java.util.ArrayList;
 import java.util.List;
 import ml.data.Instance;
-
+import ml.learner.nerualnet.functions.Function;
+import ml.math.Vector;
 
 public class Net {
 
 	// the bias term
 	private static double BIAS = -1.0;
 
-	// W[L,j,i] are weight matrices where L is the layer number, j is the
-	// j_th neuron of L, and i is the i_th neuron of layer L-1
-	public double[][][] _W = null;
-
-	// I[L,j] are vectors whose element denote weighted input of j_th
-	// neuron of layer L
-
-	// Y[L,j] are vectors whose elements denote the output of the j_th
-	// neuron of layer L
-
-	// the error
-	private double[] E = null;
-
 	// the network layers
 	private Layer[] _layers;
 
 	// max number of epochs
 	private int _maxEpoch = 5;
-
-	// the target precision
-	private double _epsilon = 0.4;
-
-	// the learning rate
-	private double _eta = 0.05;
-
+	
 	// list holds the layers being added
 	private List<Layer> _tempLayers = new ArrayList<Layer>();
 
 	
-	public Net() {
-	}
+	public Net() {}
 
 	
 	public void addLayer(Layer layer) {
@@ -65,22 +46,91 @@ public class Net {
 			}
 		}
 	}
-
 	
+
 	public void train(Instance[] examples, double eta, double precision, int maxEpoch) {
 		// the current mean squared error
 		double currMSE = 0;
 		double prevMSE;
-		int p = examples.length;
+
+		// the current epoch
 		int epoch = 0;
 
+		
+		examples = new Instance[4];
+		
+		Instance x;
+		x = new Instance(3,2);
+		x.features[0]=0.2;
+		x.features[1]=0.9;
+		x.features[2]=0.4;
+		
+		x.target[0] = 0.7;
+		x.target[1] = 0.3;
+		
+		examples[0]=x;
+		
+		
+		x = new Instance(3,2);
+		x.features[0]=0.1;
+		x.features[1]=0.3;
+		x.features[2]=0.5;
+		
+		x.target[0] = 0.6;
+		x.target[1] = 0.4;
+		
+		examples[1]=x;		
+		
+		
+		x = new Instance(3,2);
+		x.features[0]=0.9;
+		x.features[1]=0.7;
+		x.features[2]=0.8;
+		
+		x.target[0] = 0.9;
+		x.target[1] = 0.5;
+		
+		examples[2]=x;
+		
+		
+		x = new Instance(3,2);
+		x.features[0]=0.6;
+		x.features[1]=0.4;
+		x.features[2]=0.3;
+		
+		x.target[0] = 0.2;
+		x.target[1] = 0.8;
+		
+		examples[3]=x;
+		
+		// p = number of examples
+		int p = examples.length;
 		Layer layers[] = this.layers();
+
+		// W[n][j][i] are weight matrices whose elements denote the value of
+		// the synaptic weight that connects the jth neuron of layer (n) to
+		// the ith neuron of layer (n - 1).
 		double[][][] W = new double[layers.length][][];
-		double[] X = new double[examples[0].features.length + 1];
-		double[][] Y = new double[layers.length][];
+
+		// I[n][j] are vectors whose elements denote the weighted inputs
+		// related to the jth neuron of layer n, and are defined by:
 		double[][] I = new double[layers.length][];
 
-		this.initialize(W, X, Y, I);
+		// Y[n][j] are vectors whose elements denote the output of the jth
+		// neuron related to the layer n. They are defined as:
+		double[][] Y = new double[layers.length][];
+
+		// X[i] is the input vector
+		double[] X = new double[examples[0].features.length + 1];
+		
+		// E[k] is the error for kth example
+		double[] E = new double[examples.length];
+		
+		// the scratch pad vector for computing the error for E[k]
+		double[] e = new double[examples[0].target.length];
+
+		
+		this.initialize(W, I, Y);
 
 		while (true) {
 
@@ -88,18 +138,20 @@ public class Net {
 			currMSE = 0;
 
 			for (int k = 0; k < p; k++) {
-
+				
 				Instance example = examples[k];
 				makeInputVector(X, example.features);
 
-				forwardComputation(W, X);
-				backwardComputation(W, I, X);
+				computeForward(layers, W, I, Y, X);
 				
-				currMSE = currMSE + computeError(example.target, Y[Y.length - 1]);
-
+				E[k] = computeError(example.target, Y[Y.length-1], e);
+				
+				computeBackward(layers, W, I, Y, X);
+				
 			}
 
-			currMSE = currMSE / p;
+			currMSE = (1/p) * Vector.sum(E);
+			
 			if (Math.abs(prevMSE - currMSE) <= precision) break;
 
 			epoch = epoch + 1;
@@ -109,32 +161,20 @@ public class Net {
 
 	}
 
-	
-	private double computeError(double[] d, double[] y) {
-		
-		return 0;
-	}
 
-	
-	private void initialize(double[][][] W, double[] X, double[][] Y, double[][] I) {
+	private void initialize(double[][][] W, double[][] I, double[][] Y) {
 		Layer layers[] = this.layers();
-
-		// number of units for the output layer
-		int outputs = layers[layers.length - 1].units();
-
+		
 		// initializes the weights for each hidden
 		for (int n = 1; n < W.length; n++) {
 			
-			// number of units in layer n
-			int units = layers[n].units();
-			W[n] = new double[units][];
-			Y[n] = new double[units];
-			I[n] = new double[units];
-			
+			W[n] = new double[layers[n].units()][];
+			Y[n] = new double[layers[n - 1].units()];
+			I[n] = new double[layers[n - 1].units()];
+
 			// number of units connecting from n - 1
-			for (int j = 0; j < units; j++) {
+			for (int j = 0; j < layers[n].units(); j++) {
 				W[n][j] = new double[layers[n - 1].units()];
-				
 			}
 
 			layers[n].initWeight(W);
@@ -148,13 +188,47 @@ public class Net {
 	}
 
 	
-	private void forwardComputation(double[][][] W, double[] X) {
+	private void computeForward(Layer layers[], double[][][] W, double[][] I, double[][] Y, double X[]) {
+		double[] x;
+		double z;
 		
+		// input layer		
+		Function g = layers[0].activationFunction();
+		for (int j = 0; j < W[1].length; j++) {
+			z = 0;
+			for (int i = 0; i < W[1][j].length; i++) {
+				z = z + W[1][j][i]*X[i];
+			}
+			I[1][j] = z;						
+		}
+		g.compute(I[1], Y[1]);
+		
+		// hidden layers
+		for (int n = 2; n < W.length; n++) {			
+			for (int j = 0; j < W[n].length; j++) {				
+				z = 0;
+				for (int i = 0; i < W[n][j].length; i++) {
+					z = z + W[n][j][i]*Y[n-1][i];
+				}
+				I[n][j] = z;				
+			}
+			g = layers[n].activationFunction();
+			g.compute(I[n], Y[n]);
+		}
+		 
+	}
+	
+	
+	private double computeError(double[] d, double[] y, double[] e) {
+		Vector.sub(d, y, e);
+		Vector.square(e, e);
+		double error = 0.5 * Vector.sum(e);
+		return error;
 	}
 
 	
-	private void backwardComputation(double[][][] W, double[][] I, double[] X) {
-		
+	private void computeBackward(Layer layers[], double[][][] W, double[][] I, double[][] Y, double X[]) {
+
 	}
 
 	
@@ -165,7 +239,7 @@ public class Net {
 		}
 	}
 	
-	
+
 	public double[] predict(double[] features) {
 		return new double[0];
 	}
