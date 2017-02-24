@@ -1,7 +1,7 @@
 package ml.utils;
 
 public class Format {
-	
+
 	public static String vector(double[] v) {
 		StringBuffer sb = new StringBuffer();
 		sb.append("[");
@@ -12,9 +12,10 @@ public class Format {
 		sb.append("]");
 		return sb.toString();
 	}
-	
+
+
 	public static String sprintf(String format, Object... values) {
 		return String.format(format, values);
 	}
-	
+
 }

@@ -20,7 +20,9 @@ public class Net {
 	// list holds the layers being added
 	private List<Layer> _tempLayers = new ArrayList<Layer>();
 
+
 	public Net() {}
+
 
 	public void addLayer(Layer layer) {
 		layer.index(_tempLayers.size());
@@ -28,12 +30,14 @@ public class Net {
 		layer.net(this);
 	}
 
+
 	public Layer[] layers() {
 		if (_layers == null) {
 			_layers = _tempLayers.toArray(new Layer[_tempLayers.size()]);
 		}
 		return _layers;
 	}
+
 
 	private void setBias(double[][][] w) {
 		for (int n = 1; n < w.length; n++) {
@@ -43,6 +47,7 @@ public class Net {
 		}
 	}
 
+
 	private void debugWeights(double[][][] W) {
 		W[1] = new double[3][3];
 
@@ -50,6 +55,7 @@ public class Net {
 
 		W[3] = new double[1][3];
 	}
+
 
 	public void train(Instance[] examples, double eta, double precision, int maxEpoch) {
 		// the current mean squared error
@@ -116,6 +122,7 @@ public class Net {
 
 	}
 
+
 	private void initialize(double[][][] W, double[][] I, double[][] Y) {
 		Layer layers[] = this.layers();
 
@@ -141,6 +148,7 @@ public class Net {
 		}
 	}
 
+
 	private void computeForward(Layer layers[], double[][][] W, double[][] I, double[][] Y, double X[]) {
 		double[] x;
 		double z;
@@ -154,10 +162,9 @@ public class Net {
 			}
 			I[1][j] = z;
 		}
-		
+
 		g.compute(I[1], Y[1]);
 		I[1][0] = BIAS;
-		
 
 		// hidden layers
 		for (int n = 2; n < W.length; n++) {
@@ -175,6 +182,7 @@ public class Net {
 
 	}
 
+
 	private double computeError(double[] d, double[] y, double[] e) {
 		Vector.sub(d, y, e);
 		Vector.square(e, e);
@@ -182,9 +190,11 @@ public class Net {
 		return error;
 	}
 
+
 	private void computeBackward(Layer layers[], double[][][] W, double[][] I, double[][] Y, double X[]) {
 
 	}
+
 
 	private static void makeInputVector(double[] x, double[] features) {
 		x[0] = BIAS;
@@ -192,6 +202,7 @@ public class Net {
 			x[i + 1] = features[i];
 		}
 	}
+
 
 	public double[] predict(double[] features) {
 		return new double[0];

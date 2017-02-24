@@ -6,64 +6,76 @@ import ml.utils.Format;
 import ml.utils.tracing.Trace;
 
 public class Layer {
-	
+
 	private Net _net;
 	private WeightInitializer _weightInit;
 	private Function _activationFunc;
-	
+
 	private int _index;
 	private int _inputs;
 	private int _units;
-	
+
 
 	public Layer(int inputs) {
 		this.init(inputs, inputs);
 	}
 
+
 	public Layer(int inputs, int units) {
 		this.init(inputs, units);
 	}
+
 
 	private void init(int inputs, int units) {
 		_inputs = inputs;
 		_units = units;
 	}
 
+
 	public Net net() {
 		return _net;
 	}
+
 
 	public void net(Net net) {
 		_net = net;
 	}
 
+
 	public int index() {
 		return _index;
 	}
+
 
 	public void index(int index) {
 		_index = index;
 	}
 
+
 	public int inputs() {
 		return _inputs;
 	}
+
 
 	public int units() {
 		return _units;
 	}
 
+
 	public void weightInitializer(WeightInitializer init) {
 		_weightInit = init;
 	}
-	
+
+
 	public void activationFunction(Function func) {
 		_activationFunc = func;
 	}
-	
+
+
 	public Function activationFunction() {
 		return _activationFunc;
 	}
+
 
 	public void printWeightMatrix(double[][] W) {
 		StringBuffer sb = new StringBuffer();
@@ -82,6 +94,7 @@ public class Layer {
 		sb.append("]\n");
 		Trace.log(sb.toString());
 	}
+
 
 	public void initWeight(double[][][] W) {
 		_weightInit.initializeWeights(this, W);

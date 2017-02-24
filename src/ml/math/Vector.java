@@ -11,6 +11,7 @@ public class Vector {
 		}
 	}
 
+
 	public static double dot(double[] u, double[] v) {
 		double y = 0;
 		for (int i = 0; i < u.length; i++) {
@@ -19,17 +20,20 @@ public class Vector {
 		return y;
 	}
 
+
 	public static void sub(double[] u, double[] v, double[] y) {
 		for (int i = 0; i < u.length; i++) {
 			y[i] = u[i] - v[i];
 		}
 	}
 
+
 	public static void add(double[] u, double[] v, double[] y) {
 		for (int i = 0; i < u.length; i++) {
 			y[i] = u[i] + v[i];
 		}
 	}
+
 
 	public static double sum(double[] u) {
 		double y = 0;
@@ -39,11 +43,13 @@ public class Vector {
 		return y;
 	}
 
+
 	public static void square(double[] u, double[] y) {
 		for (int i = 0; i < u.length; i++) {
 			y[i] = u[i] * u[i];
 		}
 	}
+
 
 	public static void scale(double[] u, double c) {
 		for (int i = 0; i < u.length; i++) {

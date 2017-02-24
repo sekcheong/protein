@@ -49,6 +49,7 @@ public class Amino {
 		}
 	}
 
+
 	public Amino() {
 		// use the 21st value to indicate unknown acid
 		this._first = _primaryLabels.length - 1;
@@ -56,6 +57,7 @@ public class Amino {
 		this.id = total;
 		total++;
 	}
+
 
 	public Amino(String code) {
 		code = code.trim();
@@ -66,37 +68,46 @@ public class Amino {
 		total++;
 	}
 
+
 	public int primary() {
 		return _first;
 	}
+
 
 	public int secondary() {
 		return _second;
 	}
 
+
 	public int[] primaryOneHot() {
 		return _primaryOneHot[this.primary()];
 	}
+
 
 	public int[] secondaryOneHot() {
 		return _secondaryOneHot[this.secondary()];
 	}
 
+
 	public static int primaryLabelCount() {
 		return _primaryLabels.length;
 	}
-	
+
+
 	public static String primaryLabel(int cat) {
 		return _primaryLabels[cat];
 	}
+
 
 	public static String secondaryLabel(int cat) {
 		return _secondaryLabels[cat];
 	}
 
+
 	public String toString() {
 		return _primaryLabels[this._first] + " " + _secondaryLabels[this._second];
 	}
+
 
 	public static int secondaryLabelCount() {
 		return _secondaryLabels.length;

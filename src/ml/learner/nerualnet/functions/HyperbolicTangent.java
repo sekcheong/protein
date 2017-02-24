@@ -9,10 +9,12 @@ public class HyperbolicTangent implements Function {
 		}
 	}
 
+
 	@Override
 	public double compute(double x) {
 		return Math.tanh(x);
 	}
+
 
 	@Override
 	public void diff(double[] x, double[] y) {
@@ -21,6 +23,7 @@ public class HyperbolicTangent implements Function {
 			y[i] = 1 - y[i] * y[i];
 		}
 	}
+
 
 	@Override
 	public double diff(double x) {

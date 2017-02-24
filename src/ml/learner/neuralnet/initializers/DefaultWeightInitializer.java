@@ -6,20 +6,20 @@ import ml.learner.nerualnet.Layer;
 import ml.utils.tracing.Trace;
 
 public class DefaultWeightInitializer implements WeightInitializer {
-	
+
 	private Random _r = new Random();
-	
+
+
 	public DefaultWeightInitializer() {
-	
+
 	}
+
 
 	@Override
 	public void initializeWeights(Layer layer, double[][][] W) {
 		Trace.log("DefaultWeightInitializer.initializeWeights() [begin]");
 
-		if (layer.index() == 0) {
-			return;
-		}
+		if (layer.index() == 0) { return; }
 
 		// get layer the initializer belongs to
 		int L = layer.index();
