@@ -100,21 +100,18 @@ public class Program {
 		// layer, and output layer
 		Net neuralNet = new Net();
 
-		// create the input layer has 18 inputs including the bias unit
+		
 		Layer input = new Layer(4);
-
-		// create the first hidden layer with 17 inputs and 20 units
-		Layer hidden1 = new Layer(4, 8);
+		
+		Layer hidden1 = new Layer(4, 3);
 		hidden1.weightInitializer(weightInit);
 		hidden1.activationFunction(new Sigmoid());
-
-		// create the second hidden layer with 20 inputs and 20 units
-		Layer hidden2 = new Layer(8, 8);
+		
+		Layer hidden2 = new Layer(3, 2);
 		hidden2.weightInitializer(weightInit);
 		hidden2.activationFunction(new Sigmoid());
-
-		// create the output layer with 20 inputs and 3 output units
-		Layer output = new Layer(8, 3);
+		 
+		Layer output = new Layer(2, 1);
 		output.weightInitializer(weightInit);
 		output.activationFunction(new Linear());
 

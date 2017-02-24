@@ -5,6 +5,7 @@ import java.util.List;
 import ml.data.Instance;
 import ml.learner.nerualnet.functions.Function;
 import ml.math.Vector;
+import ml.utils.tracing.Trace;
 
 public class Net {
 
@@ -49,11 +50,17 @@ public class Net {
 
 
 	private void debugWeights(double[][][] W) {
-		W[1] = new double[3][3];
+		W[1] = new double[3][3];		
+		W[1][1] = new double[] { 0.2, 0.4, 0.5 };
+		W[1][2] = new double[] { 0.3, 0.6, 0.7 };
+		W[1][3] = new double[] { 0.4, 0.8, 0.3 };
 
 		W[2] = new double[2][4];
+		W[2][0] = new double[] { -0.7, 0.6, 0.2, 0.7 };
+		W[2][1] = new double[] { -0.3, 0.7, 0.2, 0.8 };
 
-		W[3] = new double[1][3];
+		W[3] = new double[1][2];
+		W[1][0] = new double[] { 0.1, 0.8, 0.5 };
 	}
 
 
@@ -83,7 +90,7 @@ public class Net {
 		double[][] Y = new double[layers.length][];
 
 		// X[i] is the input vector
-		double[] X = new double[examples[0].features.length];
+		double[] X = new double[examples[0].features.length+1];
 
 		// E[k] is the error for kth example
 		double[] E = new double[examples.length];
@@ -128,9 +135,11 @@ public class Net {
 
 		// initializes the weights for each hidden
 		for (int n = 1; n < W.length; n++) {
-
-			W[n] = new double[layers[n].units() + 1][];
-			Y[n] = new double[layers[n - 1].units() + 1];
+			
+			W[n] = new double[layers[n].units()][];
+			
+			//units in the previous unit plus a bias unit
+			Y[n] = new double[layers[n - 1].units() + 1];  
 			I[n] = new double[layers[n - 1].units() + 1];
 
 			// number of units connecting from n - 1
@@ -153,6 +162,7 @@ public class Net {
 		double[] x;
 		double z;
 
+		Trace.log("size(W[1])=(" + W[1].length + "," + W[1][0].length + ")");
 		// input layer
 		Function g = layers[0].activationFunction();
 		for (int j = 0; j < W[1].length; j++) {
@@ -168,6 +178,7 @@ public class Net {
 
 		// hidden layers
 		for (int n = 2; n < W.length; n++) {
+			Trace.log("size(W[" + n + "1])=(" + W[n].length + "," + W[n][0].length + ")");
 			for (int j = 0; j < W[n].length; j++) {
 				z = 0;
 				for (int i = 0; i < W[n][j].length; i++) {
