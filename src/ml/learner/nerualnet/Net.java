@@ -39,9 +39,8 @@ public class Net {
 
 	private List<Layer> _tempLayers = new ArrayList<Layer>();
 	
-	public Net() {
-		
-	}
+	
+	public Net() { }
 
 	
 	public void addLayer(Layer layer) {
@@ -70,7 +69,6 @@ public class Net {
 				w[l][j][0] = BIAS;
 			}
 		}
-		w[0][0][0] = BIAS;
 	}
 	
 	
@@ -79,25 +77,27 @@ public class Net {
 		Layer layres[] = this.layers();
 		
 		// creates the weight matrices and set the initial weights
-		W = new double[_layers.length][][];
-
-		// creates the input layer
-		W[0] = new double[layres[0].inputs()][1];
+		W = new double[layres.length][][];
+		I = new double[layres.length][];
+		Y = new double[layres.length][];
 		
 		// create and initialize hidden layer weight matrices
 		for (int l = 1; l < layres.length; l++) {
 			
 			W[l] = new double[layres[l].units()][];
+			I[l] = new double[layres[l].units()];
+			Y[l] = new double[layres[l].units()];
 			
 			for (int j = 0; j < layres[l].units(); j++) {
 				W[l][j] = new double[layres[l - 1].units()];
-			}	
+			}
+			
 			layres[l].initWeight();
 		}
 		
 		setBias(W);
 		
-		for (int l = 0; l < layres.length; l++) {
+		for (int l = 1; l < layres.length; l++) {
 			layres[l].printWeightMatrix();
 		}
 	}
