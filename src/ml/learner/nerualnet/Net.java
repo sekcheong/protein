@@ -16,21 +16,18 @@ public class Net {
 
 	// max number of epochs
 	private int _maxEpoch = 5;
-	
+
 	// list holds the layers being added
 	private List<Layer> _tempLayers = new ArrayList<Layer>();
 
-	
 	public Net() {}
 
-	
 	public void addLayer(Layer layer) {
 		layer.index(_tempLayers.size());
 		_tempLayers.add(layer);
 		layer.net(this);
 	}
 
-	
 	public Layer[] layers() {
 		if (_layers == null) {
 			_layers = _tempLayers.toArray(new Layer[_tempLayers.size()]);
@@ -38,7 +35,6 @@ public class Net {
 		return _layers;
 	}
 
-	
 	private void setBias(double[][][] w) {
 		for (int n = 1; n < w.length; n++) {
 			for (int j = 0; j < w[n].length; j++) {
@@ -46,7 +42,14 @@ public class Net {
 			}
 		}
 	}
-	
+
+	private void debugWeights(double[][][] W) {
+		W[1] = new double[3][3];
+
+		W[2] = new double[2][4];
+
+		W[3] = new double[1][3];
+	}
 
 	public void train(Instance[] examples, double eta, double precision, int maxEpoch) {
 		// the current mean squared error
@@ -56,53 +59,6 @@ public class Net {
 		// the current epoch
 		int epoch = 0;
 
-		
-		examples = new Instance[4];
-		
-		Instance x;
-		x = new Instance(3,2);
-		x.features[0]=0.2;
-		x.features[1]=0.9;
-		x.features[2]=0.4;
-		
-		x.target[0] = 0.7;
-		x.target[1] = 0.3;
-		
-		examples[0]=x;
-		
-		
-		x = new Instance(3,2);
-		x.features[0]=0.1;
-		x.features[1]=0.3;
-		x.features[2]=0.5;
-		
-		x.target[0] = 0.6;
-		x.target[1] = 0.4;
-		
-		examples[1]=x;		
-		
-		
-		x = new Instance(3,2);
-		x.features[0]=0.9;
-		x.features[1]=0.7;
-		x.features[2]=0.8;
-		
-		x.target[0] = 0.9;
-		x.target[1] = 0.5;
-		
-		examples[2]=x;
-		
-		
-		x = new Instance(3,2);
-		x.features[0]=0.6;
-		x.features[1]=0.4;
-		x.features[2]=0.3;
-		
-		x.target[0] = 0.2;
-		x.target[1] = 0.8;
-		
-		examples[3]=x;
-		
 		// p = number of examples
 		int p = examples.length;
 		Layer layers[] = this.layers();
@@ -121,15 +77,14 @@ public class Net {
 		double[][] Y = new double[layers.length][];
 
 		// X[i] is the input vector
-		double[] X = new double[examples[0].features.length + 1];
-		
+		double[] X = new double[examples[0].features.length];
+
 		// E[k] is the error for kth example
 		double[] E = new double[examples.length];
-		
+
 		// the scratch pad vector for computing the error for E[k]
 		double[] e = new double[examples[0].target.length];
 
-		
 		this.initialize(W, I, Y);
 
 		while (true) {
@@ -138,20 +93,20 @@ public class Net {
 			currMSE = 0;
 
 			for (int k = 0; k < p; k++) {
-				
+
 				Instance example = examples[k];
 				makeInputVector(X, example.features);
 
 				computeForward(layers, W, I, Y, X);
-				
-				E[k] = computeError(example.target, Y[Y.length-1], e);
-				
+
+				E[k] = computeError(example.target, Y[Y.length - 1], e);
+
 				computeBackward(layers, W, I, Y, X);
-				
+
 			}
 
-			currMSE = (1/p) * Vector.sum(E);
-			
+			currMSE = (1 / p) * Vector.sum(E);
+
 			if (Math.abs(prevMSE - currMSE) <= precision) break;
 
 			epoch = epoch + 1;
@@ -161,20 +116,19 @@ public class Net {
 
 	}
 
-
 	private void initialize(double[][][] W, double[][] I, double[][] Y) {
 		Layer layers[] = this.layers();
-		
+
 		// initializes the weights for each hidden
 		for (int n = 1; n < W.length; n++) {
-			
-			W[n] = new double[layers[n].units()][];
-			Y[n] = new double[layers[n - 1].units()];
-			I[n] = new double[layers[n - 1].units()];
+
+			W[n] = new double[layers[n].units() + 1][];
+			Y[n] = new double[layers[n - 1].units() + 1];
+			I[n] = new double[layers[n - 1].units() + 1];
 
 			// number of units connecting from n - 1
-			for (int j = 0; j < layers[n].units(); j++) {
-				W[n][j] = new double[layers[n - 1].units()];
+			for (int j = 0; j < layers[n].units() + 1; j++) {
+				W[n][j] = new double[layers[n - 1].units() + 1];
 			}
 
 			layers[n].initWeight(W);
@@ -187,38 +141,40 @@ public class Net {
 		}
 	}
 
-	
 	private void computeForward(Layer layers[], double[][][] W, double[][] I, double[][] Y, double X[]) {
 		double[] x;
 		double z;
-		
-		// input layer		
+
+		// input layer
 		Function g = layers[0].activationFunction();
 		for (int j = 0; j < W[1].length; j++) {
 			z = 0;
 			for (int i = 0; i < W[1][j].length; i++) {
-				z = z + W[1][j][i]*X[i];
+				z = z + W[1][j][i] * X[i];
 			}
-			I[1][j] = z;						
+			I[1][j] = z;
 		}
-		g.compute(I[1], Y[1]);
 		
+		g.compute(I[1], Y[1]);
+		I[1][0] = BIAS;
+		
+
 		// hidden layers
-		for (int n = 2; n < W.length; n++) {			
-			for (int j = 0; j < W[n].length; j++) {				
+		for (int n = 2; n < W.length; n++) {
+			for (int j = 0; j < W[n].length; j++) {
 				z = 0;
 				for (int i = 0; i < W[n][j].length; i++) {
-					z = z + W[n][j][i]*Y[n-1][i];
+					z = z + W[n][j][i] * Y[n - 1][i];
 				}
-				I[n][j] = z;				
+				I[n][j] = z;
 			}
+			I[n][0] = BIAS;
 			g = layers[n].activationFunction();
 			g.compute(I[n], Y[n]);
 		}
-		 
+
 	}
-	
-	
+
 	private double computeError(double[] d, double[] y, double[] e) {
 		Vector.sub(d, y, e);
 		Vector.square(e, e);
@@ -226,19 +182,16 @@ public class Net {
 		return error;
 	}
 
-	
 	private void computeBackward(Layer layers[], double[][][] W, double[][] I, double[][] Y, double X[]) {
 
 	}
 
-	
 	private static void makeInputVector(double[] x, double[] features) {
 		x[0] = BIAS;
 		for (int i = 0; i < features.length; i++) {
 			x[i + 1] = features[i];
 		}
 	}
-	
 
 	public double[] predict(double[] features) {
 		return new double[0];
