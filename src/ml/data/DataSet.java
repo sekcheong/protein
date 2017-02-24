@@ -60,7 +60,7 @@ public class DataSet {
 			target[i] = center.secondaryOneHot()[i];
 		}
 
-		inst.feature = features;
+		inst.features = features;
 		inst.target = target;
 
 		//logInstance(inst);
@@ -117,7 +117,7 @@ public class DataSet {
 		sb.append("[");
 
 		for (int i = 0; i < _windowSize; i++) {
-			int cat = findValue(inst.feature, 1, i * cols, cols);
+			int cat = findValue(inst.features, 1, i * cols, cols);
 			if (cat > -1) {
 				primary = Amino.primaryLabel(cat);
 				sb.append(primary);
@@ -147,7 +147,7 @@ public class DataSet {
 		int first = 0;
 		int second = 0;
 		for (Instance inst : this.instances()) {
-			first = findValue(inst.feature, 1, (_windowSize / 2) * cols, cols);
+			first = findValue(inst.features, 1, (_windowSize / 2) * cols, cols);
 			second = findValue(inst.target, 1, 0, inst.target.length);
 			//Trace.log(AminoAcid.primaryLabel(first) + " " + AminoAcid.secondaryLabel(second));
 			Amino acid = src.remove(0);

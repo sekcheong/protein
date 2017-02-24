@@ -1,9 +1,7 @@
 package ml.learner.nerualnet;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-
-import ml.learner.nerualnet.config.WeightInitializer;
+import ml.learner.neuralnet.initializers.WeightInitializer;
+import ml.utils.Format;
 import ml.utils.tracing.Trace;
 
 public class Layer {
@@ -13,7 +11,15 @@ public class Layer {
 	private int _units;
 	private WeightInitializer _weightInit;
 
+	public Layer(int inputs) {
+		this.init(inputs, inputs);
+	}
+
 	public Layer(int inputs, int units) {
+		this.init(inputs, units);
+	}
+
+	private void init(int inputs, int units) {
 		_inputs = inputs;
 		_units = units;
 	}
@@ -46,32 +52,26 @@ public class Layer {
 		_weightInit = init;
 	}
 
-	public void initWeight() {		
-		_weightInit.initializeWeights(this);
-	}
-
-	public void printWeightMatrix() {
-		NumberFormat formatter = new DecimalFormat("#0.0000");
+	public void printWeightMatrix(double[][] W) {
 		StringBuffer sb = new StringBuffer();
-		double[][][] W = _net.W();
-		int l = this.index();
-		
-		sb.append("W[").append(this.index()).append("] = [\n");		
-		
-		for (int j=0; j<W[l].length; j++) {
-			for (int i=0; i<W[l][j].length; i++) {
-				if (i==0) {
-					sb.append(formatter.format(W[l][j][i]));
+
+		sb.append("W[").append(this.index()).append("] = [\n");
+
+		for (int j = 0; j < W.length; j++) {
+			for (int i = 0; i < W[j].length; i++) {
+				if (i > 0) {
+					sb.append(" ");
 				}
-				else {
-					sb.append(" ").append(formatter.format(W[l][j][i]));
-				}
+				sb.append(Format.sprintf("%1.4f", W[j][i]));
 			}
 			sb.append("\n");
 		}
 		sb.append("]\n");
 		Trace.log(sb.toString());
 	}
-	
-	
+
+	public void initWeight(double[][][] W) {
+		_weightInit.initializeWeights(this, W);
+	}
+
 }

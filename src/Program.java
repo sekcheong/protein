@@ -6,8 +6,8 @@ import ml.data.Instance;
 import ml.io.DataReader;
 import ml.learner.nerualnet.Layer;
 import ml.learner.nerualnet.Net;
-import ml.learner.nerualnet.config.DefaultWeightInitializer;
-import ml.learner.nerualnet.config.WeightInitializer;
+import ml.learner.neuralnet.initializers.DefaultWeightInitializer;
+import ml.learner.neuralnet.initializers.WeightInitializer;
 import ml.utils.tracing.StopWatch;
 import ml.utils.tracing.Trace;
 
@@ -34,7 +34,7 @@ public class Program {
 
 			Trace.log("");
 			Trace.log("Data Set Valid    :", dataSet.verifyInstances());
-			Trace.log("Feature Length    :", dataSet.instances()[0].feature.length);
+			Trace.log("Feature Length    :", dataSet.instances()[0].features.length);
 			Trace.log("");
 			Trace.log("Training Set Valid:", subSets[1].verifyInstances());
 			Trace.log("Training Size     :", train.length);
@@ -58,28 +58,28 @@ public class Program {
 		// layer, and output layer
 		Net neuralNet = new Net();
 
-		// create the input layer has 18 inputs including the bias
-		Layer input = new Layer(18, 18);
+		// create the input layer has 18 inputs including the bias unit
+		Layer input = new Layer(18);
 		input.weightInitializer(weightInit);
 
-		// create the hidden layer with 18 inputs and 21 units
-		Layer hidden = new Layer(18, 21);
-		hidden.weightInitializer(weightInit);
-		
-		// create the hidden layer with 18 inputs and 21 units
-		Layer hidden2 = new Layer(21, 21);
+		// create the first hidden layer with 17 inputs and 20 units
+		Layer hidden1 = new Layer(18, 20);
+		hidden1.weightInitializer(weightInit);
+
+		// create the second hidden layer with 20 inputs and 20 units
+		Layer hidden2 = new Layer(20, 20);
 		hidden2.weightInitializer(weightInit);
 
-		// create the output layer with 21 inputs and 3 output units
-		Layer output = new Layer(21, 3);
+		// create the output layer with 20 inputs and 3 output units
+		Layer output = new Layer(20, 3);
 		output.weightInitializer(weightInit);
 
 		neuralNet.addLayer(input);
-		neuralNet.addLayer(hidden);
+		neuralNet.addLayer(hidden1);
 		neuralNet.addLayer(hidden2);
 		neuralNet.addLayer(output);
 
-		neuralNet.initialize();
+		neuralNet.train(train, 0.05, 0.4, 5);
 
 	}
 
