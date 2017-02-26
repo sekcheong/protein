@@ -7,7 +7,7 @@ import ml.utils.tracing.Trace;
 
 public class Layer {
 
-	private Net _net;
+	private NeuralNet _net;
 	private WeightInitializer _weightInit;
 	private Function _activationFunc;
 
@@ -16,28 +16,18 @@ public class Layer {
 	private int _units;
 
 
-	public Layer(int inputs) {
-		this.init(inputs, inputs);
-	}
-
-
-	public Layer(int inputs, int units) {
-		this.init(inputs, units);
-	}
-
-
-	private void init(int inputs, int units) {
-		_inputs = inputs;
+	public Layer(int units, int inputs) {
 		_units = units;
+		_inputs = inputs;
 	}
 
 
-	public Net net() {
+	public NeuralNet net() {
 		return _net;
 	}
 
 
-	public void net(Net net) {
+	public void net(NeuralNet net) {
 		_net = net;
 	}
 
@@ -62,42 +52,30 @@ public class Layer {
 	}
 
 
-	public void weightInitializer(WeightInitializer init) {
+	public Layer weightInitializer(WeightInitializer init) {
 		_weightInit = init;
+		return this;
 	}
 
+	public WeightInitializer weightInitializer() {
 
-	public void activationFunction(Function func) {
+		return _weightInit;
+	}
+
+	public Layer activationFunction(Function func) {
 		_activationFunc = func;
+		return this;
 	}
 
 
 	public Function activationFunction() {
 		return _activationFunc;
 	}
-
-
-	public void printWeightMatrix(double[][] W) {
-		StringBuffer sb = new StringBuffer();
-
-		sb.append("W[").append(this.index()).append("] = [\n");
-
-		for (int j = 0; j < W.length; j++) {
-			for (int i = 0; i < W[j].length; i++) {
-				if (i > 0) {
-					sb.append(" ");
-				}
-				sb.append(Format.sprintf("%1.4f", W[j][i]));
-			}
-			sb.append("\n");
-		}
-		sb.append("]\n");
-		Trace.log(sb.toString());
+	
+	
+	@Override
+	public String toString() {
+		return "L[" + this.index() + "]: " + "inputs:" + this.inputs() + ", units:" + this.units(); 
 	}
-
-
-	public void initWeight(double[][][] W) {
-		_weightInit.initializeWeights(this, W);
-	}
-
+	
 }

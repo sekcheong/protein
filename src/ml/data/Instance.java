@@ -21,9 +21,7 @@ public class Instance {
 
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
-
-		sb.append("(").append(Format.vector(features)).append(",").append(Format.vector(target)).append(")");
-
+		sb.append("([").append(Format.matrix(features)).append("],[").append(Format.matrix(target)).append("])");
 		return sb.toString();
 	}
 }

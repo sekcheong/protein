@@ -5,7 +5,9 @@ import ml.data.DataSet;
 import ml.data.Instance;
 import ml.io.DataReader;
 import ml.learner.nerualnet.Layer;
-import ml.learner.nerualnet.Net;
+import ml.learner.nerualnet.NeuralNet;
+import ml.learner.nerualnet.functions.Function;
+import ml.learner.nerualnet.functions.HyperbolicTangent;
 import ml.learner.nerualnet.functions.Linear;
 import ml.learner.nerualnet.functions.Sigmoid;
 import ml.learner.neuralnet.initializers.DefaultWeightInitializer;
@@ -52,6 +54,7 @@ public class Program {
 		return examples;
 	}
 
+
 	public static void main(String[] args) {
 		Trace.enabled = true;
 
@@ -96,29 +99,21 @@ public class Program {
 		// use default weight initializer
 		WeightInitializer weightInit = new DefaultWeightInitializer();
 
-		// create a neural network with one input layer, one hidden
-		// layer, and output layer
-		Net neuralNet = new Net();
+		Function activateFunc = new HyperbolicTangent();
 
-		
-		Layer input = new Layer(4);
-		
-		Layer hidden1 = new Layer(4, 3);
-		hidden1.weightInitializer(weightInit);
-		hidden1.activationFunction(new Sigmoid());
-		
-		Layer hidden2 = new Layer(3, 2);
-		hidden2.weightInitializer(weightInit);
-		hidden2.activationFunction(new Sigmoid());
-		 
-		Layer output = new Layer(2, 1);
-		output.weightInitializer(weightInit);
-		output.activationFunction(new Linear());
+		NeuralNet neuralNet = new NeuralNet();
 
-		neuralNet.addLayer(input);
-		neuralNet.addLayer(hidden1);
-		neuralNet.addLayer(hidden2);
-		neuralNet.addLayer(output);
+		// 2 inputs and 1 bias
+		neuralNet.addLayer(3);
+
+		// 3 units one bias
+		neuralNet.addLayer(4).weightInitializer(weightInit).activationFunction(activateFunc);
+
+		// 2 units one bias
+		neuralNet.addLayer(3).weightInitializer(weightInit).activationFunction(activateFunc);
+
+		// 1 output unit
+		neuralNet.addLayer(1).weightInitializer(weightInit).activationFunction(new Linear());
 
 		neuralNet.train(train, 0.05, 0.4, 5);
 
