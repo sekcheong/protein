@@ -1,4 +1,4 @@
-package ml.learner.nerualnet;
+package ml.learner.neuralnet;
 
 public class Neuron {
 	private Layer _layer;

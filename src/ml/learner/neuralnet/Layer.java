@@ -1,9 +1,7 @@
-package ml.learner.nerualnet;
+package ml.learner.neuralnet;
 
-import ml.learner.nerualnet.functions.Function;
+import ml.learner.neuralnet.functions.Function;
 import ml.learner.neuralnet.initializers.WeightInitializer;
-import ml.utils.Format;
-import ml.utils.tracing.Trace;
 
 public class Layer {
 
@@ -57,10 +55,12 @@ public class Layer {
 		return this;
 	}
 
+
 	public WeightInitializer weightInitializer() {
 
 		return _weightInit;
 	}
+
 
 	public Layer activationFunction(Function func) {
 		_activationFunc = func;
@@ -71,11 +71,11 @@ public class Layer {
 	public Function activationFunction() {
 		return _activationFunc;
 	}
-	
-	
+
+
 	@Override
 	public String toString() {
-		return "L[" + this.index() + "]: " + "inputs:" + this.inputs() + ", units:" + this.units(); 
+		return "L[" + this.index() + "]: " + "inputs:" + this.inputs() + ", units:" + this.units();
 	}
-	
+
 }

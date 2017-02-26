@@ -27,7 +27,7 @@ public class Trace {
 		if (!Trace.enabled) return;
 		System.out.print(msg);
 		for (Object s : moreMsgs) {
-			System.out.print(" " + s);
+			System.out.print(s);
 		}
 		System.out.println();
 	}
@@ -42,7 +42,7 @@ public class Trace {
 		if (!Trace.enabled) return;
 		System.out.print(msg);
 		for (Object s : moreMsgs) {
-			System.out.print(" " + s);
+			System.out.print(s);
 		}
 		System.err.println();
 	}

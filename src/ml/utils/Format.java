@@ -7,14 +7,20 @@ public class Format {
 	public static String matrix(Object v) {
 		try {
 
-			if (v instanceof double[]) { return format1d((double[]) v, 4); }
-			if (v instanceof double[][]) { return format2d((double[][]) v, 4); }
-			if (v instanceof double[][][]) { return format3d((double[][][]) v, 4); }
+			if (v instanceof double[]) {
+				return format1d((double[]) v, 8);
+			}
+			if (v instanceof double[][]) {
+				return format2d((double[][]) v, 8);
+			}
+			if (v instanceof double[][][]) {
+				return format3d((double[][][]) v, 8);
+			}
 
-			Trace.Error("Format.matrix(Object v): Unexpected data type " + v.toString());
+			Trace.Error("Format.matrix(Object v): Unexpected data type ",v.toString());
 		}
 		catch (Exception ex) {
-			Trace.Error("Format.matrix(Object v): Error formatting matrix " + v.toString() + "\nDetails:",
+			Trace.Error("Format.matrix(Object v): Error formatting matrix ", v.toString(), "\nDetails:",
 					ex.getMessage());
 		}
 
@@ -23,10 +29,10 @@ public class Format {
 
 
 	private static String format3d(double[][][] v, int decimal) {
-		if (v==null) return "null";
+		if (v == null) return "null";
 		StringBuffer sb = new StringBuffer();
 		for (int i = 0; i < v.length; i++) {
-			if (i>0) sb.append("\n");
+			if (i > 0) sb.append("\n");
 			sb.append("[").append(i).append("]\n");
 			sb.append(format2d((double[][]) v[i], decimal));
 		}
@@ -35,7 +41,7 @@ public class Format {
 
 
 	private static String format2d(double[][] v, int decimal) {
-		if (v==null) return "null";
+		if (v == null) return "null";
 		StringBuffer sb = new StringBuffer();
 		double m[][] = (double[][]) v;
 		for (int i = 0; i < m.length; i++) {
@@ -48,11 +54,11 @@ public class Format {
 
 
 	private static String format1d(double[] v, int decimal) {
-		if (v==null) return "null";
+		if (v == null) return "null";
 		StringBuffer sb = new StringBuffer();
 		for (int j = 0; j < v.length; j++) {
 			if (j > 0) sb.append(" ");
-			String q = sprintf("%1." + decimal + "f", v[j]);			
+			String q = sprintf("%1." + decimal + "f", v[j]);
 			sb.append(q);
 		}
 		return sb.toString();

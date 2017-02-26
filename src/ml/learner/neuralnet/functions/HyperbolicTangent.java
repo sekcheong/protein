@@ -1,4 +1,4 @@
-package ml.learner.nerualnet.functions;
+package ml.learner.neuralnet.functions;
 
 public class HyperbolicTangent implements Function {
 
@@ -35,14 +35,14 @@ public class HyperbolicTangent implements Function {
 	@Override
 	public void compute(Object... params) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 
 	@Override
 	public void diff(Object... params) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

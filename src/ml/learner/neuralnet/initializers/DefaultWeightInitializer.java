@@ -2,9 +2,6 @@ package ml.learner.neuralnet.initializers;
 
 import java.util.Random;
 
-import ml.learner.nerualnet.Layer;
-import ml.utils.tracing.Trace;
-
 public class DefaultWeightInitializer implements WeightInitializer {
 
 	private Random _r = new Random();

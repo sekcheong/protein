@@ -1,7 +1,5 @@
 package ml.learner.neuralnet.initializers;
 
-import ml.learner.nerualnet.Layer;
-
-public interface WeightInitializer {		
-	public void initializeWeights( double[][] W);
+public interface WeightInitializer {
+	public void initializeWeights(double[][] W);
 }

@@ -4,8 +4,8 @@ import ml.data.Amino;
 import ml.data.DataSet;
 import ml.data.Instance;
 import ml.io.DataReader;
-import ml.learner.nerualnet.NeuralNet;
-import ml.learner.nerualnet.functions.*;
+import ml.learner.neuralnet.NeuralNet;
+import ml.learner.neuralnet.functions.*;
 import ml.learner.neuralnet.initializers.*;
 import ml.utils.tracing.*;
 
@@ -93,7 +93,9 @@ public class Program {
 		// use default weight initializer
 		WeightInitializer weightInit = new DefaultWeightInitializer();
 
-		Function activateFunc = new HyperbolicTangent();
+		Function hiddenFunc = new Linear();
+		Function outputFunc = new Sigmoid();
+		Function htan = new HyperbolicTangent();
 
 		NeuralNet neuralNet = new NeuralNet();
 
@@ -103,18 +105,27 @@ public class Program {
 		// 3 units
 		neuralNet.addLayer(3)
 				.weightInitializer(weightInit)
-				.activationFunction(activateFunc);
+				.activationFunction(htan);
 
 		// 2 units
 		neuralNet.addLayer(2)
 				.weightInitializer(weightInit)
-				.activationFunction(activateFunc);
+				.activationFunction(htan);
 
+		// // 2 units
+		// neuralNet.addLayer(2)
+		// .weightInitializer(weightInit)
+		// .activationFunction(htan);
+		//
+		// // 2 units
+		// neuralNet.addLayer(2)
+		// .weightInitializer(weightInit)
+		// .activationFunction(htan);
+		//
 		// 1 output unit
-		neuralNet.addLayer(1)
+		neuralNet.addLayer(2)
 				.weightInitializer(weightInit)
-				.activationFunction(activateFunc);
-		// .activationFunction(new Linear());
+				.activationFunction(htan);
 
 		neuralNet.train(train, 0.05, 0.4, 5);
 

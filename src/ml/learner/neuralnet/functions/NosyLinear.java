@@ -1,4 +1,4 @@
-package ml.learner.nerualnet.functions;
+package ml.learner.neuralnet.functions;
 
 import java.util.Random;
 
