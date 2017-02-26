@@ -29,4 +29,18 @@ public class Linear implements Function {
 		return (x <= 0) ? 0 : 1;
 	}
 
+
+	@Override
+	public void compute(Object... params) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void diff(Object... params) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

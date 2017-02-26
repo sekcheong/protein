@@ -4,16 +4,10 @@ import ml.data.Amino;
 import ml.data.DataSet;
 import ml.data.Instance;
 import ml.io.DataReader;
-import ml.learner.nerualnet.Layer;
 import ml.learner.nerualnet.NeuralNet;
-import ml.learner.nerualnet.functions.Function;
-import ml.learner.nerualnet.functions.HyperbolicTangent;
-import ml.learner.nerualnet.functions.Linear;
-import ml.learner.nerualnet.functions.Sigmoid;
-import ml.learner.neuralnet.initializers.DefaultWeightInitializer;
-import ml.learner.neuralnet.initializers.WeightInitializer;
-import ml.utils.tracing.StopWatch;
-import ml.utils.tracing.Trace;
+import ml.learner.nerualnet.functions.*;
+import ml.learner.neuralnet.initializers.*;
+import ml.utils.tracing.*;
 
 public class Program {
 
@@ -103,17 +97,24 @@ public class Program {
 
 		NeuralNet neuralNet = new NeuralNet();
 
-		// 2 inputs and 1 bias
-		neuralNet.addLayer(3);
+		// 2 inputs
+		neuralNet.addLayer(2);
 
-		// 3 units one bias
-		neuralNet.addLayer(4).weightInitializer(weightInit).activationFunction(activateFunc);
+		// 3 units
+		neuralNet.addLayer(3)
+				.weightInitializer(weightInit)
+				.activationFunction(activateFunc);
 
-		// 2 units one bias
-		neuralNet.addLayer(3).weightInitializer(weightInit).activationFunction(activateFunc);
+		// 2 units
+		neuralNet.addLayer(2)
+				.weightInitializer(weightInit)
+				.activationFunction(activateFunc);
 
 		// 1 output unit
-		neuralNet.addLayer(1).weightInitializer(weightInit).activationFunction(new Linear());
+		neuralNet.addLayer(1)
+				.weightInitializer(weightInit)
+				.activationFunction(activateFunc);
+		// .activationFunction(new Linear());
 
 		neuralNet.train(train, 0.05, 0.4, 5);
 

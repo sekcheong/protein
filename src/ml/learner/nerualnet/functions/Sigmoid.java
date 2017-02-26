@@ -31,4 +31,18 @@ public class Sigmoid implements Function {
 		return y * (1 - y);
 	}
 
+
+	@Override
+	public void compute(Object... params) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void diff(Object... params) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

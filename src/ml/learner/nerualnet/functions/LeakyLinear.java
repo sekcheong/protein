@@ -41,4 +41,18 @@ public class LeakyLinear implements Function {
 	public double diff(double x) {
 		return (x < 0) ? -_slope : 1;
 	}
+
+
+	@Override
+	public void compute(Object... params) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void diff(Object... params) {
+		// TODO Auto-generated method stub
+		
+	}
 }

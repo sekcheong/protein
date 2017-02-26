@@ -25,7 +25,8 @@ public class NeuralNet {
 	public double[][][] _W;
 
 
-	public NeuralNet() {}
+	public NeuralNet() {
+	}
 
 
 	public double[][][] W() {
@@ -77,10 +78,9 @@ public class NeuralNet {
 		W[1][1] = new double[] { 0.3, 0.6, 0.7 };
 		W[1][2] = new double[] { 0.4, 0.8, 0.3 };
 
-		W[2] = new double[3][4];
-		W[2][0] = new double[] { 0, 0, 0, 0 };
-		W[2][1] = new double[] { -0.7, 0.6, 0.2, 0.7 };
-		W[2][2] = new double[] { -0.3, 0.7, 0.2, 0.8 };
+		W[2] = new double[2][4];
+		W[2][0] = new double[] { -0.7, 0.6, 0.2, 0.7 };
+		W[2][1] = new double[] { -0.3, 0.7, 0.2, 0.8 };
 
 		W[3] = new double[1][3];
 		W[3][0] = new double[] { 0.1, 0.8, 0.5 };
@@ -121,9 +121,17 @@ public class NeuralNet {
 
 			W[n] = new double[layers[n].units()][];
 
-			// units in the previous unit plus a bias unit
-			I[n] = new double[layers[n - 1].units()];
-			Y[n] = new double[layers[n - 1].units()];
+			I[n] = new double[W[n].length];
+
+			if ((n < W.length - 1)) {
+				// output for input and hidden unit is previous layer's units plus a
+				// bias unit
+				Y[n] = new double[W[n].length + 1];
+			}
+			else {
+				// for output unit we don't need the bias unit
+				Y[n] = new double[W[n].length];
+			}
 
 			// number of units connecting from n - 1
 			for (int j = 0; j < layers[n].units(); j++) {
@@ -160,7 +168,7 @@ public class NeuralNet {
 
 		// I[n][j] are vectors whose elements denote the weighted inputs
 		// related to the jth neuron of layer n, and are defined by:
-		double[][] I = new double[layers.length][];
+		double[][] I = new double[layers.length + 1][];
 
 		// Y[n][j] are vectors whose elements denote the output of the jth
 		// neuron related to the layer n. They are defined as:
@@ -170,7 +178,7 @@ public class NeuralNet {
 		double[] X = new double[examples[0].features.length + 1];
 
 		// E[k] is the error for kth example
-		double[] E = new double[examples.length];
+		double[] E = new double[examples.length + 1];
 
 		// the scratch pad vector for computing the error for E[k]
 		double[] e = new double[examples[0].target.length];
@@ -179,7 +187,13 @@ public class NeuralNet {
 		this._W = W;
 
 		examples = debugNetValues(W);
+
+		// add the bias term
 		X = new double[examples[0].features.length + 1];
+		E = new double[examples.length];
+
+		// the scratch pad vector for computing the error for E[k]
+		e = new double[examples[0].target.length];
 
 		Trace.log("W=");
 		Trace.log(Format.matrix(W));
@@ -193,11 +207,11 @@ public class NeuralNet {
 			for (int k = 0; k < p; k++) {
 
 				Instance example = examples[k];
-				makeInputVector(X, example.features);
+				addBias(X, example.features);
 
 				computeForward(layers, W, I, Y, X);
 
-				E[k] = computeError(example.target, Y[Y.length - 1], e);
+				E[k] = computeError(example.target, Y, e);
 
 				computeBackward(layers, W, I, Y, X);
 
@@ -234,17 +248,17 @@ public class NeuralNet {
 					z = z + W[n][j][i] * X[i];
 				}
 				I[n][j] = z;
-				Y[n][j] = g.compute(I[n][j]);
+				Y[n][j + 1] = g.compute(I[n][j]);
 			}
 			Y[n][0] = BIAS;
 		}
-		else if (n < W.length - 1) {								
+		else if (n < W.length - 1) {
 			for (int j = 0; j < W[n].length; j++) {
-				Trace.log("W[" + n + "][" + j +"] = [" + Format.matrix(W[n][j]) + "]");
+				Trace.log("W[" + n + "][" + j + "] = [" + Format.matrix(W[n][j]) + "]");
 				Trace.log("Y[" + (n - 1) + "] = [" + Format.matrix(Y[n - 1]) + "]");
 				double z = 0;
 				for (int i = 0; i < W[n][j].length; i++) {
-					z = z + W[n][j][i] * Y[n - 1][j];
+					z = z + W[n][j][i] * Y[n - 1][i];
 				}
 				I[n][j] = z;
 				Y[n][j + 1] = g.compute(I[n][j]);
@@ -255,7 +269,7 @@ public class NeuralNet {
 			for (int j = 0; j < W[n].length; j++) {
 				double z = 0;
 				for (int i = 0; i < W[n][j].length; i++) {
-					z = z + W[n][j][i] * Y[n - 1][j];
+					z = z + W[n][j][i] * Y[n - 1][i];
 				}
 				I[n][j] = z;
 				Y[n][j] = g.compute(I[n][j]);
@@ -268,8 +282,8 @@ public class NeuralNet {
 	}
 
 
-	private double computeError(double[] d, double[] y, double[] e) {
-		Vector.sub(d, y, e);
+	private double computeError(double[] d, double[][] y, double[] e) {
+		Vector.sub(d, y[y.length - 1], e);
 		Vector.square(e, e);
 		double error = 0.5 * Vector.sum(e);
 		return error;
@@ -281,7 +295,7 @@ public class NeuralNet {
 	}
 
 
-	private static void makeInputVector(double[] x, double[] features) {
+	private static void addBias(double[] x, double[] features) {
 		x[0] = BIAS;
 		for (int i = 0; i < features.length; i++) {
 			x[i + 1] = features[i];

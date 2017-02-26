@@ -31,4 +31,18 @@ public class HyperbolicTangent implements Function {
 		return 1 - y * y;
 	}
 
+
+	@Override
+	public void compute(Object... params) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void diff(Object... params) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
