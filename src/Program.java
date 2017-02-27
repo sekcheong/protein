@@ -122,7 +122,7 @@ public class Program {
 		// 1 output unit
 		neuralNet.addLayer(2).weightInitializer(weightInit).activationFunction(htan);
 
-		neuralNet.train(train, 0.05, 0.3, 20);
+		neuralNet.train(train, 0.05, 0, 0.04, 20);
 
 		double[] ans = neuralNet.predict(new double[] { 0.2, 0.3 });
 		Trace.log("y_hat=[", Format.matrix(ans), "]");

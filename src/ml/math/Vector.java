@@ -35,7 +35,7 @@ public class Vector {
 	}
 
 
-	public static double sum(double[] u) {
+	public static double Σ(double[] u) {
 		double y = 0;
 		for (int i = 0; i < u.length; i++) {
 			y = y + u[i];
