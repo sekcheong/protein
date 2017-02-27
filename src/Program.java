@@ -7,6 +7,7 @@ import ml.io.DataReader;
 import ml.learner.neuralnet.NeuralNet;
 import ml.learner.neuralnet.functions.*;
 import ml.learner.neuralnet.initializers.*;
+import ml.utils.Format;
 import ml.utils.tracing.*;
 
 public class Program {
@@ -103,14 +104,10 @@ public class Program {
 		neuralNet.addLayer(2);
 
 		// 3 units
-		neuralNet.addLayer(3)
-				.weightInitializer(weightInit)
-				.activationFunction(htan);
+		neuralNet.addLayer(3).weightInitializer(weightInit).activationFunction(htan);
 
 		// 2 units
-		neuralNet.addLayer(2)
-				.weightInitializer(weightInit)
-				.activationFunction(htan);
+		neuralNet.addLayer(2).weightInitializer(weightInit).activationFunction(htan);
 
 		// // 2 units
 		// neuralNet.addLayer(2)
@@ -123,12 +120,12 @@ public class Program {
 		// .activationFunction(htan);
 		//
 		// 1 output unit
-		neuralNet.addLayer(2)
-				.weightInitializer(weightInit)
-				.activationFunction(htan);
+		neuralNet.addLayer(2).weightInitializer(weightInit).activationFunction(htan);
 
-		neuralNet.train(train, 0.05, 0.4, 5);
+		neuralNet.train(train, 0.05, 0.3, 20);
 
+		double[] ans = neuralNet.predict(new double[] { 0.2, 0.3 });
+		Trace.log("y_hat=[", Format.matrix(ans), "]");
 	}
 
 }

@@ -20,7 +20,9 @@ public class NeuralNet {
 	private List<Layer> _addLayers = new ArrayList<Layer>();
 
 	// the network weight matrices
-	public double[][][] _W;
+	private double[][][] _W;
+	private double[][] _V;
+	private double[][] _Y;
 
 
 	public NeuralNet() {
@@ -71,41 +73,41 @@ public class NeuralNet {
 
 
 	private Instance[] debugNetValues(double[][][] W) {
-		W[1] = new double[3][3];
-		W[1][0] = new double[] { 0.2, 0.4, 0.5 };
-		W[1][1] = new double[] { 0.3, 0.6, 0.7 };
-		W[1][2] = new double[] { 0.4, 0.8, 0.3 };
-
-		W[2] = new double[2][4];
-		W[2][0] = new double[] { -0.7, 0.6, 0.2, 0.7 };
-		W[2][1] = new double[] { -0.3, 0.7, 0.2, 0.8 };
-
-		W[3] = new double[1][3];
-		W[3][0] = new double[] { 0.1, 0.8, 0.5 };
-
-		Instance[] ex = new Instance[1];
-		ex[0] = new Instance();
-
-		ex[0].features = new double[] { 0.3, 0.7 };
-		ex[0].target = new double[] { 0.9 };
-
-		// Instance[] ex = new Instance[4];
+		// W[1] = new double[3][3];
+		// W[1][0] = new double[] { 0.2, 0.4, 0.5 };
+		// W[1][1] = new double[] { 0.3, 0.6, 0.7 };
+		// W[1][2] = new double[] { 0.4, 0.8, 0.3 };
 		//
+		// W[2] = new double[2][4];
+		// W[2][0] = new double[] { -0.7, 0.6, 0.2, 0.7 };
+		// W[2][1] = new double[] { -0.3, 0.7, 0.2, 0.8 };
+		//
+		// W[3] = new double[1][3];
+		// W[3][0] = new double[] { 0.1, 0.8, 0.5 };
+		//
+		// Instance[] ex = new Instance[1];
 		// ex[0] = new Instance();
-		// ex[0].features = new double[] { 0.2, 0.9, 0.4 };
-		// ex[0].target = new double[] { 0.7, 0.3 };
 		//
-		// ex[1] = new Instance();
-		// ex[1].features = new double[] { 0.1, 0.3, 0.5 };
-		// ex[1].target = new double[] { 0.6, 0.4 };
-		//
-		// ex[2] = new Instance();
-		// ex[2].features = new double[] { 0.9, 0.7, 0.8 };
-		// ex[2].target = new double[] { 0.9, 0.5 };
-		//
-		// ex[3] = new Instance();
-		// ex[3].features = new double[] { 0.6, 0.4, 0.3 };
-		// ex[3].target = new double[] { 0.2, 0.8 };
+		// ex[0].features = new double[] { 0.3, 0.7 };
+		// ex[0].target = new double[] { 0.9 };
+
+		Instance[] ex = new Instance[4];
+
+		ex[0] = new Instance();
+		ex[0].features = new double[] { 0.2, 0.9, 0.4 };
+		ex[0].target = new double[] { 0.7, 0.3 };
+
+		ex[1] = new Instance();
+		ex[1].features = new double[] { 0.1, 0.3, 0.5 };
+		ex[1].target = new double[] { 0.6, 0.4 };
+
+		ex[2] = new Instance();
+		ex[2].features = new double[] { 0.9, 0.7, 0.8 };
+		ex[2].target = new double[] { 0.9, 0.5 };
+
+		ex[3] = new Instance();
+		ex[3].features = new double[] { 0.6, 0.4, 0.3 };
+		ex[3].target = new double[] { 0.2, 0.8 };
 
 		return ex;
 	}
@@ -155,57 +157,56 @@ public class NeuralNet {
 		// W[n][j][i] are weight matrices whose elements denote the value of the
 		// synaptic weight that connects the jth neuron of layer (n) to the ith
 		// neuron of layer (n - 1).
-		double[][][] W = new double[layers.length][][];
+		_W = new double[layers.length][][];
 
-		// I[n][j] are vectors whose elements denote the weighted inputs related to
+		// V[n][j] are vectors whose elements denote the weighted inputs related to
 		// the jth neuron of layer n, and are defined by:
-		double[][] I = new double[layers.length + 1][];
+		_V = new double[layers.length + 1][];
 
 		// Y[n][j] are vectors whose elements denote the output of the jth neuron
 		// related to the layer n. They are defined as:
-		double[][] Y = new double[layers.length][];
+		_Y = new double[layers.length][];
 
 		// X[i] is the input vector
-		double[] X = new double[examples[0].features.length + 1];
+		// double[] X = new double[examples[0].features.length + 1];
 
 		// E[k] is the error for kth example
 		double[] E = new double[examples.length + 1];
 
 		// The deltas for back propagations
-		double[][] delta = new double[W.length][];
+		double[][] delta = new double[_W.length][];
 
 		// the scratch pad vector for computing the error for E[k]
 		double[] e = new double[examples[0].target.length];
 
-		this.initialize(W, I, Y, delta);
-		this._W = W;
+		this.initialize(_W, _V, _Y, delta);
 
 		// <debug>
-		examples = debugNetValues(W);
-		X = new double[examples[0].features.length + 1];
+		examples = debugNetValues(_W);
+		// X = new double[examples[0].features.length + 1];
 		E = new double[examples.length];
 		e = new double[examples[0].target.length];
 		// p = examples.length;
 		// </debug>
 
 		Trace.log("W=[");
-		Trace.log(Format.matrix(W), "]");
-		Trace.log("X=[", Format.matrix(X), "]");
+		Trace.log(Format.matrix(_W), "]");
 
 		while (true) {
 
 			prevMSE = currMSE;
 			int p = 0;
 
-			for (Instance example : examples) {
+			for (Instance s : examples) {
 
-				setupInput(Y, example.features);
-				feedForward(layers, W, I, Y);
+				setupInput(_Y, s.features);
+				feedForward(layers, _W, _V, _Y);
 
-				E[p] = computeError(example.target, Y, e);
+				E[p] = computeError(s.target, _Y, e);
 				Trace.log("E[", p, "] = [", Format.matrix(E), "]");
 				p = p + 1;
-				backPropagation(layers, W, I, Y, example.target, eta, delta);
+
+				backPropagation(layers, _W, _V, _Y, s.target, eta, delta);
 
 			}
 
@@ -286,18 +287,15 @@ public class NeuralNet {
 					z = z + delta[l + 1][k] * w[l + 1][k][j];
 				}
 				delta[l][j] = -z * g.diff(v[l][j]);
+				updateWeights(layers, l, j, w, y, eta, delta);
 			}
 		}
 	}
 
 
-	private void adjustWeights(double[][][] w, double[][] y, int layer, double delta[][], double eta) {
-		for (int l = w.length - 1; l >= 1; l--) {
-			for (int j = 0; j < w[l].length; j++) {
-				for (int i = 0; i < w[l][j].length; i++) {
-					w[l][j][i] = w[l][j][i] + eta * delta[l][j] * y[l - 1][i];
-				}
-			}
+	private void updateWeights(Layer layers[], int l, int j, double[][][] w, double[][] y, double eta, double[][] delta) {
+		for (int i = 0; i < w[l][j].length; i++) {
+			w[l][j][i] = w[l][j][i] + eta * delta[l][j] * y[l - 1][j];
 		}
 	}
 
@@ -312,7 +310,29 @@ public class NeuralNet {
 
 
 	public double[] predict(double[] features) {
-		return new double[0];
+
+		Layer[] layers = _layers;
+		setupInput(_Y, features);
+
+		for (int l = 1; l < _W.length; l++) {
+			Function g = layers[l].activationFunction();
+			_Y[l] = new double[_W[l].length];
+
+			for (int j = 0; j < _W[l].length; j++) {
+				_V[l][j] = Vector.dot(_W[l][j], _Y[l - 1]);
+
+				if (l != _W.length - 1) {
+					_Y[l][0] = _BIAS;
+					_Y[l][j + 1] = g.compute(_V[l][j]);
+				}
+				else {
+					_Y[l][j] = g.compute(_V[l][j]);
+				}
+
+			}
+		}
+
+		return _Y[_W.length - 1];
 	}
 
 }
