@@ -123,7 +123,7 @@ public class Program {
 		// .activationFunction(htan);
 		//
 		// 1 output unit
-		neuralNet.addLayer(1)
+		neuralNet.addLayer(2)
 				.weightInitializer(weightInit)
 				.activationFunction(htan);
 
