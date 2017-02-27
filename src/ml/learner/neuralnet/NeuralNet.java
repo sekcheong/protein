@@ -10,7 +10,7 @@ import ml.utils.tracing.Trace;
 
 public class NeuralNet {
 
-	// the bias term 
+	// the bias term
 	private double _BIAS = -1.0;
 
 	// the network layers
@@ -23,11 +23,10 @@ public class NeuralNet {
 	private double[][][] W;
 	private double[][] V;
 	private double[][] Y;
-	private double[][] δ;
+	private double[][] DELTA;
 
 
-	public NeuralNet() {
-	}
+	public NeuralNet() {}
 
 
 	public double[][][] W() {
@@ -54,7 +53,8 @@ public class NeuralNet {
 		}
 		else {
 			// input units is the number of units of the previous layer
-			layer = new Layer(units, _addLayers.get(index - 1).units());
+			layer = new Layer(units, _addLayers.get(index - 1)
+					.units());
 		}
 
 		layer.index(_addLayers.size());
@@ -126,8 +126,8 @@ public class NeuralNet {
 			delta[n] = new double[w[n].length + 1];
 
 			if ((n != w.length - 1)) {
-				// output for input and hidden units is previous layer's units plus the
-				// bias unit
+				// output for input and hidden units is previous layer's units
+				// plus the bias unit
 				y[n] = new double[w[n].length + 1];
 			}
 			else {
@@ -140,13 +140,14 @@ public class NeuralNet {
 				w[n][j] = new double[layers[n - 1].units()];
 			}
 
-			layers[n].weightInitializer().initializeWeights(w[n]);
+			layers[n].weightInitializer()
+					.initializeWeights(w[n]);
 		}
 
 	}
 
 
-	public void train(Instance[] examples, double η, double α, double ε, int maxEpoch) {
+	public void train(Instance[] examples, double eta, double alpha, double lambda, double epsilon, int maxEpoch) {
 		// the current mean squared error
 		double currMSE = 0;
 		double prevMSE;
@@ -157,20 +158,21 @@ public class NeuralNet {
 		Layer layers[] = this.layers();
 
 		// W[n][j][i] are weight matrices whose elements denote the value of the
-		// synaptic weight that connects the jth neuron of layer (n) to the ithΦ
-		// neuron of layer (n - 1).
+		// synaptic weight that connects the jth neuron of layer (n) to the
+		// ith neuron of layer (n - 1).
 		W = new double[layers.length][][];
 
-		// V[n][j] are vectors whose elements denote the weighted inputs related to
+		// V[n][j] are vectors whose elements denote the weighted inputs related
+		// to
 		// the jth neuron of layer n, and are defined by:
 		V = new double[layers.length][];
 
-		// Y[n][j] are vectors whose elements denote the output of the jth neuron
-		// related to the layer n. They are defined as:
+		// Y[n][j] are vectors whose elements denote the output of the jth
+		// neuron related to the layer n. They are defined as:
 		Y = new double[layers.length][];
 
 		// The deltas for back propagations
-		δ = new double[W.length][];
+		DELTA = new double[W.length][];
 
 		// E[k] is the error for kth example
 		double[] E = new double[examples.length + 1];
@@ -178,16 +180,16 @@ public class NeuralNet {
 		// the scratch pad vector for computing the error for E[k]
 		double[] e = new double[examples[0].target.length];
 
-		this.initialize(W, V, Y, δ);
+		this.initialize(W, V, Y, DELTA);
 
-		// <debug>
-		examples = debugNetValues(W);
-		E = new double[examples.length];
-		e = new double[examples[0].target.length];
-		// </debug>
+		// // <debug>
+		// examples = debugNetValues(W);
+		// E = new double[examples.length];
+		// e = new double[examples[0].target.length];
+		// // </debug>
 
-		Trace.log("W=[");
-		Trace.log(Format.matrix(W), "]");
+		// Trace.log("W=[");
+		// Trace.log(Format.matrix(W), "]");
 
 		while (true) {
 
@@ -199,21 +201,28 @@ public class NeuralNet {
 				setupInput(Y, s.features);
 				feedForward(layers, W, V, Y);
 
-				E[p] = computeError(s.target, Y, e);
-				Trace.log("E[", p, "] = [", Format.matrix(E), "]");
+				E[p] = computeError(W, s.target, Y, e);
+				// Trace.log("E[", p, "] = [", Format.matrix(E), "]");
 				p = p + 1;
 
-				backPropagation(layers, W, V, Y, s.target, δ, η, α);
+				backPropagation(layers, W, V, Y, s.target, DELTA, eta, alpha, lambda);
 
 			}
 
-			currMSE = (1 / (double) p) * Vector.Σ(E);
-			Trace.log("currMSE = ", currMSE);
+			currMSE = (1 / (double) p) * Vector.sigma(E);
+			// Trace.log("currMSE = ", currMSE);
+			double d = Math.abs(prevMSE - currMSE);
+			if (d <= epsilon) {
+				Trace.log("Precision met: e = ", d);
+				//break;
+			}
 
-			if (Math.abs(prevMSE - currMSE) <= ε) break;
-
+			// Trace.log("epsilon = ", prevMSE - currMSE);
 			epoch = epoch + 1;
-			if (epoch >= maxEpoch) break;
+			if (epoch >= maxEpoch) {
+				Trace.log("Epoch topped out:", maxEpoch);
+				break;
+			}
 
 		}
 
@@ -233,7 +242,7 @@ public class NeuralNet {
 	private void feedForward(Layer layers[], double[][][] w, double[][] v, double[][] y) {
 
 		for (int n = 1; n < w.length; n++) {
-			Trace.log("w[", n, "] = [\n", Format.matrix(w[n]), "\n]");
+			// Trace.log("w[", n, "] = [\n", Format.matrix(w[n]), "\n]");
 
 			Function g = layers[n].activationFunction();
 
@@ -253,63 +262,64 @@ public class NeuralNet {
 
 			}
 
-			Trace.log("VI[", n, "] = [" + Format.matrix(v[n]), "]");
-			Trace.log("Y[", n, "] = [" + Format.matrix(y[n]), "]");
+			// Trace.log("VI[", n, "] = [" + Format.matrix(v[n]), "]");
+			// Trace.log("Y[", n, "] = [" + Format.matrix(y[n]), "]");
 		}
 
 	}
 
 
-	private void backPropagation(Layer layers[], double[][][] w, double[][] v, double[][] y, double d[], double[][] δ, double η, double α) {
+	private void backPropagation(Layer layers[], double[][][] w, double[][] v, double[][] y, double d[], double[][] delta, double eta, double alpha, double lambda) {
 		// the output layer
 		int n = w.length - 1;
 		Function g = layers[n].activationFunction();
 
-		Trace.log("d = [", Format.matrix(d), "]");
-		Trace.log("Y[", n, "] = ", "[", Format.matrix(y[n]), "]");
+		// Trace.log("d = [", Format.matrix(d), "]");
+		// Trace.log("Y[", n, "] = ", "[", Format.matrix(y[n]), "]");
 
 		// calculate the deltas for the output layer
 		for (int j = 0; j < w[n].length; j++) {
-			δ[n][j] = (d[j] - y[n][j]) * g.diff(v[n][j]);
+			delta[n][j] = (d[j] - y[n][j]) * g.diff(v[n][j]);
 		}
-		
+
 		// calculate the deltas for the hidden layers and the first layer
 		for (n = w.length - 2; n >= 1; n--) {
 			for (int j = 0; j < w[n].length; j++) {
 				double z = 0;
 				for (int k = 1; k < w[n + 1].length; k++) {
-					z = z + δ[n + 1][k] * w[n + 1][k][j];
+					z = z + delta[n + 1][k] * w[n + 1][k][j];
 				}
-				δ[n][j] = -z * g.diff(v[n][j]);
+				delta[n][j] = -z * g.diff(v[n][j]);
 			}
 		}
-		updateWeights(layers, w, y, δ, η, α);
-		
+
+		updateWeights(layers, w, y, delta, eta, lambda, alpha);
+
 	}
 
 
 	private void copyWeights(double[][][] dest, double[][][] src) {
-		
+
 	}
 
 
-	private void updateWeights(Layer layers[], double[][][] w, double[][] y, double[][] δ, double η, double α) {
+	private void updateWeights(Layer layers[], double[][][] w, double[][] y, double[][] delta, double eta, double alpha, double lambda) {
 		for (int n = w.length - 1; n >= 1; n--) {
 			for (int j = 0; j < w[n].length; j++) {
 				for (int i = 1; i < w[n][j].length; i++) {
-					w[n][j][i] = w[n][j][i] + η * δ[n][j] * y[n - 1][j];
+					w[n][j][i] = w[n][j][i] + eta * delta[n][j] * y[n - 1][j];
 				}
 			}
 		}
 	}
 
 
-	private double computeError(double[] d, double[][] y, double[] e) {
+	private double computeError(double[][][] w, double[] d, double[][] y, double[] e) {
 		// use the y value of the output
 		int k = y.length - 1;
 		Vector.sub(d, y[k], e);
 		Vector.square(e, e);
-		double error = 0.5 * Vector.Σ(e);
+		double error = 0.5 * Vector.sigma(e);
 		return error;
 	}
 
@@ -320,7 +330,7 @@ public class NeuralNet {
 		setupInput(Y, features);
 
 		for (int n = 1; n < W.length; n++) {
-			Trace.log("w[", n, "] = [\n", Format.matrix(W[n]), "\n]");
+			// Trace.log("w[", n, "] = [\n", Format.matrix(W[n]), "\n]");
 
 			Function g = layers[n].activationFunction();
 
@@ -345,6 +355,27 @@ public class NeuralNet {
 
 }
 
-// α λ, Φ, Ψ, ḟ, gʹ, ȳ, ŷ, ġ, Δ, ψ, ℰ, Ɛ, ǝ, g, ġ, f, ḟ, θ, β, α, β, γ, δ
-// , ε, ζ , η , θ, ι, κ, λ μ , ν , ξ , ο , π , ρ, ς, σ, τ, υ, φ , χ , ψ , ω Γ Δ
-// Θ, Λ, Ξ, Π, Σ, Υ Φ, Ψ Ω
+// Α α Alpha a
+// Β β Beta b
+// Γ γ Gamma g
+// Δ δ Delta d
+// Ε ε Epsilon e
+// Ζ ζ Zeta z
+// Η η Eta h
+// Θ θ Theta th
+// Ι ι Iota i
+// Κ κ Kappa k
+// Λ λ Lambda l
+// Μ μ Mu m
+// Ν ν Nu n
+// Ξ ξ Xi x
+// Ο ο Omicron o
+// Π π Pi p
+// Ρ ρ Rho r
+// Σ σ,ς * Sigma s
+// Τ τ Tau t
+// Υ υ Upsilon u
+// Φ φ Phi ph
+// Χ χ Chi ch
+// Ψ ψ Psi ps
+// Ω ω Omega o

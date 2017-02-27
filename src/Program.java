@@ -89,7 +89,7 @@ public class Program {
 		}
 
 		// use debug examples
-		train = makeExamples();
+		// train = makeExamples();
 
 		// use default weight initializer
 		WeightInitializer weightInit = new DefaultWeightInitializer();
@@ -100,14 +100,25 @@ public class Program {
 
 		NeuralNet neuralNet = new NeuralNet();
 
+		int inputs = train[0].features.length;
+		int outputs = train[0].target.length;
+
 		// 2 inputs
-		neuralNet.addLayer(2);
+		neuralNet.addLayer(inputs);
 
 		// 3 units
-		neuralNet.addLayer(3).weightInitializer(weightInit).activationFunction(htan);
+		neuralNet.addLayer(200)
+				.weightInitializer(weightInit)
+				.activationFunction(outputFunc);
+		
+//		neuralNet.addLayer(40)
+//		.weightInitializer(weightInit)
+//		.activationFunction(hiddenFunc);
 
 		// 2 units
-		neuralNet.addLayer(2).weightInitializer(weightInit).activationFunction(htan);
+		// neuralNet.addLayer(2)
+		// .weightInitializer(weightInit)
+		// .activationFunction(hiddenFunc);
 
 		// // 2 units
 		// neuralNet.addLayer(2)
@@ -120,12 +131,21 @@ public class Program {
 		// .activationFunction(htan);
 		//
 		// 1 output unit
-		neuralNet.addLayer(2).weightInitializer(weightInit).activationFunction(htan);
+		neuralNet.addLayer(outputs)
+				.weightInitializer(weightInit)
+				.activationFunction(outputFunc);
 
-		neuralNet.train(train, 0.05, 0, 0.04, 20);
+		neuralNet.train(train, 0.005, 0, 0, 0.00001, 10);
 
-		double[] ans = neuralNet.predict(new double[] { 0.2, 0.3 });
-		Trace.log("y_hat=[", Format.matrix(ans), "]");
+		Trace.log("done!");
+
+		for (Instance ex : tune) {
+			double[] y = neuralNet.predict(ex.features);
+			Trace.log("y=[", Format.matrix(y), "]");
+			Trace.log("t=[", Format.matrix(ex.target), "]");
+		}
+		// double[] ans = neuralNet.predict(new double[] { 0.2, 0.3 });
+		// Trace.log("y_hat=[", Format.matrix(ans), "]");
 	}
 
 }
