@@ -119,28 +119,28 @@ public class NeuralNet {
 
 		y[0] = new double[layers[1].units()];
 		// initializes the weights for each hidden
-		for (int l = 1; l < w.length; l++) {
+		for (int n = 1; n < w.length; n++) {
 
-			w[l] = new double[layers[l].units()][];
-			v[l] = new double[w[l].length];
-			delta[l] = new double[w[l].length + 1];
+			w[n] = new double[layers[n].units()][];
+			v[n] = new double[w[n].length];
+			delta[n] = new double[w[n].length + 1];
 
-			if ((l != w.length - 1)) {
+			if ((n != w.length - 1)) {
 				// output for input and hidden units is previous layer's units plus the
 				// bias unit
-				y[l] = new double[w[l].length + 1];
+				y[n] = new double[w[n].length + 1];
 			}
 			else {
 				// for output unit we don't need the bias unit
-				y[l] = new double[w[l].length];
+				y[n] = new double[w[n].length];
 			}
 
 			// number of units connecting from n - 1
-			for (int j = 0; j < layers[l].units(); j++) {
-				w[l][j] = new double[layers[l - 1].units()];
+			for (int j = 0; j < layers[n].units(); j++) {
+				w[n][j] = new double[layers[n - 1].units()];
 			}
 
-			layers[l].weightInitializer().initializeWeights(w[l]);
+			layers[n].weightInitializer().initializeWeights(w[n]);
 		}
 
 	}
@@ -232,29 +232,29 @@ public class NeuralNet {
 
 	private void feedForward(Layer layers[], double[][][] w, double[][] v, double[][] y) {
 
-		for (int l = 1; l < w.length; l++) {
-			Trace.log("w[", l, "] = [\n", Format.matrix(w[l]), "\n]");
+		for (int n = 1; n < w.length; n++) {
+			Trace.log("w[", n, "] = [\n", Format.matrix(w[n]), "\n]");
 
-			Function g = layers[l].activationFunction();
+			Function g = layers[n].activationFunction();
 
-			for (int j = 0; j < w[l].length; j++) {
+			for (int j = 0; j < w[n].length; j++) {
 
-				v[l][j] = Vector.dot(w[l][j], y[l - 1]);
+				v[n][j] = Vector.dot(w[n][j], y[n - 1]);
 
 				// for all non output layers set the bias term
-				if (l != w.length - 1) {
-					y[l][0] = _BIAS;
-					y[l][j + 1] = g.compute(v[l][j]);
+				if (n != w.length - 1) {
+					y[n][0] = _BIAS;
+					y[n][j + 1] = g.compute(v[n][j]);
 				}
 				else {
 					// skip the bias for the output layer
-					y[l][j] = g.compute(v[l][j]);
+					y[n][j] = g.compute(v[n][j]);
 				}
 
 			}
 
-			Trace.log("VI[", l, "] = [" + Format.matrix(v[l]), "]");
-			Trace.log("Y[", l, "] = [" + Format.matrix(y[l]), "]");
+			Trace.log("VI[", n, "] = [" + Format.matrix(v[n]), "]");
+			Trace.log("Y[", n, "] = [" + Format.matrix(y[n]), "]");
 		}
 
 	}
@@ -262,25 +262,25 @@ public class NeuralNet {
 
 	private void backPropagation(Layer layers[], double[][][] w, double[][] v, double[][] y, double d[], double[][] δ, double η, double α) {
 		// the output layer
-		int l = w.length - 1;
-		Function g = layers[l].activationFunction();
+		int n = w.length - 1;
+		Function g = layers[n].activationFunction();
 
 		Trace.log("d = [", Format.matrix(d), "]");
-		Trace.log("Y[", l, "] = ", "[", Format.matrix(y[l]), "]");
+		Trace.log("Y[", n, "] = ", "[", Format.matrix(y[n]), "]");
 
 		// calculate the deltas for the output layer
-		for (int j = 0; j < w[l].length; j++) {
-			δ[l][j] = (d[j] - y[l][j]) * g.diff(v[l][j]);
+		for (int j = 0; j < w[n].length; j++) {
+			δ[n][j] = (d[j] - y[n][j]) * g.diff(v[n][j]);
 		}
 		
 		// calculate the deltas for the hidden layers and the first layer
-		for (l = w.length - 2; l >= 1; l--) {
-			for (int j = 0; j < w[l].length; j++) {
+		for (n = w.length - 2; n >= 1; n--) {
+			for (int j = 0; j < w[n].length; j++) {
 				double z = 0;
-				for (int k = 1; k < w[l + 1].length; k++) {
-					z = z + δ[l + 1][k] * w[l + 1][k][j];
+				for (int k = 1; k < w[n + 1].length; k++) {
+					z = z + δ[n + 1][k] * w[n + 1][k][j];
 				}
-				δ[l][j] = -z * g.diff(v[l][j]);
+				δ[n][j] = -z * g.diff(v[n][j]);
 			}
 		}
 		updateWeights(layers, w, y, δ, η, α);
@@ -294,10 +294,10 @@ public class NeuralNet {
 
 
 	private void updateWeights(Layer layers[], double[][][] w, double[][] y, double[][] δ, double η, double α) {
-		for (int l = w.length - 1; l >= 1; l--) {
-			for (int j = 0; j < w[l].length; j++) {
-				for (int i = 1; i < w[l][j].length; i++) {
-					w[l][j][i] = w[l][j][i] + η * δ[l][j] * y[l - 1][j];
+		for (int n = w.length - 1; n >= 1; n--) {
+			for (int j = 0; j < w[n].length; j++) {
+				for (int i = 1; i < w[n][j].length; i++) {
+					w[n][j][i] = w[n][j][i] + η * δ[n][j] * y[n - 1][j];
 				}
 			}
 		}
@@ -319,23 +319,23 @@ public class NeuralNet {
 
 		setupInput(Y, features);
 
-		for (int l = 1; l < W.length; l++) {
-			Trace.log("w[", l, "] = [\n", Format.matrix(W[l]), "\n]");
+		for (int n = 1; n < W.length; n++) {
+			Trace.log("w[", n, "] = [\n", Format.matrix(W[n]), "\n]");
 
-			Function g = layers[l].activationFunction();
+			Function g = layers[n].activationFunction();
 
-			for (int j = 0; j < W[l].length; j++) {
+			for (int j = 0; j < W[n].length; j++) {
 
-				V[l][j] = Vector.dot(W[l][j], Y[l - 1]);
+				V[n][j] = Vector.dot(W[n][j], Y[n - 1]);
 
 				// for all non output layers set the bias term
-				if (l != W.length - 1) {
-					Y[l][0] = _BIAS;
-					Y[l][j + 1] = g.compute(V[l][j]);
+				if (n != W.length - 1) {
+					Y[n][0] = _BIAS;
+					Y[n][j + 1] = g.compute(V[n][j]);
 				}
 				else {
 					// skip the bias for the output layer
-					Y[l][j] = g.compute(V[l][j]);
+					Y[n][j] = g.compute(V[n][j]);
 				}
 
 			}
