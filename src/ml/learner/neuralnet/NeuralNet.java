@@ -20,17 +20,17 @@ public class NeuralNet {
 	private List<Layer> _addLayers = new ArrayList<Layer>();
 
 	// the network weight matrices
-	private double[][][] W;
-	private double[][] V;
-	private double[][] Y;
-	private double[][] DELTA;
+	private double[][][] _W;
+	private double[][] _V;
+	private double[][] _Y;
+	private double[][] _DELTA;
 
 
 	public NeuralNet() {}
 
 
 	public double[][][] W() {
-		return W;
+		return _W;
 	}
 
 
@@ -114,39 +114,6 @@ public class NeuralNet {
 	}
 
 
-	private void initialize(double[][][] w, double[][] v, double[][] y, double[][] delta) {
-		Layer layers[] = this.layers();
-
-		y[0] = new double[layers[1].units()];
-		// initializes the weights for each hidden
-		for (int n = 1; n < w.length; n++) {
-
-			w[n] = new double[layers[n].units()][];
-			v[n] = new double[w[n].length];
-			delta[n] = new double[w[n].length + 1];
-
-			if ((n != w.length - 1)) {
-				// output for input and hidden units is previous layer's units
-				// plus the bias unit
-				y[n] = new double[w[n].length + 1];
-			}
-			else {
-				// for output unit we don't need the bias unit
-				y[n] = new double[w[n].length];
-			}
-
-			// number of units connecting from n - 1
-			for (int j = 0; j < layers[n].units(); j++) {
-				w[n][j] = new double[layers[n - 1].units()];
-			}
-
-			layers[n].weightInitializer()
-					.initializeWeights(w[n]);
-		}
-
-	}
-
-
 	public void train(Instance[] examples, double eta, double alpha, double lambda, double epsilon, int maxEpoch) {
 		// the current mean squared error
 		double currMSE = 0;
@@ -160,19 +127,19 @@ public class NeuralNet {
 		// W[n][j][i] are weight matrices whose elements denote the value of the
 		// synaptic weight that connects the jth neuron of layer (n) to the
 		// ith neuron of layer (n - 1).
-		W = new double[layers.length][][];
+		_W = new double[layers.length][][];
 
 		// V[n][j] are vectors whose elements denote the weighted inputs related
 		// to
 		// the jth neuron of layer n, and are defined by:
-		V = new double[layers.length][];
+		_V = new double[layers.length][];
 
 		// Y[n][j] are vectors whose elements denote the output of the jth
 		// neuron related to the layer n. They are defined as:
-		Y = new double[layers.length][];
+		_Y = new double[layers.length][];
 
 		// The deltas for back propagations
-		DELTA = new double[W.length][];
+		_DELTA = new double[_W.length][];
 
 		// E[k] is the error for kth example
 		double[] E = new double[examples.length + 1];
@@ -180,7 +147,7 @@ public class NeuralNet {
 		// the scratch pad vector for computing the error for E[k]
 		double[] e = new double[examples[0].target.length];
 
-		this.initialize(W, V, Y, DELTA);
+		this.initialize(_W, _V, _Y, _DELTA);
 
 		// // <debug>
 		// examples = debugNetValues(W);
@@ -188,8 +155,8 @@ public class NeuralNet {
 		// e = new double[examples[0].target.length];
 		// // </debug>
 
-		// Trace.log("W=[");
-		// Trace.log(Format.matrix(W), "]");
+		Trace.log("W=[");
+		Trace.log(Format.matrix(_W), "]");
 
 		while (true) {
 
@@ -198,14 +165,13 @@ public class NeuralNet {
 
 			for (Instance s : examples) {
 
-				setupInput(Y, s.features);
-				feedForward(layers, W, V, Y);
+				feedForward(layers, _W, _V, _Y, s.features);
 
-				E[p] = computeError(W, s.target, Y, e);
+				E[p] = computeError(_W, s.target, _Y, e);
 				// Trace.log("E[", p, "] = [", Format.matrix(E), "]");
 				p = p + 1;
 
-				backPropagation(layers, W, V, Y, s.target, DELTA, eta, alpha, lambda);
+				backPropagation(layers, _W, _V, _Y, s.target, _DELTA, eta, alpha, lambda);
 
 			}
 
@@ -214,7 +180,7 @@ public class NeuralNet {
 			double d = Math.abs(prevMSE - currMSE);
 			if (d <= epsilon) {
 				Trace.log("Precision met: e = ", d);
-				//break;
+				// break;
 			}
 
 			// Trace.log("epsilon = ", prevMSE - currMSE);
@@ -227,43 +193,51 @@ public class NeuralNet {
 		}
 
 	}
+	
+	
+	private void initialize(double[][][] w, double[][] v, double[][] y, double[][] delta) {
+		Layer layers[] = this.layers();
 
+		w[0] = new double[layers[0].units() + 1][];
+		y[0] = new double[layers[0].units() + 1];
 
-	private void setupInput(double[][] y, double x[]) {
-		// Set Y[0] as the input vector and Y[0] as the bias term;
-		y[0] = new double[x.length + 1];
-		for (int i = 0; i < x.length; i++) {
-			y[0][i + 1] = x[i];
+		for (int l = 1; l < w.length; l++) {
+
+			w[l] = new double[layers[l].units() + 1][];
+
+			for (int j = 0; j < w[l].length; j++) {
+				w[l][j] = new double[w[l - 1].length];
+			}
+
+			v[l] = new double[w[l - 1].length];
+			y[l] = new double[w[l].length];
+			delta[l] = new double[w[l].length];
+
+			layers[l].weightInitializer()
+					.initializeWeights(w[l]);
 		}
-		y[0][0] = _BIAS;
+
 	}
 
 
-	private void feedForward(Layer layers[], double[][][] w, double[][] v, double[][] y) {
+	private void feedForward(Layer layers[], double[][][] w, double[][] v, double[][] y, double[] x) {
 
-		for (int n = 1; n < w.length; n++) {
-			// Trace.log("w[", n, "] = [\n", Format.matrix(w[n]), "\n]");
+		Function g = layers[1].activationFunction();
+		for (int j = 0; j < y[0].length - 1; j++) {
+			y[0][j + 1] = x[j];
+		}
+		y[0][0] = _BIAS;
 
-			Function g = layers[n].activationFunction();
-
-			for (int j = 0; j < w[n].length; j++) {
-
-				v[n][j] = Vector.dot(w[n][j], y[n - 1]);
-
-				// for all non output layers set the bias term
-				if (n != w.length - 1) {
-					y[n][0] = _BIAS;
-					y[n][j + 1] = g.compute(v[n][j]);
-				}
-				else {
-					// skip the bias for the output layer
-					y[n][j] = g.compute(v[n][j]);
-				}
-
+		// compute the hidden units
+		for (int l = 1; l < w.length; l++) {
+			g = layers[l].activationFunction();
+			for (int j = 0; j < w[l].length; j++) {
+				double z = Vector.dot(w[l][j], y[l - 1]);
+				v[l][j] = z;
+				y[l][j] = g.compute(z);
 			}
-
-			// Trace.log("VI[", n, "] = [" + Format.matrix(v[n]), "]");
-			// Trace.log("Y[", n, "] = [" + Format.matrix(y[n]), "]");
+			y[l][0] = _BIAS;
+			v[l][0] = _BIAS;
 		}
 
 	}
@@ -273,9 +247,6 @@ public class NeuralNet {
 		// the output layer
 		int n = w.length - 1;
 		Function g = layers[n].activationFunction();
-
-		// Trace.log("d = [", Format.matrix(d), "]");
-		// Trace.log("Y[", n, "] = ", "[", Format.matrix(y[n]), "]");
 
 		// calculate the deltas for the output layer
 		for (int j = 0; j < w[n].length; j++) {
@@ -327,30 +298,27 @@ public class NeuralNet {
 	public double[] predict(double[] features) {
 		Layer[] layers = _layers;
 
-		setupInput(Y, features);
-
-		for (int n = 1; n < W.length; n++) {
-			// Trace.log("w[", n, "] = [\n", Format.matrix(W[n]), "\n]");
+		for (int n = 1; n < _W.length; n++) {
 
 			Function g = layers[n].activationFunction();
 
-			for (int j = 0; j < W[n].length; j++) {
+			for (int j = 0; j < _W[n].length; j++) {
 
-				V[n][j] = Vector.dot(W[n][j], Y[n - 1]);
+				_V[n][j] = Vector.dot(_W[n][j], _Y[n - 1]);
 
 				// for all non output layers set the bias term
-				if (n != W.length - 1) {
-					Y[n][0] = _BIAS;
-					Y[n][j + 1] = g.compute(V[n][j]);
+				if (n != _W.length - 1) {
+					_Y[n][0] = _BIAS;
+					_Y[n][j + 1] = g.compute(_V[n][j]);
 				}
 				else {
 					// skip the bias for the output layer
-					Y[n][j] = g.compute(V[n][j]);
+					_Y[n][j] = g.compute(_V[n][j]);
 				}
 
 			}
 		}
-		return Y[W.length - 1];
+		return _Y[_W.length - 1];
 	}
 
 }

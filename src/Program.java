@@ -7,6 +7,7 @@ import ml.io.DataReader;
 import ml.learner.neuralnet.NeuralNet;
 import ml.learner.neuralnet.functions.*;
 import ml.learner.neuralnet.initializers.*;
+import ml.math.Vector;
 import ml.utils.Format;
 import ml.utils.tracing.*;
 
@@ -47,6 +48,31 @@ public class Program {
 		x.target[1] = 0.8;
 		examples[3] = x;
 		return examples;
+	}
+
+	
+	private static Instance[] makeXorExamples() {
+		Instance[] m = new Instance[5];
+
+		Instance x = new Instance(2, 1);
+
+		x.features = new double[] { 0, 0 };
+		x.target = new double[] { 0 };
+		m[0] = x;
+
+		x.features = new double[] { 0, 1 };
+		x.target = new double[] { 1 };
+		m[1] = x;
+
+		x.features = new double[] { 1, 0 };
+		x.target = new double[] { 1 };
+		m[2] = x;
+
+		x.features = new double[] { 1, 1 };
+		x.target = new double[] { 0 };
+		m[3] = x;
+
+		return m;
 	}
 
 
@@ -94,12 +120,14 @@ public class Program {
 		// use default weight initializer
 		WeightInitializer weightInit = new DefaultWeightInitializer();
 
-		Function hiddenFunc = new Linear();
-		Function outputFunc = new Sigmoid();
+		Function linear = new Linear();
+		Function ligistic = new Sigmoid();
 		Function htan = new HyperbolicTangent();
 
 		NeuralNet neuralNet = new NeuralNet();
 
+		train = makeXorExamples(); 
+		
 		int inputs = train[0].features.length;
 		int outputs = train[0].target.length;
 
@@ -107,43 +135,43 @@ public class Program {
 		neuralNet.addLayer(inputs);
 
 		// 3 units
-		neuralNet.addLayer(200)
+		neuralNet.addLayer(2)		
 				.weightInitializer(weightInit)
-				.activationFunction(outputFunc);
+				.activationFunction(ligistic);
 		
-//		neuralNet.addLayer(40)
-//		.weightInitializer(weightInit)
-//		.activationFunction(hiddenFunc);
+		neuralNet.addLayer(4)
+		.weightInitializer(weightInit)
+		.activationFunction(ligistic);
 
-		// 2 units
-		// neuralNet.addLayer(2)
-		// .weightInitializer(weightInit)
-		// .activationFunction(hiddenFunc);
-
-		// // 2 units
-		// neuralNet.addLayer(2)
-		// .weightInitializer(weightInit)
-		// .activationFunction(htan);
-		//
-		// // 2 units
-		// neuralNet.addLayer(2)
-		// .weightInitializer(weightInit)
-		// .activationFunction(htan);
-		//
-		// 1 output unit
+		
 		neuralNet.addLayer(outputs)
 				.weightInitializer(weightInit)
-				.activationFunction(outputFunc);
+				.activationFunction(ligistic);
+
 
 		neuralNet.train(train, 0.005, 0, 0, 0.00001, 10);
 
 		Trace.log("done!");
-
-		for (Instance ex : tune) {
-			double[] y = neuralNet.predict(ex.features);
-			Trace.log("y=[", Format.matrix(y), "]");
-			Trace.log("t=[", Format.matrix(ex.target), "]");
-		}
+		
+//		double[] ans;
+//		
+//		ans = neuralNet.predict(new double[] {0,0});
+//		Trace.log(Format.matrix(ans));
+//		
+//		ans = neuralNet.predict(new double[] {0,1});
+//		Trace.log(Format.matrix(ans));
+//		
+//		ans = neuralNet.predict(new double[] {1,0});
+//		
+//		Trace.log(Format.matrix(ans));
+//		ans = neuralNet.predict(new double[] {1,1});
+//		
+		
+//		for (Instance ex : tune) {
+//			double[] y = neuralNet.predict(ex.features);
+//			Trace.log("y=[", Format.matrix(y), "]");
+//			Trace.log("t=[", Format.matrix(ex.target), "]");
+//		}
 		// double[] ans = neuralNet.predict(new double[] { 0.2, 0.3 });
 		// Trace.log("y_hat=[", Format.matrix(ans), "]");
 	}
