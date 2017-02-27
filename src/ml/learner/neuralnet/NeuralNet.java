@@ -73,41 +73,41 @@ public class NeuralNet {
 
 
 	private Instance[] debugNetValues(double[][][] W) {
-		// W[1] = new double[3][3];
-		// W[1][0] = new double[] { 0.2, 0.4, 0.5 };
-		// W[1][1] = new double[] { 0.3, 0.6, 0.7 };
-		// W[1][2] = new double[] { 0.4, 0.8, 0.3 };
-		//
-		// W[2] = new double[2][4];
-		// W[2][0] = new double[] { -0.7, 0.6, 0.2, 0.7 };
-		// W[2][1] = new double[] { -0.3, 0.7, 0.2, 0.8 };
-		//
-		// W[3] = new double[1][3];
-		// W[3][0] = new double[] { 0.1, 0.8, 0.5 };
-		//
-		// Instance[] ex = new Instance[1];
-		// ex[0] = new Instance();
-		//
-		// ex[0].features = new double[] { 0.3, 0.7 };
-		// ex[0].target = new double[] { 0.9 };
+		W[1] = new double[3][3];
+		W[1][0] = new double[] { 0.2, 0.4, 0.5 };
+		W[1][1] = new double[] { 0.3, 0.6, 0.7 };
+		W[1][2] = new double[] { 0.4, 0.8, 0.3 };
 
-		Instance[] ex = new Instance[4];
+		W[2] = new double[2][4];
+		W[2][0] = new double[] { -0.7, 0.6, 0.2, 0.7 };
+		W[2][1] = new double[] { -0.3, 0.7, 0.2, 0.8 };
 
+		W[3] = new double[1][3];
+		W[3][0] = new double[] { 0.1, 0.8, 0.5 };
+
+		Instance[] ex = new Instance[1];
 		ex[0] = new Instance();
-		ex[0].features = new double[] { 0.2, 0.9, 0.4 };
-		ex[0].target = new double[] { 0.7, 0.3 };
 
-		ex[1] = new Instance();
-		ex[1].features = new double[] { 0.1, 0.3, 0.5 };
-		ex[1].target = new double[] { 0.6, 0.4 };
+		ex[0].features = new double[] { 0.3, 0.7 };
+		ex[0].target = new double[] { 0.9 };
 
-		ex[2] = new Instance();
-		ex[2].features = new double[] { 0.9, 0.7, 0.8 };
-		ex[2].target = new double[] { 0.9, 0.5 };
-
-		ex[3] = new Instance();
-		ex[3].features = new double[] { 0.6, 0.4, 0.3 };
-		ex[3].target = new double[] { 0.2, 0.8 };
+		// Instance[] ex = new Instance[4];
+		//
+		// ex[0] = new Instance();
+		// ex[0].features = new double[] { 0.2, 0.9, 0.4 };
+		// ex[0].target = new double[] { 0.7, 0.3 };
+		//
+		// ex[1] = new Instance();
+		// ex[1].features = new double[] { 0.1, 0.3, 0.5 };
+		// ex[1].target = new double[] { 0.6, 0.4 };
+		//
+		// ex[2] = new Instance();
+		// ex[2].features = new double[] { 0.9, 0.7, 0.8 };
+		// ex[2].target = new double[] { 0.9, 0.5 };
+		//
+		// ex[3] = new Instance();
+		// ex[3].features = new double[] { 0.6, 0.4, 0.3 };
+		// ex[3].target = new double[] { 0.2, 0.8 };
 
 		return ex;
 	}
@@ -120,7 +120,6 @@ public class NeuralNet {
 		for (int n = 1; n < W.length; n++) {
 
 			W[n] = new double[layers[n].units()][];
-
 			I[n] = new double[W[n].length];
 
 			if ((n < W.length - 1)) {
@@ -141,10 +140,6 @@ public class NeuralNet {
 			layers[n].weightInitializer().initializeWeights(W[n]);
 		}
 
-		// for (int n = 1; n < layers.length; n++) {
-		// String str = "W[" + n + "]\n" + Format.matrix(W[n]) + "\n";
-		// Trace.log(str);
-		// }
 	}
 
 
@@ -155,9 +150,6 @@ public class NeuralNet {
 
 		// the current epoch
 		int epoch = 0;
-
-		// p = number of examples
-		int p = examples.length;
 
 		Layer layers[] = this.layers();
 
@@ -191,7 +183,7 @@ public class NeuralNet {
 		X = new double[examples[0].features.length + 1];
 		E = new double[examples.length];
 		e = new double[examples[0].target.length];
-		p = examples.length;
+		// p = examples.length;
 		// </debug>
 
 		Trace.log("W=[");
@@ -202,17 +194,17 @@ public class NeuralNet {
 		while (true) {
 
 			prevMSE = currMSE;
+			int p = 0;
 
-			for (int k = 0; k < p; k++) {
+			for (Instance example : examples) {
 
-				Instance example = examples[k];
-				addBias(X, example.features);
+				feedForward(layers, W, I, Y, example.features);
 
-				computeForward(layers, W, I, Y, X);
+				E[p] = computeError(example.target, Y, e);
+				p = p + 1;
 
-				E[k] = computeError(example.target, Y, e);
-				Trace.log("E=[", Format.matrix(E), "]");
-				computeBackward(layers, W, I, Y, X, example.target, eta);
+				Trace.log("E[", p, "]=[", Format.matrix(E), "]");
+				backPropagation(layers, W, I, Y, X, example.target, eta);
 
 			}
 
@@ -229,17 +221,44 @@ public class NeuralNet {
 	}
 
 
-	private void computeForward(Layer layers[], double[][][] W, double[][] I, double[][] Y, double X[]) {
-		for (int n = 1; n < W.length; n++) {
-			Trace.log("feedforwrd: layer = ", n);
-			Function g = layers[n].activationFunction();
-			computeIY(W, X, I, Y, g, n);
+	private void feedForward(Layer layers[], double[][][] W, double[][] I, double[][] Y, double X[]) {
+		// Y[n][1..J] = X
+		Y[0] = new double[X.length + 1];
+		for (int i = 0; i < X.length; i++) {
+			Y[0][i + 1] = X[i];
 		}
+		Y[0][0] = BIAS;
+
+		for (int n = 1; n < W.length; n++) {
+			Trace.log("W[", n, "] = [\n", Format.matrix(W[n]), "\n]");
+
+			Function g = layers[n].activationFunction();
+
+			for (int j = 0; j < W[n].length; j++) {
+
+				I[n][j] = Vector.dot(W[n][j], Y[n - 1]);
+
+				// for all non output layers set the bias term
+				if (n != W.length - 1) {
+					Y[n][0] = BIAS;
+					Y[n][j + 1] = g.compute(I[n][j]);
+				}
+				else {
+					// skip the bias for the output layer
+					Y[n][j] = g.compute(I[n][j]);
+				}
+
+			}
+
+			Trace.log("I[", n, "] = [" + Format.matrix(I[n]), "]");
+			Trace.log("Y[", n, "] = [" + Format.matrix(Y[n]), "]");
+		}
+
 	}
 
 
-	private void computeBackward(Layer layers[], double[][][] W, double[][] I, double[][] Y, double X[], double d[],
-			double eta) {
+	private void backPropagation(Layer layers[], double[][][] W, double[][] I, double[][] Y, double X[], double d[], double eta) {
+
 		double[][] delta = new double[W.length][];
 
 		// the output layer
@@ -286,64 +305,11 @@ public class NeuralNet {
 	}
 
 
-	private void computeIY(double[][][] W, double[] X, double[][] I, double[][] Y, Function g, int n) {
-
-		Trace.log("W[", n, "] = [\n", Format.matrix(W[n]), "\n]");
-
-		if (n == 1) {
-			for (int j = 0; j < W[n].length; j++) {
-				double z = 0;
-				for (int i = 0; i < W[n][j].length; i++) {
-					z = z + W[n][j][i] * X[i];
-				}
-				I[n][j] = z;
-				Y[n][j + 1] = g.compute(I[n][j]);
-			}
-			Y[n][0] = BIAS;
-		}
-		else if (n < W.length - 1) {
-			for (int j = 0; j < W[n].length; j++) {
-				Trace.log("W[", n, "][", j, "] = [", Format.matrix(W[n][j]), "]");
-				Trace.log("Y[", (n - 1), "] = [", Format.matrix(Y[n - 1]), "]");
-				double z = 0;
-				for (int i = 0; i < W[n][j].length; i++) {
-					z = z + W[n][j][i] * Y[n - 1][i];
-				}
-				I[n][j] = z;
-				Y[n][j + 1] = g.compute(I[n][j]);
-			}
-			Y[n][0] = BIAS;
-		}
-		else {
-			for (int j = 0; j < W[n].length; j++) {
-				double z = 0;
-				for (int i = 0; i < W[n][j].length; i++) {
-					z = z + W[n][j][i] * Y[n - 1][i];
-				}
-				I[n][j] = z;
-				Y[n][j] = g.compute(I[n][j]);
-			}
-		}
-
-		Trace.log("I[", n, "] = [" + Format.matrix(I[n]), "]");
-		Trace.log("Y[", n, "] = [" + Format.matrix(Y[n]), "]");
-
-	}
-
-
 	private double computeError(double[] d, double[][] y, double[] e) {
 		Vector.sub(d, y[y.length - 1], e);
 		Vector.square(e, e);
 		double error = 0.5 * Vector.sum(e);
 		return error;
-	}
-
-
-	private static void addBias(double[] x, double[] features) {
-		x[0] = BIAS;
-		for (int i = 0; i < features.length; i++) {
-			x[i + 1] = features[i];
-		}
 	}
 
 
