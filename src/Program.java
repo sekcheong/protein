@@ -50,7 +50,7 @@ public class Program {
 		return examples;
 	}
 
-	
+
 	private static Instance[] makeXorExamples() {
 		Instance[] m = new Instance[5];
 
@@ -73,6 +73,17 @@ public class Program {
 		m[3] = x;
 
 		return m;
+	}
+
+
+	private static Instance[] makeSimpleExamples() {
+		Instance[] examples = new Instance[1];
+		Instance x;
+		x = new Instance();
+		x.features = new double[] { 0.3, 0.7 };
+		x.target = new double[] { 1 };
+		examples[0] = x;
+		return examples;
 	}
 
 
@@ -126,52 +137,48 @@ public class Program {
 
 		NeuralNet neuralNet = new NeuralNet();
 
-		train = makeXorExamples(); 
-		
+		train = makeSimpleExamples(); // makeXorExamples();
+
 		int inputs = train[0].features.length;
 		int outputs = train[0].target.length;
 
-		// 2 inputs
 		neuralNet.addLayer(inputs);
 
-		// 3 units
-		neuralNet.addLayer(2)		
+		neuralNet.addLayer(3)
 				.weightInitializer(weightInit)
 				.activationFunction(ligistic);
-		
-		neuralNet.addLayer(4)
-		.weightInitializer(weightInit)
-		.activationFunction(ligistic);
 
-		
+		neuralNet.addLayer(2)
+				.weightInitializer(weightInit)
+				.activationFunction(ligistic);
+
 		neuralNet.addLayer(outputs)
 				.weightInitializer(weightInit)
 				.activationFunction(ligistic);
 
-
 		neuralNet.train(train, 0.005, 0, 0, 0.00001, 10);
 
 		Trace.log("done!");
-		
-//		double[] ans;
-//		
-//		ans = neuralNet.predict(new double[] {0,0});
-//		Trace.log(Format.matrix(ans));
-//		
-//		ans = neuralNet.predict(new double[] {0,1});
-//		Trace.log(Format.matrix(ans));
-//		
-//		ans = neuralNet.predict(new double[] {1,0});
-//		
-//		Trace.log(Format.matrix(ans));
-//		ans = neuralNet.predict(new double[] {1,1});
-//		
-		
-//		for (Instance ex : tune) {
-//			double[] y = neuralNet.predict(ex.features);
-//			Trace.log("y=[", Format.matrix(y), "]");
-//			Trace.log("t=[", Format.matrix(ex.target), "]");
-//		}
+
+		// double[] ans;
+		//
+		// ans = neuralNet.predict(new double[] {0,0});
+		// Trace.log(Format.matrix(ans));
+		//
+		// ans = neuralNet.predict(new double[] {0,1});
+		// Trace.log(Format.matrix(ans));
+		//
+		// ans = neuralNet.predict(new double[] {1,0});
+		//
+		// Trace.log(Format.matrix(ans));
+		// ans = neuralNet.predict(new double[] {1,1});
+		//
+
+		// for (Instance ex : tune) {
+		// double[] y = neuralNet.predict(ex.features);
+		// Trace.log("y=[", Format.matrix(y), "]");
+		// Trace.log("t=[", Format.matrix(ex.target), "]");
+		// }
 		// double[] ans = neuralNet.predict(new double[] { 0.2, 0.3 });
 		// Trace.log("y_hat=[", Format.matrix(ans), "]");
 	}

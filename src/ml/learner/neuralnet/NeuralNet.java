@@ -20,7 +20,7 @@ public class NeuralNet {
 	private List<Layer> _addLayers = new ArrayList<Layer>();
 
 	// the network weight matrices
-	private double[][][] _W;
+	public double[][][] _W;
 	private double[][] _V;
 	private double[][] _Y;
 	private double[][] _DELTA;
@@ -73,44 +73,42 @@ public class NeuralNet {
 	}
 
 
-	private Instance[] debugNetValues(double[][][] W) {
-		// W[1] = new double[3][3];
-		// W[1][0] = new double[] { 0.2, 0.4, 0.5 };
-		// W[1][1] = new double[] { 0.3, 0.6, 0.7 };
-		// W[1][2] = new double[] { 0.4, 0.8, 0.3 };
-		//
-		// W[2] = new double[2][4];
-		// W[2][0] = new double[] { -0.7, 0.6, 0.2, 0.7 };
-		// W[2][1] = new double[] { -0.3, 0.7, 0.2, 0.8 };
-		//
-		// W[3] = new double[1][3];
-		// W[3][0] = new double[] { 0.1, 0.8, 0.5 };
-		//
-		// Instance[] ex = new Instance[1];
-		// ex[0] = new Instance();
-		//
-		// ex[0].features = new double[] { 0.3, 0.7 };
-		// ex[0].target = new double[] { 0.9 };
+	private  void debugNetValues(double[][][] W) {
+		 W[1] = new double[3][3];
+		 W[1][0] = new double[] { 0.2, 0.4, 0.5 };
+		 W[1][1] = new double[] { 0.3, 0.6, 0.7 };
+		 W[1][2] = new double[] { 0.4, 0.8, 0.3 };
+		
+		 W[2] = new double[2][4];
+		 W[2][0] = new double[] { -0.7, 0.6, 0.2, 0.7 };
+		 W[2][1] = new double[] { -0.3, 0.7, 0.2, 0.8 };
+		
+		 W[3] = new double[1][3];
+		 W[3][0] = new double[] { 0.1, 0.8, 0.5 };
+		
+//		 Instance[] ex = new Instance[1];
+//		 ex[0] = new Instance();
+//		
+//		 ex[0].features = new double[] { 0.3, 0.7 };
+//		 ex[0].target = new double[] { 0.9 };
 
-		Instance[] ex = new Instance[4];
-
-		ex[0] = new Instance();
-		ex[0].features = new double[] { 0.2, 0.9, 0.4 };
-		ex[0].target = new double[] { 0.7, 0.3 };
-
-		ex[1] = new Instance();
-		ex[1].features = new double[] { 0.1, 0.3, 0.5 };
-		ex[1].target = new double[] { 0.6, 0.4 };
-
-		ex[2] = new Instance();
-		ex[2].features = new double[] { 0.9, 0.7, 0.8 };
-		ex[2].target = new double[] { 0.9, 0.5 };
-
-		ex[3] = new Instance();
-		ex[3].features = new double[] { 0.6, 0.4, 0.3 };
-		ex[3].target = new double[] { 0.2, 0.8 };
-
-		return ex;
+//		Instance[] ex = new Instance[4];
+//
+//		ex[0] = new Instance();
+//		ex[0].features = new double[] { 0.2, 0.9, 0.4 };
+//		ex[0].target = new double[] { 0.7, 0.3 };
+//
+//		ex[1] = new Instance();
+//		ex[1].features = new double[] { 0.1, 0.3, 0.5 };
+//		ex[1].target = new double[] { 0.6, 0.4 };
+//
+//		ex[2] = new Instance();
+//		ex[2].features = new double[] { 0.9, 0.7, 0.8 };
+//		ex[2].target = new double[] { 0.9, 0.5 };
+//
+//		ex[3] = new Instance();
+//		ex[3].features = new double[] { 0.6, 0.4, 0.3 };
+//		ex[3].target = new double[] { 0.2, 0.8 };
 	}
 
 
@@ -148,6 +146,9 @@ public class NeuralNet {
 		double[] e = new double[examples[0].target.length];
 
 		this.initialize(_W, _V, _Y, _DELTA);
+		
+		debugNetValues(_W);
+		
 
 		// // <debug>
 		// examples = debugNetValues(W);
@@ -209,8 +210,8 @@ public class NeuralNet {
 				w[l][j] = new double[w[l - 1].length];
 			}
 
-			v[l] = new double[w[l - 1].length];
-			y[l] = new double[w[l].length];
+			v[l] = new double[w[l].length + 1];
+			y[l] = new double[w[l].length + 1];
 			delta[l] = new double[w[l].length];
 
 			layers[l].weightInitializer()
@@ -232,12 +233,15 @@ public class NeuralNet {
 		for (int l = 1; l < w.length; l++) {
 			g = layers[l].activationFunction();
 			for (int j = 0; j < w[l].length; j++) {
-				double z = Vector.dot(w[l][j], y[l - 1]);
+				double z = 0; // Vector.dot(w[l][j], y[l - 1]);
+				for (int i = 0; i < w[l].length; i++) {
+					z = z + w[l][j][i] * y[l - 1][j];
+				}
 				v[l][j] = z;
 				y[l][j] = g.compute(z);
 			}
 			y[l][0] = _BIAS;
-			v[l][0] = _BIAS;
+			//v[l][0] = _BIAS;
 		}
 
 	}
