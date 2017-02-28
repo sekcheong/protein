@@ -135,7 +135,7 @@ public class Program {
 
 		NeuralNet neuralNet = new NeuralNet();
 
-		train = makeXorExamples(); // makeXorExamples();
+		train = makeExamples(); // makeXorExamples(); // makeXorExamples();
 
 		int inputs = train[0].features.length;
 		int outputs = train[0].target.length;
