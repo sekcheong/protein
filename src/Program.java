@@ -55,17 +55,17 @@ public class Program {
 		Instance[] m = new Instance[4];
 
 		m[0] = new Instance();
-		m[0] .features = new double[] { 0, 0 };
-		m[0] .target = new double[] { 0 };
+		m[0].features = new double[] { 0, 0 };
+		m[0].target = new double[] { 0 };
 
 		m[1] = new Instance();
 		m[1].features = new double[] { 0, 1 };
 		m[1].target = new double[] { 1 };
-		
-		m[2]= new Instance();
+
+		m[2] = new Instance();
 		m[2].features = new double[] { 1, 0 };
 		m[2].target = new double[] { 1 };
-		
+
 		m[3] = new Instance();
 		m[3].features = new double[] { 1, 1 };
 		m[3].target = new double[] { 0 };
@@ -83,50 +83,53 @@ public class Program {
 		examples[0] = x;
 		return examples;
 	}
-	
-	
-	
+
+
 	private static void stepByStepExamples() {
 		NeuralNet net = new NeuralNet();
-		
+
 		Function sigmoid = new Sigmoid();
 		WeightInitializer weightInit = new DefaultWeightInitializer();
-		
-		net.addLayer(2).activationFunction(sigmoid).weightInitializer(weightInit);
-		net.addLayer(2).activationFunction(sigmoid).weightInitializer(weightInit);
-		net.addLayer(2).activationFunction(sigmoid).weightInitializer(weightInit);
-		
-		net._W = new double[3][][];
-		net._W[0] = new double[2][2];		
-		net._W[1] = new double[2][3];
-		net._W[2] = new double[2][3];
-		
-		net._W[1][0][0] = .35;
-		net._W[1][0][1] = .15;
-		net._W[1][0][2] = .20;
-		
-		net._W[1][1][0] = .35;
-		net._W[1][1][1] = .20;
-		net._W[1][1][2] = .30;
-		
-		
-		net._W[2][0][0] = .60;
-		net._W[2][0][1] = .40;
-		net._W[2][0][2] = .40;
-		
-		net._W[2][1][0] = .60;
-		net._W[2][1][1] = .45;
-		net._W[2][1][2] = .55;
-		
+
+		net.addLayer(2)
+				.activationFunction(sigmoid)
+				.weightInitializer(weightInit);
+		net.addLayer(2)
+				.activationFunction(sigmoid)
+				.weightInitializer(weightInit);
+		net.addLayer(2)
+				.activationFunction(sigmoid)
+				.weightInitializer(weightInit);
+
+		net._w = new double[3][][];
+		net._w[0] = new double[2][2];
+		net._w[1] = new double[2][3];
+		net._w[2] = new double[2][3];
+
+		net._w[1][0][0] = .35;
+		net._w[1][0][1] = .15;
+		net._w[1][0][2] = .20;
+
+		net._w[1][1][0] = .35;
+		net._w[1][1][1] = .25;
+		net._w[1][1][2] = .30;
+
+		net._w[2][0][0] = .60;
+		net._w[2][0][1] = .40;
+		net._w[2][0][2] = .45;
+
+		net._w[2][1][0] = .60;
+		net._w[2][1][1] = .50;
+		net._w[2][1][2] = .55;
+
 		Instance[] o = new Instance[1];
 		o[0] = new Instance();
-		o[0].features = new double[] {.05, .10};
-		o[0].target = new double[] {.01, .99};
-		
-		net.train(o, 0.05, 0, 0, 0.01,10);
+		o[0].features = new double[] { .05, .10 };
+		o[0].target = new double[] { .01, .99 };
+
+		net.train(o, 0.5, 0, 0, 0.01, 10);
 	}
 
-	
 
 	public static void main(String[] args) {
 		Trace.enabled = true;
@@ -166,38 +169,36 @@ public class Program {
 			ex.printStackTrace();
 		}
 
-		
 		stepByStepExamples();
-		
-		
+
 		// use debug examples
 		// train = makeExamples();
 
 		// use default weight initializer
-//		WeightInitializer weightInit = new DefaultWeightInitializer();
-//
-//		Function linear = new Linear();
-//		Function ligistic = new Sigmoid();
-//		Function htan = new HyperbolicTangent();
+		// WeightInitializer weightInit = new DefaultWeightInitializer();
+		//
+		// Function linear = new Linear();
+		// Function ligistic = new Sigmoid();
+		// Function htan = new HyperbolicTangent();
 
-//		NeuralNet neuralNet = new NeuralNet();
-//
-//		train = makeExamples(); // makeXorExamples(); // makeXorExamples();
-//
-//		int inputs = train[0].features.length;
-//		int outputs = train[0].target.length;
-//
-//		neuralNet.addLayer(inputs);
-//
-//		neuralNet.addLayer(2)
-//				.weightInitializer(weightInit)
-//				.activationFunction(ligistic);
-//
-//		neuralNet.addLayer(outputs)
-//				.weightInitializer(weightInit)
-//				.activationFunction(ligistic);
-//
-//		neuralNet.train(train, 0.005, 0, 0, 0.01, 100);
+		// NeuralNet neuralNet = new NeuralNet();
+		//
+		// train = makeExamples(); // makeXorExamples(); // makeXorExamples();
+		//
+		// int inputs = train[0].features.length;
+		// int outputs = train[0].target.length;
+		//
+		// neuralNet.addLayer(inputs);
+		//
+		// neuralNet.addLayer(2)
+		// .weightInitializer(weightInit)
+		// .activationFunction(ligistic);
+		//
+		// neuralNet.addLayer(outputs)
+		// .weightInitializer(weightInit)
+		// .activationFunction(ligistic);
+		//
+		// neuralNet.train(train, 0.005, 0, 0, 0.01, 100);
 
 		Trace.log("done!");
 
