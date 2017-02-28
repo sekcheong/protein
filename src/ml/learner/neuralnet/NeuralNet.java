@@ -31,11 +31,11 @@ public class NeuralNet {
 	// the bias term
 	private double _bias = 1;
 
-	// the default activation function
-	Function _sigmoid = new Sigmoid();
-
-	// the default weight initializer
-	WeightInitializer _weightInit = new DefaultWeightInitializer();
+//	// the default activation function
+//	Function _sigmoid = new Sigmoid();
+//
+//	// the default weight initializer
+//	WeightInitializer _weightInit = new DefaultWeightInitializer();
 
 
 	public NeuralNet() {}
@@ -138,89 +138,89 @@ public class NeuralNet {
 
 		Layer layers[] = this.layers();
 
-		// W[n][j][i] are weight matrices whose elements denote the value of the
+		// _w[n][j][i] are weight matrices whose elements denote the value of the
 		// synaptic weight that connects the jth neuron of layer (n) to the
 		// ith neuron of layer (n - 1).
 		_w = new double[layers.length][][];
 
-		// V[n][j] are vectors whose elements denote the weighted inputs related
+		// _v[n][j] are vectors whose elements denote the weighted inputs related
 		// to the jth neuron of layer n, and are defined by:
 		_u = new double[layers.length][];
 
-		// Y[n][j] are vectors whose elements denote the output of the jth
+		// _y[n][j] are vectors whose elements denote the output of the jth
 		// neuron related to the layer n. They are defined as:
 		_y = new double[layers.length][];
 
 		// The deltas for back propagations
 		_delta = new double[_w.length][];
 
-		// E[k] is the error for kth example
-		double[] E = new double[examples.length + 1];
-
-		// the scratch pad vector for computing the error for E[k]
-		double[] e = new double[examples[0].target.length];
-
+		// se[k] is the error for kth sample
+		double[] se = new double[examples.length];
+		
+		
 		this.initialize(_w, _u, _y, _delta);
 
-		_w = new double[3][][];
-		_w[0] = new double[2][2];
-		_w[1] = new double[2][3];
-		_w[2] = new double[2][3];
-
-		_w[1][0][0] = .35;
-		_w[1][0][1] = .15;
-		_w[1][0][2] = .20;
-
-		_w[1][1][0] = .35;
-		_w[1][1][1] = .25;
-		_w[1][1][2] = .30;
-
-		_w[2][0][0] = .60;
-		_w[2][0][1] = .40;
-		_w[2][0][2] = .45;
-
-		_w[2][1][0] = .60;
-		_w[2][1][1] = .50;
-		_w[2][1][2] = .55;
-
-		// debugNetValues(_W);
-
-		// // <debug>
-		// examples = debugNetValues(W);
-		// E = new double[examples.length];
-		// e = new double[examples[0].target.length];
-		// // </debug>
+//		_w = new double[3][][];
+//		_w[0] = new double[2][2];
+//		_w[1] = new double[2][3];
+//		_w[2] = new double[2][3];
+//
+//		_w[1][0][0] = .35;
+//		_w[1][0][1] = .15;
+//		_w[1][0][2] = .20;
+//
+//		_w[1][1][0] = .35;
+//		_w[1][1][1] = .25;
+//		_w[1][1][2] = .30;
+//
+//		_w[2][0][0] = .60;
+//		_w[2][0][1] = .40;
+//		_w[2][0][2] = .45;
+//
+//		_w[2][1][0] = .60;
+//		_w[2][1][1] = .50;
+//		_w[2][1][2] = .55;
 
 		Trace.log("W=[");
 		Trace.log(Format.matrix(_w), "]");
 
+
 		while (true) {
+			
+			Trace.log("");
+			Trace.log("Epoch: ", epoch);
 
 			prevMSE = currMSE;
+			
+			// total number of samples in the batch
 			int p = 0;
-
+			
 			for (Instance s : examples) {
 
 				feedForward(layers, _w, _u, _y, s.features);
-				E[p] = computeError(_w, s.target, _y);
-
 				backPropagation(layers, _w, _u, _y, s.target, _delta, eta, alpha, lambda);
 
-				// recalculate the predicted y based on the updated weights
+				// recalculates the predicted y based on the updated weights
 				feedForward(layers, _w, _u, _y, s.features);
-
+				
+				// computes the deviation of prediction from target
+				double e = computeError(_w, s.target, _y);
+				se[p] = e;
 				p = p + 1;
-				Trace.log("E[", p - 1, "] = ", E[p - 1]);
+				
+				Trace.log("E[", p - 1, "] = ", se[p - 1]);
 			}
 
-			currMSE = (1 / (double) p) * Vector.sigma(E);
+			// mean squre error for the entire batch of samples 
+			currMSE = (1 / (double) p) * Vector.sigma(se);
+			
 			Trace.log("currMSE = ", currMSE);
-
 			Trace.log("w = ", Format.matrix(_w));
+			
 			double d = Math.abs(prevMSE - currMSE);
 			if (d <= epsilon) {
 				Trace.log("Precision met: e = ", d);
-				// break;
+				//break;
 			}
 
 			// Trace.log("epsilon = ", prevMSE - currMSE);
@@ -322,27 +322,35 @@ public class NeuralNet {
 
 		// calculate the deltas for the output layer
 		for (int j = 0; j < w[l].length; j++) {
+			
 			delta[l][j] = (d[j] - y[l][j]) * g.diff(u[l][j]);
+			
 			// update weights
-			for (int i = 0; i < w[l].length; i++) {
+			for (int i = 0; i < w[l][j].length; i++) {
 				w[l][j][i] = w[l][j][i] + eta * delta[l][j] * y[l - 1][i];
 			}
+			
 		}
 
 		// calculate the deltas for the hidden layers and the first layer
 		for (l = w.length - 2; l >= 1; l--) {
+			
 			for (int j = 0; j < w[l].length; j++) {
+				
+				//compute delta[l] 
 				double z = 0;
 				for (int k = 0; k < w[l + 1].length; k++) {
 					z = z + delta[l + 1][k] * w[l + 1][k][j];
 				}
 				delta[l][j] = -z * g.diff(u[l][j]);
+				
 				// update weights
 				for (int i = 0; i < w[l][j].length; i++) {
 					w[l][j][i] = w[l][j][i] + eta * delta[l][j] * y[l - 1][i];
 				}
-
+			
 			}
+			
 		}
 	}
 
@@ -383,19 +391,6 @@ public class NeuralNet {
 		return _y[_w.length - 1];
 	}
 
-
-	private WeightInitializer getWeightInit(int layer) {
-		WeightInitializer w = _layers[layer].weightInitializer();
-		if (w != null) return w;
-		return _weightInit;
-	}
-
-
-	private Function getActivateFunc(int layer) {
-		Function f = _layers[layer].activationFunction();
-		if (f != null) return f;
-		return _sigmoid;
-	}
 
 }
 

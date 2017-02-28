@@ -127,7 +127,50 @@ public class Program {
 		o[0].features = new double[] { .05, .10 };
 		o[0].target = new double[] { .01, .99 };
 
-		net.train(o, 0.5, 0, 0, 0.01, 10);
+		net.train(o, 0.5, 0, 0, 0.05, 100);
+	}
+	
+	
+	private static void xorExamples() {
+		Instance[] m = new Instance[4];
+
+		m[0] = new Instance();
+		m[0].features = new double[] { 0, 0 };
+		m[0].target = new double[] { 0 };
+
+		m[1] = new Instance();
+		m[1].features = new double[] { 0, 1 };
+		m[1].target = new double[] { 1 };
+
+		m[2] = new Instance();
+		m[2].features = new double[] { 1, 0 };
+		m[2].target = new double[] { 1 };
+
+		m[3] = new Instance();
+		m[3].features = new double[] { 1, 1 };
+		m[3].target = new double[] { 0 };
+		
+		
+		NeuralNet net = new NeuralNet();
+
+		Function sigmoid = new Sigmoid();
+		WeightInitializer weightInit = new DefaultWeightInitializer();
+
+		net.addLayer(2)
+				.activationFunction(sigmoid)
+				.weightInitializer(weightInit);
+		net.addLayer(2)
+				.activationFunction(sigmoid)
+				.weightInitializer(weightInit);
+		net.addLayer(1)
+				.activationFunction(sigmoid)
+				.weightInitializer(weightInit);
+		net.train(m, 0.005, 0, 0, 0.05, 5);
+				
+		for (Instance t : m) {
+			double[] out = net.predict(t.features);
+			Trace.log("[", Format.matrix(t.features), "]=[", Format.matrix(out), "]");
+		}
 	}
 
 
@@ -169,7 +212,7 @@ public class Program {
 			ex.printStackTrace();
 		}
 
-		stepByStepExamples();
+		xorExamples();
 
 		// use debug examples
 		// train = makeExamples();
@@ -199,8 +242,8 @@ public class Program {
 		// .activationFunction(ligistic);
 		//
 		// neuralNet.train(train, 0.005, 0, 0, 0.01, 100);
-
-		Trace.log("done!");
+	
+		Trace.log("[END]");
 
 		// double[] ans;
 		//
