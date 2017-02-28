@@ -52,25 +52,23 @@ public class Program {
 
 
 	private static Instance[] makeXorExamples() {
-		Instance[] m = new Instance[5];
+		Instance[] m = new Instance[4];
 
-		Instance x = new Instance(2, 1);
+		m[0] = new Instance();
+		m[0] .features = new double[] { 0, 0 };
+		m[0] .target = new double[] { 0 };
 
-		x.features = new double[] { 0, 0 };
-		x.target = new double[] { 0 };
-		m[0] = x;
-
-		x.features = new double[] { 0, 1 };
-		x.target = new double[] { 1 };
-		m[1] = x;
-
-		x.features = new double[] { 1, 0 };
-		x.target = new double[] { 1 };
-		m[2] = x;
-
-		x.features = new double[] { 1, 1 };
-		x.target = new double[] { 0 };
-		m[3] = x;
+		m[1] = new Instance();
+		m[1].features = new double[] { 0, 1 };
+		m[1].target = new double[] { 1 };
+		
+		m[2]= new Instance();
+		m[2].features = new double[] { 1, 0 };
+		m[2].target = new double[] { 1 };
+		
+		m[3] = new Instance();
+		m[3].features = new double[] { 1, 1 };
+		m[3].target = new double[] { 0 };
 
 		return m;
 	}
@@ -137,26 +135,22 @@ public class Program {
 
 		NeuralNet neuralNet = new NeuralNet();
 
-		train = makeSimpleExamples(); // makeXorExamples();
+		train = makeXorExamples(); // makeXorExamples();
 
 		int inputs = train[0].features.length;
 		int outputs = train[0].target.length;
 
-		neuralNet.addLayer(2);
-
-		neuralNet.addLayer(3)
-				.weightInitializer(weightInit)
-				.activationFunction(ligistic);
+		neuralNet.addLayer(inputs);
 
 		neuralNet.addLayer(2)
 				.weightInitializer(weightInit)
 				.activationFunction(ligistic);
 
-		neuralNet.addLayer(1)
+		neuralNet.addLayer(outputs)
 				.weightInitializer(weightInit)
 				.activationFunction(ligistic);
 
-		neuralNet.train(train, 0.005, 0, 0, 0.01, 10);
+		neuralNet.train(train, 0.005, 0, 0, 0.01, 100);
 
 		Trace.log("done!");
 

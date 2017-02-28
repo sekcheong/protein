@@ -3,7 +3,7 @@ package ml.learner.neuralnet.functions;
 public class Sigmoid implements Function {
 
 	@Override
-	public void compute(double[] x, double[] y) {
+	public void eval(double[] x, double[] y) {
 		for (int i = 0; i < x.length; i++) {
 			y[i] = 1 / (1 + Math.exp(-x[i]));
 		}
@@ -11,7 +11,7 @@ public class Sigmoid implements Function {
 
 
 	@Override
-	public double compute(double x) {
+	public double eval(double x) {
 		return 1 / (1 + Math.exp(-x));
 	}
 
@@ -33,7 +33,7 @@ public class Sigmoid implements Function {
 
 
 	@Override
-	public void compute(Object... params) {
+	public void eval(Object... params) {
 		// TODO Auto-generated method stub
 		
 	}

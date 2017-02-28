@@ -16,7 +16,7 @@ public class LeakyLinear implements Function {
 
 
 	@Override
-	public void compute(double[] x, double[] y) {
+	public void eval(double[] x, double[] y) {
 		for (int i = 0; i < x.length; i++) {
 			y[i] = (x[i] < 0) ? x[i] * _slope : x[i];
 		}
@@ -24,7 +24,7 @@ public class LeakyLinear implements Function {
 
 
 	@Override
-	public double compute(double x) {
+	public double eval(double x) {
 		return (x < 0) ? x * _slope : x;
 	}
 
@@ -44,7 +44,7 @@ public class LeakyLinear implements Function {
 
 
 	@Override
-	public void compute(Object... params) {
+	public void eval(Object... params) {
 		// TODO Auto-generated method stub
 		
 	}

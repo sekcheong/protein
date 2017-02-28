@@ -3,7 +3,7 @@ package ml.learner.neuralnet.functions;
 public class Linear implements Function {
 
 	@Override
-	public void compute(double[] x, double[] y) {
+	public void eval(double[] x, double[] y) {
 		for (int i = 0; i < x.length; i++) {
 			y[i] = Math.max(0, x[i]);
 		}
@@ -11,7 +11,7 @@ public class Linear implements Function {
 
 
 	@Override
-	public double compute(double x) {
+	public double eval(double x) {
 		return Math.max(0, x);
 	}
 
@@ -31,7 +31,7 @@ public class Linear implements Function {
 
 
 	@Override
-	public void compute(Object... params) {
+	public void eval(Object... params) {
 		// TODO Auto-generated method stub
 		
 	}
