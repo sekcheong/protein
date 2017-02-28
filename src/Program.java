@@ -142,7 +142,7 @@ public class Program {
 		int inputs = train[0].features.length;
 		int outputs = train[0].target.length;
 
-		neuralNet.addLayer(inputs);
+		neuralNet.addLayer(2);
 
 		neuralNet.addLayer(3)
 				.weightInitializer(weightInit)
@@ -152,7 +152,7 @@ public class Program {
 				.weightInitializer(weightInit)
 				.activationFunction(ligistic);
 
-		neuralNet.addLayer(outputs)
+		neuralNet.addLayer(1)
 				.weightInitializer(weightInit)
 				.activationFunction(ligistic);
 
