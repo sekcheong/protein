@@ -156,7 +156,7 @@ public class Program {
 				.weightInitializer(weightInit)
 				.activationFunction(ligistic);
 
-		neuralNet.train(train, 0.005, 0, 0, 0.00001, 10);
+		neuralNet.train(train, 0.005, 0, 0, 0.01, 10);
 
 		Trace.log("done!");
 

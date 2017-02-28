@@ -56,14 +56,12 @@ public class NeuralNet {
 		}
 		else {
 			// input units is the number of units of the previous layer
-			layer = new Layer(units, _addLayers.get(index - 1)
-					.units());
+			layer = new Layer(units, _addLayers.get(index - 1).units());
 		}
 
 		layer.index(_addLayers.size());
 		layer.net(this);
 		_addLayers.add(layer);
-
 		return layer;
 	}
 
@@ -131,8 +129,7 @@ public class NeuralNet {
 		_W = new double[layers.length][][];
 
 		// V[n][j] are vectors whose elements denote the weighted inputs related
-		// to
-		// the jth neuron of layer n, and are defined by:
+		// to the jth neuron of layer n, and are defined by:
 		_V = new double[layers.length][];
 
 		// Y[n][j] are vectors whose elements denote the output of the jth
@@ -216,16 +213,14 @@ public class NeuralNet {
 			}
 
 			// u are vectors whose elements denote the weighted inputs related
-			// to
-			// the jth neuron of layer L
+			// to the jth neuron of layer L
 			u[l] = new double[w[l].length];
 
 			// output of the jth neuron of layer L
 			y[l] = new double[w[l].length + 1];
 			delta[l] = new double[w[l].length];
 
-			layers[l].weightInitializer()
-					.initializeWeights(w[l]);
+			layers[l].weightInitializer().initializeWeights(w[l]);
 		}
 
 	}
@@ -244,38 +239,33 @@ public class NeuralNet {
 			g = layers[l].activationFunction();
 			for (int j = 0; j < w[l].length; j++) {
 				double z = Vector.dot(w[l][j], y[l - 1]);
-//				for (int i = 0; i < w[l].length; i++) {
-//					z = z + w[l][j][i] * y[l - 1][j];
-//				}
 				v[l][j] = z;
 				y[l][j + 1] = g.compute(z);
 			}
 			y[l][0] = _BIAS;
-			
 		}
 
 	}
 
 
-	private void backPropagation(Layer layers[], double[][][] w, double[][] v, double[][] y, double d[], double[][] delta, double eta, double alpha,
-			double lambda) {
+	private void backPropagation(Layer layers[], double[][][] w, double[][] v, double[][] y, double d[], double[][] delta, double eta, double alpha, double lambda) {
 		// the output layer
-		int n = w.length - 1;
-		Function g = layers[n].activationFunction();
+		int l = w.length - 1;
+		Function g = layers[l].activationFunction();
 
 		// calculate the deltas for the output layer
-		for (int j = 0; j < w[n].length; j++) {
-			delta[n][j] = (d[j] - y[n][j]) * g.diff(v[n][j]);
+		for (int j = 0; j < w[l].length; j++) {
+			delta[l][j] = (d[j] - y[l][j]) * g.diff(v[l][j]);
 		}
 
 		// calculate the deltas for the hidden layers and the first layer
-		for (n = w.length - 2; n >= 1; n--) {
-			for (int j = 0; j < w[n].length; j++) {
+		for (l = w.length - 2; l >= 1; l--) {
+			for (int j = 0; j < w[l].length; j++) {
 				double z = 0;
-				for (int k = 1; k < w[n + 1].length; k++) {
-					z = z + delta[n + 1][k] * w[n + 1][k][j];
+				for (int k = 1; k < w[l + 1].length; k++) {
+					z = z + delta[l + 1][k] * w[l + 1][k][j];
 				}
-				delta[n][j] = -z * g.diff(v[n][j]);
+				delta[l][j] = -z * g.diff(v[l][j]);
 			}
 		}
 
