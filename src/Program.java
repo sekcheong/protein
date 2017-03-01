@@ -200,13 +200,13 @@ public class Program {
 					.activationFunction(linear)
 					.weightInitializer(weightInit);
 
-			net.addLayer(500)
+			net.addLayer(300)
 					.activationFunction(linear)
 					.weightInitializer(weightInit);
 
-//			net.addLayer(600)
-//					.activationFunction(linear)
-//					.weightInitializer(weightInit);
+			 net.addLayer(120)
+			 .activationFunction(linear)
+			 .weightInitializer(weightInit);
 
 			net.addLayer(outputs)
 					.activationFunction(sigmoid)
@@ -216,7 +216,7 @@ public class Program {
 			watch = StopWatch.start();
 
 			Trace.enabled = false;
-			net.train(train, 0.5, 0, 0, 0.01, 5);
+			net.train(train, 0.05, 0, 0, 0.01, 30);
 			Trace.enabled = true;
 
 			watch.stop();
@@ -229,7 +229,7 @@ public class Program {
 				double[] out = net.predict(t.features);
 
 				out = threshold(out);
-				//Trace.log("([", Format.matrix(t.target, 0), "],[", Format.matrix(out,0), "])");
+				Trace.log("([", Format.matrix(t.target, 0), "],[",Format.matrix(out,0), "])");
 
 				boolean match = true;
 				for (int i = 0; i < t.target.length; i++) {
@@ -237,7 +237,10 @@ public class Program {
 						match = false;
 					}
 				}
-				if (match) correct++;
+				
+				if (match) {
+					correct++;
+				}
 
 				// Trace.log("([", Format.matrix(threshold(t.target), 0), "],[",
 				// Format.matrix(t.target,0), "])");
@@ -254,7 +257,7 @@ public class Program {
 
 
 	public static void main(String[] args) {
-	
+
 		proteinSecondary(args[0], args[1]);
 		// stepByStepExamples();
 		// xorExamples();
