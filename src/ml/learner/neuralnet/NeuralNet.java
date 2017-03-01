@@ -20,6 +20,9 @@ public class NeuralNet {
 
 	// the network weight matrices
 	public double[][][] _w;
+	
+	public double[][][] _w0;
+
 
 	private double[][] _u;
 
@@ -29,14 +32,13 @@ public class NeuralNet {
 
 	// the bias term
 	private double _bias = 1;
-	
+
 
 	// // the default activation function
 	// Function _sigmoid = new Sigmoid();
 	//
 	// // the default weight initializer
 	// WeightInitializer _weightInit = new DefaultWeightInitializer();
-
 
 	public NeuralNet() {
 	}
@@ -193,14 +195,14 @@ public class NeuralNet {
 			Trace.log("");
 			Trace.log("Epoch: ", epoch);
 
-			prevMSE = currMSE;
+			//prevMSE = currMSE;
 
+			prevMSE = computeMeanSquareError(_w, _u, _y, examples, se);
 			// total number of samples in the batch
 			int p = 0;
 
 			Collections.shuffle(trainSet);
-			
-			
+
 			for (Instance s : trainSet) {
 
 				feedForward(layers, _w, _u, _y, s.features);
@@ -225,10 +227,11 @@ public class NeuralNet {
 
 			double d = Math.abs(prevMSE - currMSE);
 			if (d <= epsilon) {
+				Trace.log("acc = ", epsilon);
 				Trace.log("Precision met: e = ", d);
-				// break;
+				//break;
 			}
-			Console.log(epoch);
+			//Console.log(epoch);
 			// Trace.log("epsilon = ", prevMSE - currMSE);
 			epoch = epoch + 1;
 			if (epoch >= maxEpoch) {
@@ -370,9 +373,24 @@ public class NeuralNet {
 	}
 
 
+	private double computeMeanSquareError(double[][][] w, double[][] u, double[][] y, Instance[] examples, double[] sampleError) {
+		for (int i=0; i<examples.length; i++) {
+			feedForward(this.layers(), w, u, y, examples[i].features);
+			sampleError[i]=computeError(w, examples[i].target, y);
+		}
+		double mse = (1 / (double) examples.length) * Vector.sigma(sampleError);
+		return mse;
+	}
+
+
+	private double[] predict(double[] features, double[][][] w, double[][] u, double[][] y, double[] x) {
+		feedForward(this.layers(), w, u, y, features);
+		return y[y.length - 1];
+	}
+
+
 	public double[] predict(double[] features) {
-		feedForward(this.layers(), _w, _u, _y, features);
-		return _y[_y.length - 1];
+		return predict(features, _w, _u, _y, features);
 	}
 
 }
