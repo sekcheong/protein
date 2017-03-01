@@ -182,22 +182,22 @@ public class Program {
 			int outputs = train[0].target.length;
 
 			NeuralNet net = new NeuralNet();
-			
+
 			net.addLayer(inputs)
-			.activationFunction(linear)
-			.weightInitializer(weightInit);
-			
+					.activationFunction(linear)
+					.weightInitializer(weightInit);
+
 			net.addLayer(1000)
-			.activationFunction(linear)
-			.weightInitializer(weightInit);
+					.activationFunction(linear)
+					.weightInitializer(weightInit);
+
+			net.addLayer(400)
+					.activationFunction(sigmoid)
+					.weightInitializer(weightInit);
 			
-			net.addLayer(600)
-			.activationFunction(sigmoid)
-			.weightInitializer(weightInit);
-//			
 			net.addLayer(outputs)
-			.activationFunction(sigmoid)
-			.weightInitializer(weightInit);
+					.activationFunction(sigmoid)
+					.weightInitializer(weightInit);
 
 			Trace.log("Learning...");
 			watch = StopWatch.start();
