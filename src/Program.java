@@ -72,33 +72,35 @@ public class Program {
 		net.addLayer(2).activationFunction(sigmoid).weightInitializer(weightInit);
 		net.addLayer(2).activationFunction(sigmoid).weightInitializer(weightInit);
 
-		net._w = new double[3][][];
-		net._w[0] = new double[2][2];
-		net._w[1] = new double[2][3];
-		net._w[2] = new double[2][3];
+		double[][][] w = new double[3][][];
+		w[0] = new double[2][2];
+		w[1] = new double[2][3];
+		w[2] = new double[2][3];
 
-		net._w[1][0][0] = .35;
-		net._w[1][0][1] = .15;
-		net._w[1][0][2] = .20;
+		w[1][0][0] = .35;
+		w[1][0][1] = .15;
+		w[1][0][2] = .20;
 
-		net._w[1][1][0] = .35;
-		net._w[1][1][1] = .25;
-		net._w[1][1][2] = .30;
+		w[1][1][0] = .35;
+		w[1][1][1] = .25;
+		w[1][1][2] = .30;
 
-		net._w[2][0][0] = .60;
-		net._w[2][0][1] = .40;
-		net._w[2][0][2] = .45;
+		w[2][0][0] = .60;
+		w[2][0][1] = .40;
+		w[2][0][2] = .45;
 
-		net._w[2][1][0] = .60;
-		net._w[2][1][1] = .50;
-		net._w[2][1][2] = .55;
+		w[2][1][0] = .60;
+		w[2][1][1] = .50;
+		w[2][1][2] = .55;
 
 		Instance[] o = new Instance[1];
 		o[0] = new Instance();
 		o[0].features = new double[] { .05, .10 };
 		o[0].target = new double[] { .01, .99 };
 
+		net.weights(w);
 		net.train(o, 0.5, 0, 0, 0.05, 100000);
+		
 		double[] f = new double[] { 0.05, 0.1 };
 		double[] out = net.predict(f);
 		Trace.log("[", Format.matrix(f), "]=[", Format.matrix(out), "]");
@@ -250,19 +252,19 @@ public class Program {
 						.activationFunction(linear)
 						.weightInitializer(weightInit);
 
-				// net.addLayer(120)
-				// .activationFunction(linear)
-				// .weightInitializer(weightInit);
+//				net.addLayer(160)
+//				 .activationFunction(linear)
+//				 .weightInitializer(weightInit);
 
 				net.addLayer(outputs)
 						.activationFunction(sigmoid)
 						.weightInitializer(weightInit);
 
-				Trace.log("Learning...");
+				//Trace.log("Learning...");
 				watch = StopWatch.start();
 
 				Trace.enabled = false;
-				net.train(train, 0.3, 0, 0, 0.005, 50);
+				net.train(train, 0.5, 0, 0, 0.0015, 50);
 				//Trace.enabled = true;
 
 				watch.stop();
