@@ -229,7 +229,7 @@ public class NeuralNet {
 			if (d <= epsilon) {
 				Trace.log("acc = ", epsilon);
 				Trace.log("Precision met: e = ", d);
-				//break;
+				break;
 			}
 			//Console.log(epoch);
 			// Trace.log("epsilon = ", prevMSE - currMSE);
