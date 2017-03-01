@@ -199,6 +199,8 @@ public class NeuralNet {
 			int p = 0;
 
 			Collections.shuffle(trainSet);
+			
+			
 			for (Instance s : trainSet) {
 
 				feedForward(layers, _w, _u, _y, s.features);

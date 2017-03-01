@@ -169,7 +169,7 @@ public class Program {
 			List<List<Amino>> val = reader.Read();
 
 			DataSet dataSet = new DataSet(val, 17);
-			DataSet[] subSets = dataSet.Split(0.2);
+			DataSet[] subSets = dataSet.Split(0.8);
 
 			train = subSets[0].instances();
 			tune = subSets[1].instances();
@@ -178,10 +178,10 @@ public class Program {
 			Trace.log("Data set valid    :", dataSet.verifyInstances());
 			Trace.log("Feature length    :", dataSet.instances()[0].features.length);
 			Trace.log("");
-			Trace.log("Training set valid:", subSets[1].verifyInstances());
+			Trace.log("Training set valid:", subSets[0].verifyInstances());
 			Trace.log("Training size     :", train.length);
 			Trace.log("");
-			Trace.log("Tuning set valid  :", subSets[0].verifyInstances());
+			Trace.log("Tuning set valid  :", subSets[1].verifyInstances());
 			Trace.log("Tuning size       :", tune.length);
 			watch.stop();
 			Trace.log("");
@@ -200,13 +200,13 @@ public class Program {
 					.activationFunction(linear)
 					.weightInitializer(weightInit);
 
-			net.addLayer(1000)
+			net.addLayer(500)
 					.activationFunction(linear)
 					.weightInitializer(weightInit);
 
-			net.addLayer(600)
-					.activationFunction(sigmoid)
-					.weightInitializer(weightInit);
+//			net.addLayer(600)
+//					.activationFunction(linear)
+//					.weightInitializer(weightInit);
 
 			net.addLayer(outputs)
 					.activationFunction(sigmoid)
@@ -229,10 +229,9 @@ public class Program {
 				double[] out = net.predict(t.features);
 
 				out = threshold(out);
-				Trace.log("([", Format.matrix(t.target, 0), "],[", Format.matrix(out,0), "])");
+				//Trace.log("([", Format.matrix(t.target, 0), "],[", Format.matrix(out,0), "])");
 
 				boolean match = true;
-				;
 				for (int i = 0; i < t.target.length; i++) {
 					if (t.target[i] != out[i]) {
 						match = false;
@@ -255,66 +254,11 @@ public class Program {
 
 
 	public static void main(String[] args) {
-		Trace.enabled = true;
-
+	
 		proteinSecondary(args[0], args[1]);
-
 		// stepByStepExamples();
-
 		// xorExamples();
 
-		// use debug examples
-		// train = makeExamples();
-
-		// use default weight initializer
-		// WeightInitializer weightInit = new DefaultWeightInitializer();
-		//
-		// Function linear = new Linear();
-		// Function ligistic = new Sigmoid();
-		// Function htan = new HyperbolicTangent();
-
-		// NeuralNet neuralNet = new NeuralNet();
-		//
-		// train = makeExamples(); // makeXorExamples(); // makeXorExamples();
-		//
-		// int inputs = train[0].features.length;
-		// int outputs = train[0].target.length;
-		//
-		// neuralNet.addLayer(inputs);
-		//
-		// neuralNet.addLayer(2)
-		// .weightInitializer(weightInit)
-		// .activationFunction(ligistic);
-		//
-		// neuralNet.addLayer(outputs)
-		// .weightInitializer(weightInit)
-		// .activationFunction(ligistic);
-		//
-		// neuralNet.train(train, 0.005, 0, 0, 0.01, 100);
-
-		// Trace.log("[END]");
-
-		// double[] ans;
-		//
-		// ans = neuralNet.predict(new double[] {0,0});
-		// Trace.log(Format.matrix(ans));
-		//
-		// ans = neuralNet.predict(new double[] {0,1});
-		// Trace.log(Format.matrix(ans));
-		//
-		// ans = neuralNet.predict(new double[] {1,0});
-		//
-		// Trace.log(Format.matrix(ans));
-		// ans = neuralNet.predict(new double[] {1,1});
-		//
-
-		// for (Instance ex : tune) {
-		// double[] y = neuralNet.predict(ex.features);
-		// Trace.log("y=[", Format.matrix(y), "]");
-		// Trace.log("t=[", Format.matrix(ex.target), "]");
-		// }
-		// double[] ans = neuralNet.predict(new double[] { 0.2, 0.3 });
-		// Trace.log("y_hat=[", Format.matrix(ans), "]");
 	}
 
 }
