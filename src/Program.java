@@ -7,7 +7,6 @@ import ml.io.DataReader;
 import ml.learner.neuralnet.NeuralNet;
 import ml.learner.neuralnet.functions.*;
 import ml.learner.neuralnet.initializers.*;
-import ml.math.Vector;
 import ml.utils.Format;
 import ml.utils.tracing.*;
 
@@ -68,15 +67,9 @@ public class Program {
 		Function sigmoid = new Sigmoid();
 		WeightInitializer weightInit = new DefaultWeightInitializer();
 
-		net.addLayer(2)
-				.activationFunction(sigmoid)
-				.weightInitializer(weightInit);
-		net.addLayer(2)
-				.activationFunction(sigmoid)
-				.weightInitializer(weightInit);
-		net.addLayer(2)
-				.activationFunction(sigmoid)
-				.weightInitializer(weightInit);
+		net.addLayer(2).activationFunction(sigmoid).weightInitializer(weightInit);
+		net.addLayer(2).activationFunction(sigmoid).weightInitializer(weightInit);
+		net.addLayer(2).activationFunction(sigmoid).weightInitializer(weightInit);
 
 		net._w = new double[3][][];
 		net._w[0] = new double[2][2];
@@ -105,12 +98,12 @@ public class Program {
 		o[0].target = new double[] { .01, .99 };
 
 		net.train(o, 0.5, 0, 0, 0.05, 100000);
-		double[] f = new double[] {0.05, 0.1};
+		double[] f = new double[] { 0.05, 0.1 };
 		double[] out = net.predict(f);
 		Trace.log("[", Format.matrix(f), "]=[", Format.matrix(out), "]");
 	}
-	
-	
+
+
 	private static void xorExamples() {
 
 		Instance[] m = new Instance[4];
@@ -136,18 +129,10 @@ public class Program {
 		Function sigmoid = new Sigmoid();
 		WeightInitializer weightInit = new DefaultWeightInitializer();
 
-		net.addLayer(2)
-				.activationFunction(sigmoid)
-				.weightInitializer(weightInit);
-		net.addLayer(4)
-				.activationFunction(sigmoid)
-				.weightInitializer(weightInit);
-		net.addLayer(4)
-				.activationFunction(sigmoid)
-				.weightInitializer(weightInit);
-		net.addLayer(1)
-				.activationFunction(sigmoid)
-				.weightInitializer(weightInit);
+		net.addLayer(2).activationFunction(sigmoid).weightInitializer(weightInit);
+		net.addLayer(4).activationFunction(sigmoid).weightInitializer(weightInit);
+		net.addLayer(4).activationFunction(sigmoid).weightInitializer(weightInit);
+		net.addLayer(1).activationFunction(sigmoid).weightInitializer(weightInit);
 
 		net.train(m, 0.5, 0, 0, 0.005, 10000);
 
@@ -158,9 +143,7 @@ public class Program {
 	}
 
 
-	public static void main(String[] args) {
-		Trace.enabled = true;
-
+	private static void proteinSecondary(String trainFile, String testFile) {
 		DataReader reader = null;
 		Instance[] train = null;
 		Instance[] tune = null;
@@ -169,11 +152,12 @@ public class Program {
 
 			StopWatch watch = StopWatch.start();
 
-			reader = new DataReader(args[0]);
+			reader = new DataReader(trainFile);
 			List<List<Amino>> val = reader.Read();
 
 			DataSet dataSet = new DataSet(val, 17);
 			DataSet[] subSets = dataSet.Split(0.2);
+
 			train = subSets[0].instances();
 			tune = subSets[1].instances();
 
@@ -186,19 +170,80 @@ public class Program {
 			Trace.log("");
 			Trace.log("Tuning set valid  :", subSets[0].verifyInstances());
 			Trace.log("Tuning size       :", tune.length);
-
 			watch.stop();
-
 			Trace.log("");
 			Trace.log("Loading time      :", watch.elapsedTime() + "s");
+
+			Function sigmoid = new Sigmoid();
+			Function linear = new Linear();
+			WeightInitializer weightInit = new DefaultWeightInitializer();
+
+			int inputs = train[0].features.length;
+			int outputs = train[0].target.length;
+
+			NeuralNet net = new NeuralNet();
+			
+			net.addLayer(inputs)
+			.activationFunction(linear)
+			.weightInitializer(weightInit);
+			
+			net.addLayer(1000)
+			.activationFunction(linear)
+			.weightInitializer(weightInit);
+			
+			net.addLayer(600)
+			.activationFunction(sigmoid)
+			.weightInitializer(weightInit);
+//			
+			net.addLayer(outputs)
+			.activationFunction(sigmoid)
+			.weightInitializer(weightInit);
+
+			Trace.log("Learning...");
+			watch = StopWatch.start();
+
+			Trace.enabled=false;
+			net.train(train, 0.5, 0, 0, 0.01, 30);
+			Trace.enabled=true;
+			
+			watch.stop();
+			Trace.log("[done]");
+			Trace.log("Elpased time      :", watch.elapsedTime() + "s");
+			
+			for (Instance t: tune) {
+					double[] out = net.predict(t.features);
+					double max = -1;
+					int maxIndex = 0;
+					
+					for (int i=0; i<out.length; i++) {
+						if (out[i]>0.5) { 
+							out[i]=1;
+//							maxIndex =i;
+//							max = out[i];
+						}
+//						out[i]=0;
+					}
+					
+					out[maxIndex]=1;
+					Trace.log("([", Format.matrix(t.target), "],[", Format.matrix(out), "])");
+			}
+
 		}
 		catch (Exception ex) {
 			ex.printStackTrace();
 		}
 
-		//stepByStepExamples();
+	}
+
+
+	public static void main(String[] args) {
+		Trace.enabled = true;
+
+		proteinSecondary(args[0], args[1]);
 		
-		xorExamples();
+		// stepByStepExamples();
+
+		//xorExamples();
 
 		// use debug examples
 		// train = makeExamples();
@@ -228,8 +273,8 @@ public class Program {
 		// .activationFunction(ligistic);
 		//
 		// neuralNet.train(train, 0.005, 0, 0, 0.01, 100);
-	
-		Trace.log("[END]");
+
+		//Trace.log("[END]");
 
 		// double[] ans;
 		//

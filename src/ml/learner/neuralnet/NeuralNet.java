@@ -5,17 +5,15 @@ import java.util.Collections;
 import java.util.List;
 import ml.data.Instance;
 import ml.learner.neuralnet.functions.Function;
-import ml.learner.neuralnet.functions.Sigmoid;
-import ml.learner.neuralnet.initializers.DefaultWeightInitializer;
-import ml.learner.neuralnet.initializers.WeightInitializer;
 import ml.math.Vector;
+import ml.utils.Console;
 import ml.utils.Format;
 import ml.utils.tracing.Trace;
 
 public class NeuralNet {
 
 	// the network layers
-	private Layer[] _layers;
+	private Layer[] _layers = null;
 
 	// the list holds the layers being added
 	private List<Layer> _addLayers = new ArrayList<Layer>();
@@ -39,7 +37,8 @@ public class NeuralNet {
 	// WeightInitializer _weightInit = new DefaultWeightInitializer();
 
 
-	public NeuralNet() {}
+	public NeuralNet() {
+	}
 
 
 	public double[][][] weights() {
@@ -71,21 +70,18 @@ public class NeuralNet {
 		}
 		else {
 			// input units is the number of units of the previous layer
-			layer = new Layer(units, _addLayers.get(index - 1)
-					.units());
+			layer = new Layer(units, _addLayers.get(index - 1).units());
 		}
 
 		layer.index(_addLayers.size());
 		layer.net(this);
 		_addLayers.add(layer);
+		_layers = _addLayers.toArray(new Layer[_addLayers.size()]);
 		return layer;
 	}
 
 
 	public Layer[] layers() {
-		if (_layers == null) {
-			_layers = _addLayers.toArray(new Layer[_addLayers.size()]);
-		}
 		return _layers;
 	}
 
@@ -161,11 +157,10 @@ public class NeuralNet {
 		double[] se = new double[examples.length];
 
 		List<Instance> trainSet = new ArrayList<Instance>();
-		for (int i=0; i<examples.length; i++) {
+		for (int i = 0; i < examples.length; i++) {
 			trainSet.add(examples[i]);
 		}
-		
-		
+
 		this.initialize(_w, _u, _y, _delta);
 
 		// _w = new double[3][][];
@@ -202,7 +197,7 @@ public class NeuralNet {
 			// total number of samples in the batch
 			int p = 0;
 
-			Collections.shuffle(trainSet); 
+			Collections.shuffle(trainSet);
 			for (Instance s : trainSet) {
 
 				feedForward(layers, _w, _u, _y, s.features);
@@ -219,7 +214,7 @@ public class NeuralNet {
 				Trace.log("E[", p - 1, "] = ", se[p - 1]);
 			}
 
-			// mean squre error for the entire batch of samples
+			// mean square error for the entire batch of samples
 			currMSE = (1 / (double) p) * Vector.sigma(se);
 
 			Trace.log("currMSE = ", currMSE);
@@ -228,9 +223,9 @@ public class NeuralNet {
 			double d = Math.abs(prevMSE - currMSE);
 			if (d <= epsilon) {
 				Trace.log("Precision met: e = ", d);
-				//break;
+				// break;
 			}
-
+			Console.log(epoch);
 			// Trace.log("epsilon = ", prevMSE - currMSE);
 			epoch = epoch + 1;
 			if (epoch >= maxEpoch) {
@@ -286,8 +281,7 @@ public class NeuralNet {
 
 			delta[l] = new double[w[l].length];
 
-			layers[l].weightInitializer()
-					.initializeWeights(w[l]);
+			layers[l].weightInitializer().initializeWeights(w[l]);
 		}
 
 	}
@@ -374,7 +368,7 @@ public class NeuralNet {
 
 
 	public double[] predict(double[] features) {
-		feedForward(_layers, _w, _u, _y, features);
+		feedForward(this.layers(), _w, _u, _y, features);
 		return _y[_y.length - 1];
 	}
 
