@@ -1,17 +1,22 @@
 package ml.learner.neuralnet;
 
-import ml.learner.neuralnet.functions.Function;
+import ml.learner.neuralnet.functions.*;
+import ml.learner.neuralnet.initializers.DefaultWeightInitializer;
 import ml.learner.neuralnet.initializers.WeightInitializer;
 
 public class Layer {
 
 	private NeuralNet _net;
-	private WeightInitializer _weightInit;
-	private Function _activationFunc;
+	private WeightInitializer _weightInit = null;
+	private Function _activationFunc = null;
 
 	private int _index;
 	private int _inputs;
 	private int _units;
+
+	private static Function _defaultActivationFunc = new Sigmoid();
+
+	private static WeightInitializer _defaultWeightInitializer = new DefaultWeightInitializer();
 
 
 	public Layer(int units, int inputs) {
@@ -57,7 +62,7 @@ public class Layer {
 
 
 	public WeightInitializer weightInitializer() {
-
+		if (_weightInit == null) return _defaultWeightInitializer;
 		return _weightInit;
 	}
 
@@ -69,6 +74,7 @@ public class Layer {
 
 
 	public Function activationFunction() {
+		if (_activationFunc == null) return _defaultActivationFunc;
 		return _activationFunc;
 	}
 

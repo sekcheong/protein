@@ -29,6 +29,7 @@ public class NeuralNet {
 
 	// the bias term
 	private double _bias = 1;
+	
 
 	// // the default activation function
 	// Function _sigmoid = new Sigmoid();

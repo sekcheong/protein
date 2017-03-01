@@ -5,23 +5,27 @@ import ml.utils.tracing.Trace;
 public class Format {
 
 	public static String matrix(Object v) {
+		return matrix(v, 8);
+	}
+
+
+	public static String matrix(Object v, int decimal) {
 		try {
 
 			if (v instanceof double[]) {
-				return format1d((double[]) v, 8);
+				return format1d((double[]) v, decimal);
 			}
 			if (v instanceof double[][]) {
-				return format2d((double[][]) v, 8);
+				return format2d((double[][]) v, decimal);
 			}
 			if (v instanceof double[][][]) {
-				return format3d((double[][][]) v, 8);
+				return format3d((double[][][]) v, decimal);
 			}
 
-			Trace.Error("Format.matrix(Object v): Unexpected data type ",v.toString());
+			Trace.Error("Format.matrix(Object v): Unexpected data type ", v.toString());
 		}
 		catch (Exception ex) {
-			Trace.Error("Format.matrix(Object v): Error formatting matrix ", v.toString(), "\nDetails:",
-					ex.getMessage());
+			Trace.Error("Format.matrix(Object v): Error formatting matrix ", v.toString(), "\nDetails:", ex.getMessage());
 		}
 
 		return "";

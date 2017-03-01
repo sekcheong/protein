@@ -7,8 +7,8 @@ import ml.io.DataReader;
 import ml.learner.neuralnet.NeuralNet;
 import ml.learner.neuralnet.functions.*;
 import ml.learner.neuralnet.initializers.*;
-import ml.utils.Format;
 import ml.utils.tracing.*;
+import ml.utils.Format;
 
 public class Program {
 
@@ -143,6 +143,19 @@ public class Program {
 	}
 
 
+	private static double[] threshold(double[] values) {
+		double[] t = new double[values.length];
+		int max = 0;
+		for (int i = 0; i < values.length; i++) {
+			if (values[i] > values[max]) {
+				max = i;
+			}
+		}
+		t[max] = 1;
+		return t;
+	}
+
+
 	private static void proteinSecondary(String trainFile, String testFile) {
 		DataReader reader = null;
 		Instance[] train = null;
@@ -191,10 +204,10 @@ public class Program {
 					.activationFunction(linear)
 					.weightInitializer(weightInit);
 
-			net.addLayer(400)
+			net.addLayer(600)
 					.activationFunction(sigmoid)
 					.weightInitializer(weightInit);
-			
+
 			net.addLayer(outputs)
 					.activationFunction(sigmoid)
 					.weightInitializer(weightInit);
@@ -202,32 +215,37 @@ public class Program {
 			Trace.log("Learning...");
 			watch = StopWatch.start();
 
-			Trace.enabled=false;
-			net.train(train, 0.5, 0, 0, 0.01, 30);
-			Trace.enabled=true;
-			
+			Trace.enabled = false;
+			net.train(train, 0.5, 0, 0, 0.01, 5);
+			Trace.enabled = true;
+
 			watch.stop();
 			Trace.log("[done]");
 			Trace.log("Elpased time      :", watch.elapsedTime() + "s");
-			
-			for (Instance t: tune) {
-					double[] out = net.predict(t.features);
-					double max = -1;
-					int maxIndex = 0;
-					
-					for (int i=0; i<out.length; i++) {
-						if (out[i]>0.5) { 
-							out[i]=1;
-//							maxIndex =i;
-//							max = out[i];
-						}
-//						out[i]=0;
+
+			int correct = 0;
+
+			for (Instance t : tune) {
+				double[] out = net.predict(t.features);
+
+				out = threshold(out);
+				Trace.log("([", Format.matrix(t.target, 0), "],[", Format.matrix(out,0), "])");
+
+				boolean match = true;
+				;
+				for (int i = 0; i < t.target.length; i++) {
+					if (t.target[i] != out[i]) {
+						match = false;
 					}
-					
-					out[maxIndex]=1;
-					Trace.log("([", Format.matrix(t.target), "],[", Format.matrix(out), "])");
+				}
+				if (match) correct++;
+
+				// Trace.log("([", Format.matrix(threshold(t.target), 0), "],[",
+				// Format.matrix(t.target,0), "])");
 			}
 
+			double acc = ((double) correct) / tune.length;
+			Trace.log("Accuracy:", acc);
 		}
 		catch (Exception ex) {
 			ex.printStackTrace();
@@ -240,10 +258,10 @@ public class Program {
 		Trace.enabled = true;
 
 		proteinSecondary(args[0], args[1]);
-		
+
 		// stepByStepExamples();
 
-		//xorExamples();
+		// xorExamples();
 
 		// use debug examples
 		// train = makeExamples();
@@ -274,7 +292,7 @@ public class Program {
 		//
 		// neuralNet.train(train, 0.005, 0, 0, 0.01, 100);
 
-		//Trace.log("[END]");
+		// Trace.log("[END]");
 
 		// double[] ans;
 		//
