@@ -1,0 +1,88 @@
+// Α α Alpha a
+// Β β Beta b
+// Γ γ Gamma g
+// Δ δ Delta d
+// Ε ε Epsilon e
+// Ζ ζ Zeta z
+// Η η Eta h
+// Θ θ Theta th
+// Ι ι Iota i
+// Κ κ Kappa k
+// Λ λ Lambda l
+// Μ μ Mu m
+// Ν ν Nu n
+// Ξ ξ Xi x
+// Ο ο Omicron o
+// Π π Pi p
+// Ρ ρ Rho r
+// Σ σ,ς * Sigma s
+// Τ τ Tau t
+// Υ υ Upsilon u
+// Φ φ Phi ph
+// Χ χ Chi ch
+// Ψ ψ Psi ps
+// Ω ω Omega o
+
+
+
+//_w = new double[3][][];
+		// _w[0] = new double[2][2];
+		// _w[1] = new double[2][3];
+		// _w[2] = new double[2][3];
+		//
+		// _w[1][0][0] = .35;
+		// _w[1][0][1] = .15;
+		// _w[1][0][2] = .20;
+		//
+		// _w[1][1][0] = .35;
+		// _w[1][1][1] = .25;
+		// _w[1][1][2] = .30;
+		//
+		// _w[2][0][0] = .60;
+		// _w[2][0][1] = .40;
+		// _w[2][0][2] = .45;
+		//
+		// _w[2][1][0] = .60;
+		// _w[2][1][1] = .50;
+		// _w[2][1][2] = .55;
+
+
+
+
+//private void debugNetValues(double[][][] W) {
+//	W[1] = new double[3][3];
+//	W[1][0] = new double[] { 0.2, 0.4, 0.5 };
+//	W[1][1] = new double[] { 0.3, 0.6, 0.7 };
+//	W[1][2] = new double[] { 0.4, 0.8, 0.3 };
+//
+//	W[2] = new double[2][4];
+//	W[2][0] = new double[] { -0.7, 0.6, 0.2, 0.7 };
+//	W[2][1] = new double[] { -0.3, 0.7, 0.2, 0.8 };
+//
+//	W[3] = new double[1][3];
+//	W[3][0] = new double[] { 0.1, 0.8, 0.5 };
+
+	// Instance[] ex = new Instance[1];
+	// ex[0] = new Instance();
+	//
+	// ex[0].features = new double[] { 0.3, 0.7 };
+	// ex[0].target = new double[] { 0.9 };
+
+	// Instance[] ex = new Instance[4];
+	//
+	// ex[0] = new Instance();
+	// ex[0].features = new double[] { 0.2, 0.9, 0.4 };
+	// ex[0].target = new double[] { 0.7, 0.3 };
+	//
+	// ex[1] = new Instance();
+	// ex[1].features = new double[] { 0.1, 0.3, 0.5 };
+	// ex[1].target = new double[] { 0.6, 0.4 };
+	//
+	// ex[2] = new Instance();
+	// ex[2].features = new double[] { 0.9, 0.7, 0.8 };
+	// ex[2].target = new double[] { 0.9, 0.5 };
+	//
+	// ex[3] = new Instance();
+	// ex[3].features = new double[] { 0.6, 0.4, 0.3 };
+	// ex[3].target = new double[] { 0.2, 0.8 };
+//}

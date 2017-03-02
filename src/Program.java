@@ -68,37 +68,47 @@ public class Program {
 		Function sigmoid = new Sigmoid();
 		WeightInitializer weightInit = new DefaultWeightInitializer();
 
-		net.addLayer(2).activationFunction(sigmoid).weightInitializer(weightInit);
-		net.addLayer(2).activationFunction(sigmoid).weightInitializer(weightInit);
-		net.addLayer(2).activationFunction(sigmoid).weightInitializer(weightInit);
+		net.addLayer(2)
+				.activationFunction(sigmoid)
+				.weightInitializer(weightInit);
 
-		net._w = new double[3][][];
-		net._w[0] = new double[2][2];
-		net._w[1] = new double[2][3];
-		net._w[2] = new double[2][3];
+		net.addLayer(2)
+				.activationFunction(sigmoid)
+				.weightInitializer(weightInit);
 
-		net._w[1][0][0] = .35;
-		net._w[1][0][1] = .15;
-		net._w[1][0][2] = .20;
+		net.addLayer(2)
+				.activationFunction(sigmoid)
+				.weightInitializer(weightInit);
 
-		net._w[1][1][0] = .35;
-		net._w[1][1][1] = .25;
-		net._w[1][1][2] = .30;
+		double[][][] w = new double[3][][];
+		w[0] = new double[2][2];
+		w[1] = new double[2][3];
+		w[2] = new double[2][3];
 
-		net._w[2][0][0] = .60;
-		net._w[2][0][1] = .40;
-		net._w[2][0][2] = .45;
+		w[1][0][0] = .35;
+		w[1][0][1] = .15;
+		w[1][0][2] = .20;
 
-		net._w[2][1][0] = .60;
-		net._w[2][1][1] = .50;
-		net._w[2][1][2] = .55;
+		w[1][1][0] = .35;
+		w[1][1][1] = .25;
+		w[1][1][2] = .30;
+
+		w[2][0][0] = .60;
+		w[2][0][1] = .40;
+		w[2][0][2] = .45;
+
+		w[2][1][0] = .60;
+		w[2][1][1] = .50;
+		w[2][1][2] = .55;
 
 		Instance[] o = new Instance[1];
 		o[0] = new Instance();
 		o[0].features = new double[] { .05, .10 };
 		o[0].target = new double[] { .01, .99 };
 
+		net.weights(w);
 		net.train(o, 0.5, 0, 0, 0.05, 100000);
+
 		double[] f = new double[] { 0.05, 0.1 };
 		double[] out = net.predict(f);
 		Trace.log("[", Format.matrix(f), "]=[", Format.matrix(out), "]");
@@ -124,10 +134,16 @@ public class Program {
 		WeightInitializer weightInit = new DefaultWeightInitializer();
 		Instance[] examples = m.toArray(new Instance[m.size()]);
 
-		net.addLayer(1).activationFunction(sigmoid).weightInitializer(weightInit);
-		net.addLayer(300).activationFunction(sigmoid).weightInitializer(weightInit);
+		net.addLayer(1)
+				.activationFunction(sigmoid)
+				.weightInitializer(weightInit);
+		net.addLayer(300)
+				.activationFunction(sigmoid)
+				.weightInitializer(weightInit);
 		// net.addLayer(100).activationFunction(sigmoid).weightInitializer(weightInit);
-		net.addLayer(1).activationFunction(sigmoid).weightInitializer(weightInit);
+		net.addLayer(1)
+				.activationFunction(sigmoid)
+				.weightInitializer(weightInit);
 
 		Trace.enabled = false;
 		net.train(examples, 0.0005, 0, 0, 0.0000001, epochs);
@@ -166,10 +182,21 @@ public class Program {
 		Function sigmoid = new Sigmoid();
 		WeightInitializer weightInit = new DefaultWeightInitializer();
 
-		net.addLayer(2).activationFunction(sigmoid).weightInitializer(weightInit);
-		net.addLayer(3).activationFunction(sigmoid).weightInitializer(weightInit);
-		net.addLayer(3).activationFunction(sigmoid).weightInitializer(weightInit);
-		net.addLayer(1).activationFunction(sigmoid).weightInitializer(weightInit);
+		net.addLayer(2)
+				.activationFunction(sigmoid)
+				.weightInitializer(weightInit);
+
+		net.addLayer(3)
+				.activationFunction(sigmoid)
+				.weightInitializer(weightInit);
+
+		net.addLayer(3)
+				.activationFunction(sigmoid)
+				.weightInitializer(weightInit);
+
+		net.addLayer(1)
+				.activationFunction(sigmoid)
+				.weightInitializer(weightInit);
 
 		net.train(m, 0.5, 0, 0, 0.0001, epochs);
 
@@ -238,8 +265,8 @@ public class Program {
 			int inputs = train[0].features.length;
 			int outputs = train[0].target.length;
 
-			for (int hu:hiddenUnits) {
-				
+			for (int hu : hiddenUnits) {
+
 				NeuralNet net = new NeuralNet();
 
 				net.addLayer(inputs)
@@ -250,7 +277,7 @@ public class Program {
 						.activationFunction(linear)
 						.weightInitializer(weightInit);
 
-				// net.addLayer(120)
+				// net.addLayer(160)
 				// .activationFunction(linear)
 				// .weightInitializer(weightInit);
 
@@ -258,12 +285,12 @@ public class Program {
 						.activationFunction(sigmoid)
 						.weightInitializer(weightInit);
 
-				Trace.log("Learning...");
+				// Trace.log("Learning...");
 				watch = StopWatch.start();
 
 				Trace.enabled = false;
-				net.train(train, 0.3, 0, 0, 0.005, 50);
-				//Trace.enabled = true;
+				net.train(train, 0.5, 0, 0, 0.0015, 50);
+				// Trace.enabled = true;
 
 				watch.stop();
 				Trace.log("[done]");
@@ -289,13 +316,14 @@ public class Program {
 						correct++;
 					}
 
-					// Trace.log("([", Format.matrix(threshold(t.target), 0), "],[",
+					// Trace.log("([", Format.matrix(threshold(t.target), 0),
+					// "],[",
 					// Format.matrix(t.target,0), "])");
 				}
 
 				double acc = ((double) correct) / tune.length;
-				Trace.enabled=true;
-				Trace.log( hu, ", " ,acc ,", ", watch.elapsedTime() );
+				Trace.enabled = true;
+				Trace.log(hu, ", ", acc, ", ", watch.elapsedTime(), ", ", net.epoch());
 			}
 		}
 		catch (Exception ex) {
@@ -309,11 +337,11 @@ public class Program {
 
 		int[] hu = new int[] { 1, 2, 3, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240, 250, 300, 400, 500, 600, 700, 800, 900, 1000 };
 
-		 proteinSecondary(args[0], args[1], hu);
+		proteinSecondary(args[0], args[1], hu);
 		// stepByStepExamples();
 		// xorExamples(15000);
 
-		//sineExamples(10000);
+		// sineExamples(10000);
 	}
 
 }

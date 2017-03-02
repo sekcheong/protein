@@ -19,10 +19,9 @@ public class NeuralNet {
 	private List<Layer> _addLayers = new ArrayList<Layer>();
 
 	// the network weight matrices
-	public double[][][] _w;
-	
-	public double[][][] _w0;
+	private double[][][] _w;
 
+	private double[][][] _w0;
 
 	private double[][] _u;
 
@@ -33,15 +32,10 @@ public class NeuralNet {
 	// the bias term
 	private double _bias = 1;
 
+	private int _epoch = 0;
 
-	// // the default activation function
-	// Function _sigmoid = new Sigmoid();
-	//
-	// // the default weight initializer
-	// WeightInitializer _weightInit = new DefaultWeightInitializer();
 
-	public NeuralNet() {
-	}
+	public NeuralNet() {}
 
 
 	public double[][][] weights() {
@@ -64,6 +58,11 @@ public class NeuralNet {
 	}
 
 
+	public int epoch() {
+		return _epoch;
+	}
+
+
 	public Layer addLayer(int units) {
 		int index = _addLayers.size();
 		Layer layer;
@@ -73,7 +72,8 @@ public class NeuralNet {
 		}
 		else {
 			// input units is the number of units of the previous layer
-			layer = new Layer(units, _addLayers.get(index - 1).units());
+			layer = new Layer(units, _addLayers.get(index - 1)
+					.units());
 		}
 
 		layer.index(_addLayers.size());
@@ -89,52 +89,13 @@ public class NeuralNet {
 	}
 
 
-	private void debugNetValues(double[][][] W) {
-		W[1] = new double[3][3];
-		W[1][0] = new double[] { 0.2, 0.4, 0.5 };
-		W[1][1] = new double[] { 0.3, 0.6, 0.7 };
-		W[1][2] = new double[] { 0.4, 0.8, 0.3 };
-
-		W[2] = new double[2][4];
-		W[2][0] = new double[] { -0.7, 0.6, 0.2, 0.7 };
-		W[2][1] = new double[] { -0.3, 0.7, 0.2, 0.8 };
-
-		W[3] = new double[1][3];
-		W[3][0] = new double[] { 0.1, 0.8, 0.5 };
-
-		// Instance[] ex = new Instance[1];
-		// ex[0] = new Instance();
-		//
-		// ex[0].features = new double[] { 0.3, 0.7 };
-		// ex[0].target = new double[] { 0.9 };
-
-		// Instance[] ex = new Instance[4];
-		//
-		// ex[0] = new Instance();
-		// ex[0].features = new double[] { 0.2, 0.9, 0.4 };
-		// ex[0].target = new double[] { 0.7, 0.3 };
-		//
-		// ex[1] = new Instance();
-		// ex[1].features = new double[] { 0.1, 0.3, 0.5 };
-		// ex[1].target = new double[] { 0.6, 0.4 };
-		//
-		// ex[2] = new Instance();
-		// ex[2].features = new double[] { 0.9, 0.7, 0.8 };
-		// ex[2].target = new double[] { 0.9, 0.5 };
-		//
-		// ex[3] = new Instance();
-		// ex[3].features = new double[] { 0.6, 0.4, 0.3 };
-		// ex[3].target = new double[] { 0.2, 0.8 };
-	}
-
-
 	public void train(Instance[] examples, double eta, double alpha, double lambda, double epsilon, int maxEpoch) {
 		// the current mean squared error
 		double currMSE = 0;
 		double prevMSE;
 
 		// the current epoch
-		int epoch = 0;
+		_epoch = 0;
 
 		Layer layers[] = this.layers();
 
@@ -165,39 +126,17 @@ public class NeuralNet {
 		}
 
 		this.initialize(_w, _u, _y, _delta);
-
-		// _w = new double[3][][];
-		// _w[0] = new double[2][2];
-		// _w[1] = new double[2][3];
-		// _w[2] = new double[2][3];
-		//
-		// _w[1][0][0] = .35;
-		// _w[1][0][1] = .15;
-		// _w[1][0][2] = .20;
-		//
-		// _w[1][1][0] = .35;
-		// _w[1][1][1] = .25;
-		// _w[1][1][2] = .30;
-		//
-		// _w[2][0][0] = .60;
-		// _w[2][0][1] = .40;
-		// _w[2][0][2] = .45;
-		//
-		// _w[2][1][0] = .60;
-		// _w[2][1][1] = .50;
-		// _w[2][1][2] = .55;
-
+		
 		Trace.log("W=[");
 		Trace.log(Format.matrix(_w), "]");
 
 		while (true) {
 
 			Trace.log("");
-			Trace.log("Epoch: ", epoch);
-
-			//prevMSE = currMSE;
+			Trace.log("Epoch: ", _epoch);
 
 			prevMSE = computeMeanSquareError(_w, _u, _y, examples, se);
+			
 			// total number of samples in the batch
 			int p = 0;
 
@@ -231,10 +170,11 @@ public class NeuralNet {
 				Trace.log("Precision met: e = ", d);
 				break;
 			}
-			//Console.log(epoch);
+
 			// Trace.log("epsilon = ", prevMSE - currMSE);
-			epoch = epoch + 1;
-			if (epoch >= maxEpoch) {
+
+			_epoch = _epoch + 1;
+			if (_epoch >= maxEpoch) {
 				Trace.log("Epoch topped out:", maxEpoch);
 				break;
 			}
@@ -287,7 +227,8 @@ public class NeuralNet {
 
 			delta[l] = new double[w[l].length];
 
-			layers[l].weightInitializer().initializeWeights(w[l]);
+			layers[l].weightInitializer()
+					.initializeWeights(w[l]);
 		}
 
 	}
@@ -374,9 +315,9 @@ public class NeuralNet {
 
 
 	private double computeMeanSquareError(double[][][] w, double[][] u, double[][] y, Instance[] examples, double[] sampleError) {
-		for (int i=0; i<examples.length; i++) {
+		for (int i = 0; i < examples.length; i++) {
 			feedForward(this.layers(), w, u, y, examples[i].features);
-			sampleError[i]=computeError(w, examples[i].target, y);
+			sampleError[i] = computeError(w, examples[i].target, y);
 		}
 		double mse = (1 / (double) examples.length) * Vector.sigma(sampleError);
 		return mse;
@@ -395,27 +336,3 @@ public class NeuralNet {
 
 }
 
-// Α α Alpha a
-// Β β Beta b
-// Γ γ Gamma g
-// Δ δ Delta d
-// Ε ε Epsilon e
-// Ζ ζ Zeta z
-// Η η Eta h
-// Θ θ Theta th
-// Ι ι Iota i
-// Κ κ Kappa k
-// Λ λ Lambda l
-// Μ μ Mu m
-// Ν ν Nu n
-// Ξ ξ Xi x
-// Ο ο Omicron o
-// Π π Pi p
-// Ρ ρ Rho r
-// Σ σ,ς * Sigma s
-// Τ τ Tau t
-// Υ υ Upsilon u
-// Φ φ Phi ph
-// Χ χ Chi ch
-// Ψ ψ Psi ps
-// Ω ω Omega o
