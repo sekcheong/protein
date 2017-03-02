@@ -198,7 +198,8 @@ public class Program {
 				.activationFunction(sigmoid)
 				.weightInitializer(weightInit);
 
-		net.train(m, 0.5, 0, 0, 0.0001, epochs);
+		net.train(m, 0.5, epochs, 0.005, 0.65);
+		
 
 		for (Instance t : m) {
 			double[] out = net.predict(t.features);
@@ -234,8 +235,8 @@ public class Program {
 			DataSet[] subSets = dataSet.Split(0.8);
 
 			Instance[] train = subSets[0].instances();
-			Instance[] tune = subSets[1].instances();
-
+			Instance[] tune = subSets[1].instances();			
+			
 			reader = new DataReader(testFile);
 			val = reader.Read();
 			DataSet testSet = new DataSet(val, 17);
@@ -289,7 +290,9 @@ public class Program {
 				watch = StopWatch.start();
 
 				Trace.enabled = false;
-				net.train(train, 0.5, 0, 0, 0.0015, 50);
+				
+				net.train(train, tune, 0.5, 5, 0.005, 0, 0);
+				
 				// Trace.enabled = true;
 
 				watch.stop();
@@ -339,9 +342,9 @@ public class Program {
 				120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 
 				230, 240, 250, 300, 400, 500, 600, 700, 800, 900, 1000 };
 
-		proteinSecondary(args[0], args[1], hu);
+		//proteinSecondary(args[0], args[1], hu);
 		// stepByStepExamples();
-		// xorExamples(15000);
+		 xorExamples(15000);
 
 		// sineExamples(10000);
 	}
