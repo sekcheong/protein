@@ -190,16 +190,15 @@ public class Program {
 				.activationFunction(sigmoid)
 				.weightInitializer(weightInit);
 
-		net.addLayer(3)
-				.activationFunction(sigmoid)
-				.weightInitializer(weightInit);
+//		net.addLayer(3)
+//				.activationFunction(sigmoid)
+//				.weightInitializer(weightInit);
 
 		net.addLayer(1)
 				.activationFunction(sigmoid)
 				.weightInitializer(weightInit);
 
-		net.train(m, 0.5, epochs, 0.005, 0.65);
-		
+		net.train(m, 0.5, 1800, 0.0000005, 0.7);
 
 		for (Instance t : m) {
 			double[] out = net.predict(t.features);
@@ -291,7 +290,8 @@ public class Program {
 
 				Trace.enabled = false;
 				
-				net.train(train, tune, 0.5, 5, 0.005, 0, 0);
+				net.train(train, 0.5, 50, 0.05, 0.0);
+				//net.train(train, tune, 0.5, 5, 0.005, 0, 0);
 				
 				// Trace.enabled = true;
 
@@ -342,9 +342,9 @@ public class Program {
 				120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 
 				230, 240, 250, 300, 400, 500, 600, 700, 800, 900, 1000 };
 
-		//proteinSecondary(args[0], args[1], hu);
+		proteinSecondary(args[0], args[1], hu);
 		// stepByStepExamples();
-		 xorExamples(15000);
+		// xorExamples(3000);
 
 		// sineExamples(10000);
 	}

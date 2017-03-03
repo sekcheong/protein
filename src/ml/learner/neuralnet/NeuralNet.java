@@ -156,12 +156,22 @@ public class NeuralNet {
 
 			shuffleArray(trainCopy);
 
-			prevMSE = computeMeanSquareError(_w, _u, _y, trainCopy, se);
-
+			//prevMSE = computeMeanSquareError(_w, _u, _y, trainCopy, se);
+			p=0;
+			for (Instance s : trainCopy) {
+				feedForward(layers, _w, _u, _y, s.features);
+				se[p] = computeError(_w, s.target, _y);
+				p = p + 1;
+			}
+			prevMSE = (1 / (double) p) * Vector.sigma(se);
+			
+			p=0;
 			for (Instance s : trainCopy) {
 
 				feedForward(layers, _w, _u, _y, s.features);
+
 				backPropagation(layers, _w, _u, _y, s.target, _delta, eta, alpha, lambda);
+				//Trace.log("w1", Format.matrix(_w, 4));
 
 				// recalculates the predicted y based on the updated weights
 				feedForward(layers, _w, _u, _y, s.features);
@@ -170,14 +180,24 @@ public class NeuralNet {
 				double e = computeError(_w, s.target, _y);
 				se[p] = e;
 				p = p + 1;
-				//
+
 				// Trace.log("E[", p - 1, "] = ", se[p - 1]);
 			}
 
 			// mean square error for the entire batch of samples
 			currMSE = (1 / (double) p) * Vector.sigma(se);
-
-			double currMSE2 = computeMeanSquareError(_w, _u, _y, trainCopy, se);
+//			p=0;
+//			for (Instance s : trainCopy) {
+//				feedForward(layers, _w, _u, _y, s.features);
+//				se[p] = computeError(_w, s.target, _y);
+//				p = p + 1;
+//			}
+//			currMSE = (1 / (double) p) * Vector.sigma(se);
+			
+			_epoch = _epoch + 1;
+			
+			Trace.log("w2", Format.matrix(_w, 4));
+			//double currMSE2 = computeMeanSquareError(_w, _u, _y, trainCopy, se);
 
 			Trace.log("currMSE = ", currMSE);
 
@@ -187,12 +207,11 @@ public class NeuralNet {
 			if (d <= epsilon) {
 				Trace.log("acc = ", epsilon);
 				Trace.log("Precision met: e = ", d);
+				Trace.log("Epoch:", _epoch);
 				break;
 			}
 
 			// Trace.log("epsilon = ", prevMSE - currMSE);
-
-			_epoch = _epoch + 1;
 			if (_epoch >= maxEpoch) {
 				Trace.log("Epoch topped out:", maxEpoch);
 				break;
@@ -245,7 +264,7 @@ public class NeuralNet {
 			// y are vectors whose elements denote the output of the jth neuron
 			// of layer L for hidden unit y also has a bias term at y[0];
 			if (l < w.length - 1) {
-				// for hidden layerso add the bias term
+				// for hidden layers add the bias term
 				y[l] = new double[w[l].length + 1];
 				y[l][0] = _bias;
 			}
@@ -302,33 +321,26 @@ public class NeuralNet {
 
 		// calculate the deltas for the output layer
 		for (int j = 0; j < w[l].length; j++) {
-
 			delta[l][j] = (d[j] - y[l][j]) * g.diff(u[l][j]);
-
 			// update weights
 			for (int i = 0; i < w[l][j].length; i++) {
 				w[l][j][i] = w[l][j][i] + alpha * (w[l][j][i] - w0[l][j][i]) + eta * delta[l][j] * y[l - 1][i];
 			}
-
 		}
 
 		// calculate the deltas for the hidden layers and the first layer
 		for (l = w.length - 2; l >= 1; l--) {
-
 			for (int j = 0; j < w[l].length; j++) {
-
 				// compute delta[l]
 				double z = 0;
 				for (int k = 0; k < w[l + 1].length; k++) {
 					z = z + delta[l + 1][k] * w[l + 1][k][j];
 				}
 				delta[l][j] = -z * g.diff(u[l][j]);
-
 				// update weights
 				for (int i = 0; i < w[l][j].length; i++) {
 					w[l][j][i] = w[l][j][i] + alpha * (w[l][j][i] - w0[l][j][i]) + eta * delta[l][j] * y[l - 1][i];
 				}
-
 			}
 		}
 
