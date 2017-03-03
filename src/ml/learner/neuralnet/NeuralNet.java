@@ -35,8 +35,7 @@ public class NeuralNet {
 	private int _epoch = 0;
 
 
-	public NeuralNet() {
-	}
+	public NeuralNet() {}
 
 
 	public double[][][] weights() {
@@ -156,22 +155,22 @@ public class NeuralNet {
 
 			shuffleArray(trainCopy);
 
-			//prevMSE = computeMeanSquareError(_w, _u, _y, trainCopy, se);
-			p=0;
+			// prevMSE = computeMeanSquareError(_w, _u, _y, trainCopy, se);
+			p = 0;
 			for (Instance s : trainCopy) {
 				feedForward(layers, _w, _u, _y, s.features);
 				se[p] = computeError(_w, s.target, _y);
 				p = p + 1;
 			}
 			prevMSE = (1 / (double) p) * Vector.sigma(se);
-			
-			p=0;
+
+			p = 0;
 			for (Instance s : trainCopy) {
 
 				feedForward(layers, _w, _u, _y, s.features);
 
 				backPropagation(layers, _w, _u, _y, s.target, _delta, eta, alpha, lambda);
-				//Trace.log("w1", Format.matrix(_w, 4));
+				// Trace.log("w1", Format.matrix(_w, 4));
 
 				// recalculates the predicted y based on the updated weights
 				feedForward(layers, _w, _u, _y, s.features);
@@ -186,18 +185,19 @@ public class NeuralNet {
 
 			// mean square error for the entire batch of samples
 			currMSE = (1 / (double) p) * Vector.sigma(se);
-//			p=0;
-//			for (Instance s : trainCopy) {
-//				feedForward(layers, _w, _u, _y, s.features);
-//				se[p] = computeError(_w, s.target, _y);
-//				p = p + 1;
-//			}
-//			currMSE = (1 / (double) p) * Vector.sigma(se);
-			
+			// p=0;
+			// for (Instance s : trainCopy) {
+			// feedForward(layers, _w, _u, _y, s.features);
+			// se[p] = computeError(_w, s.target, _y);
+			// p = p + 1;
+			// }
+			// currMSE = (1 / (double) p) * Vector.sigma(se);
+
 			_epoch = _epoch + 1;
-			
+
 			Trace.log("w2", Format.matrix(_w, 4));
-			//double currMSE2 = computeMeanSquareError(_w, _u, _y, trainCopy, se);
+			// double currMSE2 = computeMeanSquareError(_w, _u, _y, trainCopy,
+			// se);
 
 			Trace.log("currMSE = ", currMSE);
 
@@ -234,14 +234,16 @@ public class NeuralNet {
 	}
 
 
-	// allocates the necessary storage and initialize the weights for the learning session
+	// allocates the necessary storage and initialize the weights for the
+	// learning session
 	private void initialize(double[][][] w, double[][] u, double[][] y, double[][] delta) {
 		Layer layers[] = this.layers();
 
 		w[0] = new double[layers[0].units()][];
 
 		// y[0] used as the input for the entire net and y[0][0] is the bias
-		// term, this is little bit confusing but it will make the feedforward easier
+		// term, this is little bit confusing but it will make the feedforward
+		// easier
 		y[0] = new double[w[0].length + 1];
 		y[0][0] = _bias;
 
@@ -324,7 +326,7 @@ public class NeuralNet {
 			delta[l][j] = (d[j] - y[l][j]) * g.diff(u[l][j]);
 			// update weights
 			for (int i = 0; i < w[l][j].length; i++) {
-				w[l][j][i] = w[l][j][i] + alpha * (w[l][j][i] - w0[l][j][i]) + eta * delta[l][j] * y[l - 1][i];
+				w[l][j][i] = w[l][j][i] + alpha * (w[l][j][i] - w0[l][j][i]) + eta * delta[l][j] * y[l - 1][i] - eta * lambda * w[l][j][i];
 			}
 		}
 
@@ -339,7 +341,7 @@ public class NeuralNet {
 				delta[l][j] = -z * g.diff(u[l][j]);
 				// update weights
 				for (int i = 0; i < w[l][j].length; i++) {
-					w[l][j][i] = w[l][j][i] + alpha * (w[l][j][i] - w0[l][j][i]) + eta * delta[l][j] * y[l - 1][i];
+					w[l][j][i] = w[l][j][i] + alpha * (w[l][j][i] - w0[l][j][i]) + eta * delta[l][j] * y[l - 1][i] - eta * lambda * w[l][j][i];
 				}
 			}
 		}
@@ -365,6 +367,30 @@ public class NeuralNet {
 		}
 		double mse = (1 / (double) examples.length) * Vector.sigma(sampleError);
 		return mse;
+	}
+
+
+	private double computeL2NetWeight(double[][][] w, double lambda) {
+		double c = 0;
+		for (int l = 1; l < w.length; l++) {
+			for (int j = 0; j < w[l].length; j++) {
+				for (int i = 0; i < w[l][j].length; i++) {
+					c = c + (w[l][j][i] * w[l][j][i]);
+				}
+			}
+		}
+		return (lambda / 2) * c;
+	}
+
+
+	private double computeLayerWeight(double[][][] w, int l, double lambda) {
+		double c = 0;
+		for (int j = 0; j < w[l].length; j++) {
+			for (int i = 0; i < w[l][j].length; i++) {
+				c = c + w[l][j][i];
+			}
+		}
+		return lambda * c;
 	}
 
 

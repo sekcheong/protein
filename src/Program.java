@@ -290,7 +290,7 @@ public class Program {
 
 				Trace.enabled = false;
 				
-				net.train(train, 0.5, 50, 0.05, 0.0);
+				net.train(train, 0.5, 50, 0.05, 0.01);
 				//net.train(train, tune, 0.5, 5, 0.005, 0, 0);
 				
 				// Trace.enabled = true;
