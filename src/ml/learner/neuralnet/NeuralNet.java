@@ -6,7 +6,6 @@ import java.util.List;
 import ml.data.Instance;
 import ml.learner.neuralnet.functions.Function;
 import ml.math.Vector;
-import ml.utils.Console;
 import ml.utils.Format;
 import ml.utils.tracing.Trace;
 
@@ -36,7 +35,8 @@ public class NeuralNet {
 	private int _epoch = 0;
 
 
-	public NeuralNet() {}
+	public NeuralNet() {
+	}
 
 
 	public double[][][] weights() {
@@ -116,14 +116,12 @@ public class NeuralNet {
 		Layer layers[] = this.layers();
 
 		// _w[n][j][i] are weight matrices whose elements denote the value of
-		// the
-		// synaptic weight that connects the jth neuron of layer (n) to the
-		// ith neuron of layer (n - 1).
+		// the synaptic weight that connects the j th neuron of layer (n) to the
+		// i th neuron of layer (n - 1).
 		_w = new double[layers.length][][];
 
 		// _v[n][j] are vectors whose elements denote the weighted inputs
-		// related
-		// to the jth neuron of layer n, and are defined by:
+		// related to the jth neuron of layer n, and are defined by:
 		_u = new double[layers.length][];
 
 		// _y[n][j] are vectors whose elements denote the output of the jth
@@ -136,15 +134,15 @@ public class NeuralNet {
 		// se[k] is the error for kth sample
 		double[] se = new double[train.length];
 
-		List<Instance> trainSet = new ArrayList<Instance>();
+		Instance[] trainCopy = new Instance[train.length];
 		for (int i = 0; i < train.length; i++) {
-			trainSet.add(train[i]);
+			trainCopy[i] = train[i];
 		}
 
 		this.initialize(_w, _u, _y, _delta);
 
 		queueCurrentWeight(_w);
-		
+
 		Trace.log("W=[");
 		Trace.log(Format.matrix(_w), "]");
 
@@ -153,14 +151,14 @@ public class NeuralNet {
 			Trace.log("");
 			Trace.log("Epoch: ", _epoch);
 
-			prevMSE = computeMeanSquareError(_w, _u, _y, train, se);
-
 			// total number of samples in the batch
 			int p = 0;
 
-			Collections.shuffle(trainSet);
+			shuffleArray(trainCopy);
 
-			for (Instance s : trainSet) {
+			prevMSE = computeMeanSquareError(_w, _u, _y, trainCopy, se);
+
+			for (Instance s : trainCopy) {
 
 				feedForward(layers, _w, _u, _y, s.features);
 				backPropagation(layers, _w, _u, _y, s.target, _delta, eta, alpha, lambda);
@@ -169,9 +167,9 @@ public class NeuralNet {
 				feedForward(layers, _w, _u, _y, s.features);
 
 				// computes the deviation of prediction from target
-				 double e = computeError(_w, s.target, _y);
-				 se[p] = e;
-				 p = p + 1;
+				double e = computeError(_w, s.target, _y);
+				se[p] = e;
+				p = p + 1;
 				//
 				// Trace.log("E[", p - 1, "] = ", se[p - 1]);
 			}
@@ -179,7 +177,7 @@ public class NeuralNet {
 			// mean square error for the entire batch of samples
 			currMSE = (1 / (double) p) * Vector.sigma(se);
 
-			double currMSE2 = computeMeanSquareError(_w, _u, _y, train, se);
+			double currMSE2 = computeMeanSquareError(_w, _u, _y, trainCopy, se);
 
 			Trace.log("currMSE = ", currMSE);
 
@@ -205,16 +203,26 @@ public class NeuralNet {
 	}
 
 
-	// allocates the nessary storage and initialize the weights for the learning
-	// session
+	private void shuffleArray(Instance[] examples) {
+		List<Instance> e = new ArrayList<Instance>();
+		for (int i = 0; i < examples.length; i++) {
+			e.add(examples[i]);
+		}
+		Collections.shuffle(e);
+		for (int i = 0; i < e.size(); i++) {
+			examples[i] = e.get(i);
+		}
+	}
+
+
+	// allocates the necessary storage and initialize the weights for the learning session
 	private void initialize(double[][][] w, double[][] u, double[][] y, double[][] delta) {
 		Layer layers[] = this.layers();
 
 		w[0] = new double[layers[0].units()][];
 
 		// y[0] used as the input for the entire net and y[0][0] is the bias
-		// term
-		// this is little bit confusing but it will make the feedforward easire
+		// term, this is little bit confusing but it will make the feedforward easier
 		y[0] = new double[w[0].length + 1];
 		y[0][0] = _bias;
 
@@ -234,9 +242,8 @@ public class NeuralNet {
 			// to the jth neuron of layer L
 			u[l] = new double[w[l].length];
 
-			// y are vectors whose elements denote the output of thejth neuron
-			// of layer L
-			// for hidden unit y also has a bias term at y[0];
+			// y are vectors whose elements denote the output of the jth neuron
+			// of layer L for hidden unit y also has a bias term at y[0];
 			if (l < w.length - 1) {
 				// for hidden layerso add the bias term
 				y[l] = new double[w[l].length + 1];
