@@ -283,6 +283,10 @@ public class Program {
 						.activationFunction(linear)
 						.weightInitializer(weightInit);
 
+				net.addLayer(hu)
+						.activationFunction(linear)
+						.weightInitializer(weightInit);
+
 				net.addLayer(outputs)
 						.activationFunction(sigmoid)
 						.weightInitializer(weightInit);
