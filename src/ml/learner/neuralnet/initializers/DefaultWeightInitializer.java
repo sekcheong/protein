@@ -18,7 +18,12 @@ public class DefaultWeightInitializer implements WeightInitializer {
 		for (int j = 0; j < W.length; j++) {
 			for (int i = 0; i < W[0].length; i++) {
 				//initialize the weights between -0.01 and 0.01
-				W[j][i] = _r.nextDouble()*0.02 - 0.01;
+				if (_r.nextBoolean()) {
+				W[j][i] = _r.nextDouble()*0.02 ;
+				}
+				else {
+					W[j][i] = - _r.nextDouble()*0.02 ;
+				}
 			}
 		}
 	}

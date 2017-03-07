@@ -136,8 +136,8 @@ public class NeuralNet {
 
 	public void train(Instance[] train, Instance[] tune, double eta, int maxEpoch, double epsilon, double alpha, double lambda) {
 		// the current mean squared error
-		double currMSE = 0;
-		double prevMSE;
+		double preAccuracy = 0;
+		double accuracy = 0;
 
 		// the current epoch
 		_epoch = 0;
@@ -164,6 +164,8 @@ public class NeuralNet {
 
 		_m = new double[_w.length][];
 		
+		double[][][] savedW;
+		
 
 		Instance[] trainCopy = new Instance[train.length];
 		for (int i = 0; i < train.length; i++) {
@@ -181,8 +183,9 @@ public class NeuralNet {
 
 			shuffleArray(trainCopy);
 
-			prevMSE = currMSE;
-
+			preAccuracy = accuracy;
+			savedW = copyWeights(_w);
+			
 			for (Instance s : trainCopy) {
 
 				feedForward(layers, _w, _m, _u, _y, s.features);
@@ -190,7 +193,7 @@ public class NeuralNet {
 
 			}
 
-			currMSE = computeMeanSquaredError(trainCopy);
+			//currMSE = computeMeanSquaredError(trainCopy);
 
 			_epoch = _epoch + 1;
 
@@ -201,15 +204,11 @@ public class NeuralNet {
 				break;
 			}
 			
-			double accuracy = computeAccuracy(tune);
-			if (accuracy>0.6) break;
-
-			double d = Math.abs(prevMSE - currMSE);
-			if (d <= epsilon) {
-				//Trace.log("epsilon = ", epsilon);
-				//Trace.log("Precision met: e = ", d);
-				//Trace.log("Epoch:", _epoch);
-				//break;
+			accuracy = computeAccuracy(tune);
+			//Trace.log( Format.sprintf("%2.4f", accuracy));
+			if ((preAccuracy-accuracy)>epsilon) {
+				_w = savedW;
+				break;
 			}
 
 		}
@@ -398,14 +397,14 @@ public class NeuralNet {
 			_weightQueue = new double[2][][][];
 		}
 		if (_weightQueue[0] == null) {
-			_weightQueue[0] = copyWeight(w);
+			_weightQueue[0] = copyWeights(w);
 		}
 		else if (_weightQueue[1] == null) {
-			_weightQueue[1] = copyWeight(w);
+			_weightQueue[1] = copyWeights(w);
 		}
 		else {
 			_weightQueue[0] = _weightQueue[1];
-			_weightQueue[1] = copyWeight(w);
+			_weightQueue[1] = copyWeights(w);
 		}
 	}
 
@@ -415,7 +414,7 @@ public class NeuralNet {
 	}
 
 
-	private double[][][] copyWeight(double[][][] w) {
+	private double[][][] copyWeights(double[][][] w) {
 		double[][][] cpy = new double[w.length][][];
 		for (int i = 0; i < w.length; i++) {
 			if (w[i] == null)

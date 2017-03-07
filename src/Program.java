@@ -269,61 +269,54 @@ public class Program {
 			int inputs = train[0].features.length;
 			int outputs = train[0].target.length;
 
-			 for (int hu : hiddenUnits) {
+			for (int hu : hiddenUnits) {
 
-			NeuralNet net = new NeuralNet();
+				NeuralNet net = new NeuralNet();
 
-			net.tune(tune);
+				net.tune(tune);
 
-			net.addLayer(inputs)
-					.activationFunction(linear)
-					.weightInitializer(weightInit);
+				net.addLayer(inputs)
+						.activationFunction(linear)
+						.weightInitializer(weightInit);
 
-			net.addLayer(hu)
-					.activationFunction(linear)
-					.weightInitializer(weightInit);
+				net.addLayer(hu)
+						.activationFunction(linear)
+						.weightInitializer(weightInit);
 
-			// net.addLayer(160)
-			// .activationFunction(linear)
-			// .weightInitializer(weightInit);
+				net.addLayer(outputs)
+						.activationFunction(sigmoid)
+						.weightInitializer(weightInit);
 
-			net.addLayer(outputs)
-					.activationFunction(sigmoid)
-					.weightInitializer(weightInit);
+				watch = StopWatch.start();
 
-			// Trace.log("Learning...");
-			watch = StopWatch.start();
+				net.train(train, tune, 0.03, 100, 0.006, 0.75, 0.00005);
 
-			net.train(train, tune, 0.5, 100, 0.05, 0.75, 0.000008);
+				watch.stop();
 
-			watch.stop();
-			
+				int correct = 0;
+				for (Instance t : test) {
+					double[] out = net.predict(t.features);
 
-			int correct = 0;
+					out = threshold(out);
+					// Trace.log("([", Format.matrix(t.target, 0), "],[", Format.matrix(out, 0), "]");
 
-			for (Instance t : test) {
-				double[] out = net.predict(t.features);
-
-				out = threshold(out);
-				//Trace.log("([", Format.matrix(t.target, 0), "],[", Format.matrix(out, 4), "], [", Format.matrix(out2, 0), "])");
-
-				boolean match = true;
-				for (int i = 0; i < t.target.length; i++) {
-					if (t.target[i] != out[i]) {
-						match = false;
+					boolean match = true;
+					for (int i = 0; i < t.target.length; i++) {
+						if (t.target[i] != out[i]) {
+							match = false;
+						}
 					}
-				}
-				if (match) {
-					correct++;
+					if (match) {
+						correct++;
+					}
+
+					// Trace.log("([", Format.matrix(threshold(t.target), 0),"],[",Format.matrix(t.target,0), "])");
 				}
 
-				// Trace.log("([", Format.matrix(threshold(t.target), 0),"],[",Format.matrix(t.target,0), "])");
+				double acc = ((double) correct) / test.length;
+				Trace.enabled = true;
+				Trace.log(hu, ", ", Format.sprintf("%2.4f", acc), ", ", watch.elapsedTime(), ", ", net.epoch());
 			}
-
-			double acc = ((double) correct) / test.length;
-			Trace.enabled = true;
-			Trace.log(hu, ", ", acc, ", ", watch.elapsedTime(), ", ", net.epoch());
-			 }
 		}
 		catch (Exception ex) {
 			ex.printStackTrace();
