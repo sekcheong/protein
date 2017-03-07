@@ -194,19 +194,22 @@ public class NeuralNet {
 
 			_epoch = _epoch + 1;
 
-			Trace.log("Epoch: ", _epoch);
+			//Trace.log("Epoch: ", _epoch);
 			
 			if (_epoch >= maxEpoch) {
-				Trace.log("Epoch topped out:", maxEpoch);
+				//Trace.log("Epoch topped out:", maxEpoch);
 				break;
 			}
+			
+			double accuracy = computeAccuracy(tune);
+			if (accuracy>0.6) break;
 
 			double d = Math.abs(prevMSE - currMSE);
 			if (d <= epsilon) {
-				Trace.log("epsilon = ", epsilon);
-				Trace.log("Precision met: e = ", d);
-				Trace.log("Epoch:", _epoch);
-				break;
+				//Trace.log("epsilon = ", epsilon);
+				//Trace.log("Precision met: e = ", d);
+				//Trace.log("Epoch:", _epoch);
+				//break;
 			}
 
 		}
@@ -431,44 +434,47 @@ public class NeuralNet {
 	}
 
 
-//	private static double[] threshold(double[] values) {
-//		double[] t = new double[values.length];
-//		int max = 0;
-//		for (int i = 0; i < values.length; i++) {
-//			if (values[i] > values[max]) {
-//				max = i;
-//			}
-//		}
-//		t[max] = 1;
-//		return t;
-//	}
+	private static double[] threshold(double[] values) {
+		double[] t = new double[values.length];
+		int max = 0;
+		for (int i = 0; i < values.length; i++) {
+			if (values[i] > values[max]) {
+				max = i;
+			}
+		}
+		t[max] = 1;
+		return t;
+	}
 
 
-//	private double computeAccuracy(Instance[] tune) {
-//		int correct = 0;
-//
-//		for (Instance t : tune) {
-//			double[] out = this.predict(t.features);
-//
-//			out = threshold(out);
-//
-//			boolean match = true;
-//			for (int i = 0; i < t.target.length; i++) {
-//				if (t.target[i] != out[i]) {
-//					match = false;
-//					break;
-//				}
-//			}
-//
-//			if (match) {
-//				correct++;
-//			}
-//
-//		}
-//
-//		double acc = ((double) correct) / tune.length;
-//		return acc;
-//	}
+	private double computeAccuracy(Instance[] tune) {
+		
+		int correct = 0;
+
+		for (Instance t : tune) {
+			double[] out = this.predict(t.features);
+
+			double[] out2 = threshold(out);
+			//Trace.log("([", Format.matrix(t.target, 0), "],[", Format.matrix(out, 4), "], [", Format.matrix(out2, 0), "])");
+
+			boolean match = true;
+			for (int i = 0; i < t.target.length; i++) {
+				if (t.target[i] != out2[i]) {
+					match = false;
+				}
+			}
+
+			if (match) {
+				correct++;
+			}
+
+			// Trace.log("([", Format.matrix(threshold(t.target), 0),"],[",Format.matrix(t.target,0), "])");
+		}
+
+		double acc = ((double) correct) / tune.length;
+		
+		return acc;
+	}
 
 
 	// private void filterOutput(double[] out) {

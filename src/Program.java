@@ -138,19 +138,19 @@ public class Program {
 		net.addLayer(1)
 				.activationFunction(htan)
 				.weightInitializer(weightInit);
-		
+
 		net.addLayer(100)
 				.activationFunction(htan)
 				.weightInitializer(weightInit);
-		
+
 		net.addLayer(100)
 				.activationFunction(htan)
 				.weightInitializer(weightInit);
-		
+
 		net.addLayer(100)
 				.activationFunction(htan)
 				.weightInitializer(weightInit);
-		
+
 		net.addLayer(1)
 				.activationFunction(htan)
 				.weightInitializer(weightInit);
@@ -237,8 +237,8 @@ public class Program {
 			DataSet dataSet = new DataSet(val, 17);
 			DataSet[] subSets = dataSet.Split(0.8);
 
-			Instance[] train = dataSet.instances(); // subSets[0].instances();
-			Instance[] tune = null; //subSets[1].instances();
+			Instance[] train = subSets[0].instances();
+			Instance[] tune = subSets[1].instances();
 
 			reader = new DataReader(testFile);
 			val = reader.Read();
@@ -252,8 +252,8 @@ public class Program {
 			Trace.log("Training set valid:", subSets[0].verifyInstances());
 			Trace.log("Training size     :", train.length);
 			Trace.log("");
-//			Trace.log("Tuning set valid  :", subSets[1].verifyInstances());
-//			Trace.log("Tuning size       :", tune.length);
+			Trace.log("Tuning set valid  :", subSets[1].verifyInstances());
+			Trace.log("Tuning size       :", tune.length);
 			Trace.log("");
 			Trace.log("Test set valid  :", testSet.verifyInstances());
 			Trace.log("Test size       :", test.length);
@@ -269,67 +269,61 @@ public class Program {
 			int inputs = train[0].features.length;
 			int outputs = train[0].target.length;
 
-			//for (int hu : hiddenUnits) {
+			 for (int hu : hiddenUnits) {
 
-				NeuralNet net = new NeuralNet();
+			NeuralNet net = new NeuralNet();
 
-				net.tune(tune);
+			net.tune(tune);
 
-				net.addLayer(inputs)
-						.activationFunction(linear)
-						.weightInitializer(weightInit);
+			net.addLayer(inputs)
+					.activationFunction(linear)
+					.weightInitializer(weightInit);
 
-				net.addLayer(180)
-						.activationFunction(linear)
-						.weightInitializer(weightInit);
+			net.addLayer(hu)
+					.activationFunction(linear)
+					.weightInitializer(weightInit);
 
-				// net.addLayer(160)
-				// .activationFunction(linear)
-				// .weightInitializer(weightInit);
+			// net.addLayer(160)
+			// .activationFunction(linear)
+			// .weightInitializer(weightInit);
 
-				net.addLayer(outputs)
-						.activationFunction(sigmoid)
-						.weightInitializer(weightInit);
+			net.addLayer(outputs)
+					.activationFunction(sigmoid)
+					.weightInitializer(weightInit);
 
-				// Trace.log("Learning...");
-				watch = StopWatch.start();
+			// Trace.log("Learning...");
+			watch = StopWatch.start();
 
-				//Trace.enabled = false;
-				
-				net.train(train, 0.5, 50, 0.005, 0.75, 0.00008);
+			net.train(train, tune, 0.5, 100, 0.05, 0.75, 0.000008);
 
-				// Trace.enabled = true;
+			watch.stop();
+			
 
-				watch.stop();
-				Trace.log("[done]");
-				Trace.log("Elpased time      :", watch.elapsedTime() + "s");
+			int correct = 0;
 
-				int correct = 0;
+			for (Instance t : test) {
+				double[] out = net.predict(t.features);
 
-				for (Instance t : test) {
-					double[] out = net.predict(t.features);
+				out = threshold(out);
+				//Trace.log("([", Format.matrix(t.target, 0), "],[", Format.matrix(out, 4), "], [", Format.matrix(out2, 0), "])");
 
-					double[] out2 = threshold(out);
-					Trace.log("([", Format.matrix(t.target, 0),"],[",Format.matrix(out,4), "], [",Format.matrix(out2,0), "])");
-
-					boolean match = true;
-					for (int i = 0; i < t.target.length; i++) {
-						if (t.target[i] != out2[i]) {
-							match = false;
-						}
+				boolean match = true;
+				for (int i = 0; i < t.target.length; i++) {
+					if (t.target[i] != out[i]) {
+						match = false;
 					}
-
-					if (match) {
-						correct++;
-					}
-
-					// Trace.log("([", Format.matrix(threshold(t.target), 0),"],[",Format.matrix(t.target,0), "])");
+				}
+				if (match) {
+					correct++;
 				}
 
-				double acc = ((double) correct) / test.length;
-				Trace.enabled = true;
-				Trace.log(160, ", ", acc, ", ", watch.elapsedTime(), ", ", net.epoch());
-			//}
+				// Trace.log("([", Format.matrix(threshold(t.target), 0),"],[",Format.matrix(t.target,0), "])");
+			}
+
+			double acc = ((double) correct) / test.length;
+			Trace.enabled = true;
+			Trace.log(hu, ", ", acc, ", ", watch.elapsedTime(), ", ", net.epoch());
+			 }
 		}
 		catch (Exception ex) {
 			ex.printStackTrace();
@@ -340,15 +334,15 @@ public class Program {
 
 	public static void main(String[] args) {
 
-		 int[] hu = new int[] { 1, 2, 3, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110,
-		 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220,
-		 230, 240, 250, 300, 400, 500, 600, 700, 800, 900, 1000 };
+		int[] hu = new int[] { 1, 2, 3, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110,
+				120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220,
+				230, 240, 250, 300, 400, 500, 600, 700, 800, 900, 1000 };
 
-		 proteinSecondary(args[0], args[1], hu);
+		proteinSecondary(args[0], args[1], hu);
 		// stepByStepExamples();
 		// xorExamples(3000);
 
-		//sineExamples(10000);
+		// sineExamples(10000);
 	}
 
 }
