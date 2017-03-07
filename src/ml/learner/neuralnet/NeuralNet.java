@@ -3,6 +3,8 @@ package ml.learner.neuralnet;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
+
 import ml.data.Instance;
 import ml.learner.neuralnet.functions.Function;
 import ml.math.Vector;
@@ -25,6 +27,9 @@ public class NeuralNet {
 
 	private double[][] _y;
 
+	// the drop out mask
+	private double[][] _m;
+
 	private double[][] _delta;
 
 	private double[][][][] _weightQueue;
@@ -35,6 +40,10 @@ public class NeuralNet {
 	private double _bias = 1;
 
 	private int _epoch = 0;
+
+	private boolean _dropOut;
+
+	private Random _random = new Random();
 
 
 	public NeuralNet() {}
@@ -100,6 +109,16 @@ public class NeuralNet {
 	}
 
 
+	public boolean dropOut() {
+		return _dropOut;
+	}
+
+
+	public void dropOut(boolean dropOut) {
+		_dropOut = dropOut;
+	}
+
+
 	public void train(Instance[] train, double eta, int maxEpoch, double epsilon) {
 		train(train, null, eta, maxEpoch, epsilon, 0, 0);
 	}
@@ -141,15 +160,17 @@ public class NeuralNet {
 		// The deltas for back propagations
 		_delta = new double[_w.length][];
 
-		// se[k] is the error for k th sample
-		double[] se = new double[train.length];
+		// The dropout mask
+
+		_m = new double[_w.length][];
+		
 
 		Instance[] trainCopy = new Instance[train.length];
 		for (int i = 0; i < train.length; i++) {
 			trainCopy[i] = train[i];
 		}
 
-		this.initialize(_w, _u, _y, _delta);
+		this.initialize(_w, _u, _m, _y, _delta);
 
 		queueCurrentWeight(_w);
 
@@ -158,82 +179,57 @@ public class NeuralNet {
 
 		while (true) {
 
-			Trace.log("");
-			Trace.log("Epoch: ", _epoch);
-
-			// total number of samples in the batch
-			int p = 0;
-
 			shuffleArray(trainCopy);
 
-			// prevMSE = computeMeanSquareError(_w, _u, _y, trainCopy, se);
-			p = 0;
-			for (Instance s : trainCopy) {
-				feedForward(layers, _w, _u, _y, s.features);
-				se[p] = computeError(_w, s.target, _y);
-				p = p + 1;
-			}
-			prevMSE = (1 / (double) p) * Vector.sigma(se);
+			prevMSE = currMSE;
 
-			p = 0;
 			for (Instance s : trainCopy) {
 
-				feedForward(layers, _w, _u, _y, s.features);
+				feedForward(layers, _w, _m, _u, _y, s.features);
+				backPropagation(layers, _w, _m, _u, _y, s.target, _delta, eta, alpha, lambda);
 
-				backPropagation(layers, _w, _u, _y, s.target, _delta, eta, alpha, lambda);
-				// Trace.log("w1", Format.matrix(_w, 4));
-
-				// recalculates the predicted y based on the updated weights
-				feedForward(layers, _w, _u, _y, s.features);
-
-				// computes the deviation of prediction from target
-				double e = computeError(_w, s.target, _y);
-				se[p] = e;
-				p = p + 1;
-
-				// Trace.log("E[", p - 1, "] = ", se[p - 1]);
 			}
 
-			// mean square error for the entire batch of samples
-			currMSE = (1 / (double) p) * Vector.sigma(se);
-			// p=0;
-			// for (Instance s : trainCopy) {
-			// feedForward(layers, _w, _u, _y, s.features);
-			// se[p] = computeError(_w, s.target, _y);
-			// p = p + 1;
-			// }
-			// currMSE = (1 / (double) p) * Vector.sigma(se);
+			currMSE = computeMeanSquaredError(trainCopy);
 
 			_epoch = _epoch + 1;
-			Trace.enabled=true;
-			double acc = computeAccuracy(this._tune);
-			//Trace.log("Accuracy:", acc);
-			Trace.enabled=false;
-			Trace.log("w2", Format.matrix(_w, 4));
-			// double currMSE2 = computeMeanSquareError(_w, _u, _y, trainCopy, se);
 
-			Trace.log("currMSE = ", currMSE);
-
-			Trace.log("w = ", Format.matrix(_w));
+			Trace.log("Epoch: ", _epoch);
 			
-			if (acc>0.6) break;
-
-			double d = Math.abs(prevMSE - currMSE);
-			if (d <= epsilon) {
-				Trace.log("acc = ", epsilon);
-				Trace.log("Precision met: e = ", d);
-				Trace.log("Epoch:", _epoch);
-				//break;
-			}
-
-			// Trace.log("epsilon = ", prevMSE - currMSE);
 			if (_epoch >= maxEpoch) {
 				Trace.log("Epoch topped out:", maxEpoch);
 				break;
 			}
 
+			double d = Math.abs(prevMSE - currMSE);
+			if (d <= epsilon) {
+				Trace.log("epsilon = ", epsilon);
+				Trace.log("Precision met: e = ", d);
+				Trace.log("Epoch:", _epoch);
+				break;
+			}
+
 		}
 
+	}
+
+
+	private void computeDropOutMask(double[][] m) {
+		if (!this.dropOut()) return;
+		for (int j = 0; j < m[0].length; j++) {
+			m[0][j] = 1;
+		}
+		for (int l = 0; l < m.length; l++) {
+			for (int j = 0; j < m[l].length; j++) {
+				m[l][j] = flipCoin();
+			}
+		}
+	}
+
+
+	private int flipCoin() {
+		if (_random.nextBoolean()) return 1;
+		else return 0;
 	}
 
 
@@ -250,10 +246,11 @@ public class NeuralNet {
 
 
 	// allocates the necessary storage and initialize the weights for the learning session
-	private void initialize(double[][][] w, double[][] u, double[][] y, double[][] delta) {
+	private void initialize(double[][][] w, double[][] u, double[][] m, double[][] y, double[][] delta) {
 		Layer layers[] = this.layers();
 
 		w[0] = new double[layers[0].units()][];
+		m[0] = new double[layers[0].units()];
 
 		// y[0] used as the input for the entire net and y[0][0] is the bias
 		// term, this is little bit confusing but it will make the feedforward
@@ -266,11 +263,13 @@ public class NeuralNet {
 
 			// create the neuron in layer l
 			w[l] = new double[layers[l].units()][];
+			m[l] = new double[layers[l].units()];
 
 			// synaptic weight that connects the j th neuron of layer L to the
 			// i th neuron of layer (L − 1) plus a bias term.
 			for (int j = 0; j < w[l].length; j++) {
 				w[l][j] = new double[layers[l - 1].units() + 1];
+				m[l][j] = 1;
 			}
 
 			// u are vectors whose elements denote the weighted inputs related
@@ -296,7 +295,7 @@ public class NeuralNet {
 	}
 
 
-	private void feedForward(Layer layers[], double[][][] w, double[][] u, double[][] y, double[] x) {
+	private void feedForward(Layer layers[], double[][][] w, double[][] m, double[][] u, double[][] y, double[] x) {
 
 		Function g = layers[1].activationFunction();
 		for (int j = 0; j < y[0].length - 1; j++) {
@@ -310,12 +309,12 @@ public class NeuralNet {
 			for (int j = 0; j < w[l].length; j++) {
 				double z = Vector.dot(w[l][j], y[l - 1]);
 				u[l][j] = z;
-				// if l is hidden layer off set by 1 for the bias term
+				// if l is hidden layer offset by 1 for the bias term
 				if (l < w.length - 1) {
-					y[l][j + 1] = g.eval(z);
+					y[l][j + 1] = g.eval(z) * m[l][j];
 				}
 				else {
-					y[l][j] = g.eval(z);
+					y[l][j] = g.eval(z) * m[l][j];
 				}
 			}
 			// if l is hidden layer set the bias
@@ -326,7 +325,7 @@ public class NeuralNet {
 	}
 
 
-	private void backPropagation(Layer layers[], double[][][] w, double[][] u, double[][] y, double d[], double[][] delta, double eta, double alpha, double lambda) {
+	private void backPropagation(Layer layers[], double[][][] w, double[][] m, double[][] u, double[][] y, double d[], double[][] delta, double eta, double alpha, double lambda) {
 		// the output layer
 		int l = w.length - 1;
 
@@ -359,6 +358,7 @@ public class NeuralNet {
 					double momentum = alpha * (w[l][j][i] - w0[l][j][i]);
 					double weightDecay = eta * lambda * w[l][j][i];
 					w[l][j][i] = w[l][j][i] + momentum + eta * delta[l][j] * y[l - 1][i] - weightDecay;
+					// w[l][j][i] = w[l][j][i] * m[l-1][i];
 				}
 			}
 		}
@@ -369,11 +369,24 @@ public class NeuralNet {
 
 	private double computeError(double[][][] w, double[] d, double[][] y) {
 		double e = 0;
-		int l = w.length - 1;
+		int l = w.length - 1; // get the index of the output layout
 		for (int j = 0; j < w[l].length; j++) {
 			e = e + 0.5 * (d[j] - y[l][j]) * (d[j] - y[l][j]);
 		}
 		return e;
+	}
+
+
+	private double computeMeanSquaredError(Instance[] examples) {
+		int p = 0;
+		double[] se = new double[examples.length];
+		for (Instance s : examples) {
+			feedForward(_layers, _w, _m, _u, _y, s.features);
+			se[p] = computeError(_w, s.target, _y);
+			p = p + 1;
+		}
+		double mse = (1 / (double) se.length) * Vector.sigma(se);
+		return mse;
 	}
 
 
@@ -416,8 +429,8 @@ public class NeuralNet {
 		}
 		return cpy;
 	}
-	
-	
+
+
 	private static double[] threshold(double[] values) {
 		double[] t = new double[values.length];
 		int max = 0;
@@ -438,8 +451,6 @@ public class NeuralNet {
 			double[] out = this.predict(t.features);
 
 			out = threshold(out);
-			// Trace.log("([", Format.matrix(t.target, 0),
-			// "],[",Format.matrix(out,0), "])");
 
 			boolean match = true;
 			for (int i = 0; i < t.target.length; i++) {
@@ -453,54 +464,30 @@ public class NeuralNet {
 				correct++;
 			}
 
-			// Trace.log("([", Format.matrix(threshold(t.target), 0),
-			// "],[",
-			// Format.matrix(t.target,0), "])");
 		}
 
 		double acc = ((double) correct) / tune.length;
 		return acc;
-//		int correctCount = 0;
-//		
-//		for (Instance x:tune) {
-//			
-//			double[] out = predict(x.features);
-//			filterOutput(out);
-//			
-//			boolean correct = true;
-//			for (int i=0; i<x.target.length; i++) {
-//				if (x.target[i]!=out[i]) {
-//					correct = false;
-//					break;
-//				}
-//			}
-//			
-//			if (correct) correctCount++;
-//			
-//		}
-//		
-//		return ((double) correctCount) / (double) tune.length;
 	}
 
 
-	private void filterOutput(double[] out) {
-		int max = 0;
-		for (int i = 1; i < out.length; i++) {
-			if (out[i] > out[max]) max = i;
-			out[i] = 0;
-		}
-		out[max] = 1.0;
-	}
+	// private void filterOutput(double[] out) {
+	// int max = 0;
+	// for (int i = 1; i < out.length; i++) {
+	// if (out[i] > out[max]) max = i;
+	// out[i] = 0;
+	// }
+	// out[max] = 1.0;
+	// }
 
-
-	private double[] predict(double[] features, double[][][] w, double[][] u, double[][] y, double[] x) {
-		feedForward(this.layers(), w, u, y, features);
+	private double[] predict(double[] features, double[][][] w, double[][] m, double[][] u, double[][] y, double[] x) {
+		feedForward(this.layers(), w, m, u, y, features);
 		return y[y.length - 1];
 	}
 
 
 	public double[] predict(double[] features) {
-		return predict(features, _w, _u, _y, features);
+		return predict(features, _w, _m, _u, _y, features);
 	}
 
 }
