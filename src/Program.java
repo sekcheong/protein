@@ -279,7 +279,7 @@ public class Program {
 						.activationFunction(linear)
 						.weightInitializer(weightInit);
 
-				net.addLayer(200)
+				net.addLayer(180)
 						.activationFunction(linear)
 						.weightInitializer(weightInit);
 
@@ -296,7 +296,7 @@ public class Program {
 
 				//Trace.enabled = false;
 				
-				net.train(train, 0.5, 100, 0.0002, 0.75, 0.00008);
+				net.train(train, 0.5, 50, 0.005, 0.75, 0.00008);
 
 				// Trace.enabled = true;
 
@@ -310,11 +310,11 @@ public class Program {
 					double[] out = net.predict(t.features);
 
 					double[] out2 = threshold(out);
-					Trace.log("([", Format.matrix(t.target, 0),"],[",Format.matrix(out,0), "], [",Format.matrix(out2,0), "])");
+					Trace.log("([", Format.matrix(t.target, 0),"],[",Format.matrix(out,4), "], [",Format.matrix(out2,0), "])");
 
 					boolean match = true;
 					for (int i = 0; i < t.target.length; i++) {
-						if (t.target[i] != out[i]) {
+						if (t.target[i] != out2[i]) {
 							match = false;
 						}
 					}

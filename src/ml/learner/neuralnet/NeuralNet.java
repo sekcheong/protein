@@ -174,8 +174,8 @@ public class NeuralNet {
 
 		queueCurrentWeight(_w);
 
-		Trace.log("W=[");
-		Trace.log(Format.matrix(_w), "]");
+//		Trace.log("W=[");
+//		Trace.log(Format.matrix(_w), "]");
 
 		while (true) {
 
@@ -247,7 +247,7 @@ public class NeuralNet {
 
 	// allocates the necessary storage and initialize the weights for the learning session
 	private void initialize(double[][][] w, double[][] u, double[][] m, double[][] y, double[][] delta) {
-		Layer layers[] = this.layers();
+		Layer[] layers = this.layers();
 
 		w[0] = new double[layers[0].units()][];
 		m[0] = new double[layers[0].units()];
@@ -295,7 +295,7 @@ public class NeuralNet {
 	}
 
 
-	private void feedForward(Layer layers[], double[][][] w, double[][] m, double[][] u, double[][] y, double[] x) {
+	private void feedForward(Layer[] layers, double[][][] w, double[][] m, double[][] u, double[][] y, double[] x) {
 
 		Function g = layers[1].activationFunction();
 		for (int j = 0; j < y[0].length - 1; j++) {
@@ -325,7 +325,7 @@ public class NeuralNet {
 	}
 
 
-	private void backPropagation(Layer layers[], double[][][] w, double[][] m, double[][] u, double[][] y, double d[], double[][] delta, double eta, double alpha, double lambda) {
+	private void backPropagation(Layer[] layers, double[][][] w, double[][] m, double[][] u, double[][] y, double d[], double[][] delta, double eta, double alpha, double lambda) {
 		// the output layer
 		int l = w.length - 1;
 
@@ -378,12 +378,12 @@ public class NeuralNet {
 
 
 	private double computeMeanSquaredError(Instance[] examples) {
-		int p = 0;
 		double[] se = new double[examples.length];
+		int i = 0;
 		for (Instance s : examples) {
 			feedForward(_layers, _w, _m, _u, _y, s.features);
-			se[p] = computeError(_w, s.target, _y);
-			p = p + 1;
+			se[i] = computeError(_w, s.target, _y);
+			i++;
 		}
 		double mse = (1 / (double) se.length) * Vector.sigma(se);
 		return mse;
@@ -431,44 +431,44 @@ public class NeuralNet {
 	}
 
 
-	private static double[] threshold(double[] values) {
-		double[] t = new double[values.length];
-		int max = 0;
-		for (int i = 0; i < values.length; i++) {
-			if (values[i] > values[max]) {
-				max = i;
-			}
-		}
-		t[max] = 1;
-		return t;
-	}
+//	private static double[] threshold(double[] values) {
+//		double[] t = new double[values.length];
+//		int max = 0;
+//		for (int i = 0; i < values.length; i++) {
+//			if (values[i] > values[max]) {
+//				max = i;
+//			}
+//		}
+//		t[max] = 1;
+//		return t;
+//	}
 
 
-	private double computeAccuracy(Instance[] tune) {
-		int correct = 0;
-
-		for (Instance t : tune) {
-			double[] out = this.predict(t.features);
-
-			out = threshold(out);
-
-			boolean match = true;
-			for (int i = 0; i < t.target.length; i++) {
-				if (t.target[i] != out[i]) {
-					match = false;
-					break;
-				}
-			}
-
-			if (match) {
-				correct++;
-			}
-
-		}
-
-		double acc = ((double) correct) / tune.length;
-		return acc;
-	}
+//	private double computeAccuracy(Instance[] tune) {
+//		int correct = 0;
+//
+//		for (Instance t : tune) {
+//			double[] out = this.predict(t.features);
+//
+//			out = threshold(out);
+//
+//			boolean match = true;
+//			for (int i = 0; i < t.target.length; i++) {
+//				if (t.target[i] != out[i]) {
+//					match = false;
+//					break;
+//				}
+//			}
+//
+//			if (match) {
+//				correct++;
+//			}
+//
+//		}
+//
+//		double acc = ((double) correct) / tune.length;
+//		return acc;
+//	}
 
 
 	// private void filterOutput(double[] out) {
@@ -480,14 +480,40 @@ public class NeuralNet {
 	// out[max] = 1.0;
 	// }
 
-	private double[] predict(double[] features, double[][][] w, double[][] m, double[][] u, double[][] y, double[] x) {
-		feedForward(this.layers(), w, m, u, y, features);
+	private double[] predict(Layer[] layers, double[][][] w, double[][] m, double[][] u, double[][] y, double[] x) {
+		Function g = layers[1].activationFunction();
+		for (int j = 0; j < y[0].length - 1; j++) {
+			y[0][j + 1] = x[j];
+		}
+		y[0][0] = _bias;
+
+		// compute the hidden units
+		for (int l = 1; l < w.length; l++) {
+			g = layers[l].activationFunction();
+			for (int j = 0; j < w[l].length; j++) {
+				double z = Vector.dot(w[l][j], y[l - 1]);
+				u[l][j] = z;
+				// if l is hidden layer offset by 1 for the bias term
+				if (l < w.length - 1) {
+					y[l][j + 1] = g.eval(z);
+				}
+				else {
+					y[l][j] = g.eval(z);
+				}
+			}
+			
+			// if l is hidden layer set the bias
+			if (l < w.length - 1) {
+				y[l][0] = _bias;
+			}
+		}
+		
 		return y[y.length - 1];
 	}
 
 
 	public double[] predict(double[] features) {
-		return predict(features, _w, _m, _u, _y, features);
+		return predict(this.layers(), _w, _m, _u, _y, features);
 	}
 
 }
