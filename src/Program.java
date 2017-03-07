@@ -269,6 +269,8 @@ public class Program {
 
 				NeuralNet net = new NeuralNet();
 
+				net.tune(tune);
+				
 				net.addLayer(inputs)
 						.activationFunction(linear)
 						.weightInitializer(weightInit);
@@ -290,7 +292,7 @@ public class Program {
 
 				Trace.enabled = false;
 				
-				net.train(train, 0.5, 50, 0.05, 0.01);
+				net.train(train, 0.5, 100, 0.05, 0.01);
 				//net.train(train, tune, 0.5, 5, 0.005, 0, 0);
 				
 				// Trace.enabled = true;
@@ -324,7 +326,7 @@ public class Program {
 					// Format.matrix(t.target,0), "])");
 				}
 
-				double acc = ((double) correct) / tune.length;
+				double acc = ((double) correct) / test.length;
 				Trace.enabled = true;
 				Trace.log(hu, ", ", acc, ", ", watch.elapsedTime(), ", ", net.epoch());
 			}

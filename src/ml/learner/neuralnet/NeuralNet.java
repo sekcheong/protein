@@ -9,6 +9,7 @@ import ml.math.Vector;
 import ml.utils.Format;
 import ml.utils.tracing.Trace;
 
+
 public class NeuralNet {
 
 	// the network layers
@@ -27,7 +28,8 @@ public class NeuralNet {
 	private double[][] _delta;
 
 	private double[][][][] _weightQueue;
-	private int _weightQueueIndex = 0;
+
+	private Instance[] _tune;
 
 	// the bias term
 	private double _bias = 1;
@@ -58,6 +60,16 @@ public class NeuralNet {
 	}
 
 
+	public void tune(Instance[] tuneSet) {
+		_tune = tuneSet;
+	}
+
+
+	public Instance[] tune() {
+		return _tune;
+	}
+
+
 	public int epoch() {
 		return _epoch;
 	}
@@ -72,8 +84,7 @@ public class NeuralNet {
 		}
 		else {
 			// input units is the number of units of the previous layer
-			layer = new Layer(units, _addLayers.get(index - 1)
-					.units());
+			layer = new Layer(units, _addLayers.get(index - 1).units());
 		}
 
 		layer.index(_addLayers.size());
@@ -120,17 +131,17 @@ public class NeuralNet {
 		_w = new double[layers.length][][];
 
 		// _v[n][j] are vectors whose elements denote the weighted inputs
-		// related to the jth neuron of layer n, and are defined by:
+		// related to the j th neuron of layer n, and are defined by:
 		_u = new double[layers.length][];
 
-		// _y[n][j] are vectors whose elements denote the output of the jth
+		// _y[n][j] are vectors whose elements denote the output of the j th
 		// neuron related to the layer n. They are defined as:
 		_y = new double[layers.length][];
 
 		// The deltas for back propagations
 		_delta = new double[_w.length][];
 
-		// se[k] is the error for kth sample
+		// se[k] is the error for k th sample
 		double[] se = new double[train.length];
 
 		Instance[] trainCopy = new Instance[train.length];
@@ -194,21 +205,25 @@ public class NeuralNet {
 			// currMSE = (1 / (double) p) * Vector.sigma(se);
 
 			_epoch = _epoch + 1;
-
+			Trace.enabled=true;
+			double acc = computeAccuracy(this._tune);
+			//Trace.log("Accuracy:", acc);
+			Trace.enabled=false;
 			Trace.log("w2", Format.matrix(_w, 4));
-			// double currMSE2 = computeMeanSquareError(_w, _u, _y, trainCopy,
-			// se);
+			// double currMSE2 = computeMeanSquareError(_w, _u, _y, trainCopy, se);
 
 			Trace.log("currMSE = ", currMSE);
 
 			Trace.log("w = ", Format.matrix(_w));
+			
+			if (acc>0.6) break;
 
 			double d = Math.abs(prevMSE - currMSE);
 			if (d <= epsilon) {
 				Trace.log("acc = ", epsilon);
 				Trace.log("Precision met: e = ", d);
 				Trace.log("Epoch:", _epoch);
-				break;
+				//break;
 			}
 
 			// Trace.log("epsilon = ", prevMSE - currMSE);
@@ -234,8 +249,7 @@ public class NeuralNet {
 	}
 
 
-	// allocates the necessary storage and initialize the weights for the
-	// learning session
+	// allocates the necessary storage and initialize the weights for the learning session
 	private void initialize(double[][][] w, double[][] u, double[][] y, double[][] delta) {
 		Layer layers[] = this.layers();
 
@@ -253,17 +267,17 @@ public class NeuralNet {
 			// create the neuron in layer l
 			w[l] = new double[layers[l].units()][];
 
-			// synaptic weight that connects the jth neuron of layer L to the
-			// ith neuron of layer (L − 1) plus a bias term.
+			// synaptic weight that connects the j th neuron of layer L to the
+			// i th neuron of layer (L − 1) plus a bias term.
 			for (int j = 0; j < w[l].length; j++) {
 				w[l][j] = new double[layers[l - 1].units() + 1];
 			}
 
 			// u are vectors whose elements denote the weighted inputs related
-			// to the jth neuron of layer L
+			// to the j th neuron of layer L
 			u[l] = new double[w[l].length];
 
-			// y are vectors whose elements denote the output of the jth neuron
+			// y are vectors whose elements denote the output of the j th neuron
 			// of layer L for hidden unit y also has a bias term at y[0];
 			if (l < w.length - 1) {
 				// for hidden layers add the bias term
@@ -276,8 +290,7 @@ public class NeuralNet {
 
 			delta[l] = new double[w[l].length];
 
-			layers[l].weightInitializer()
-					.initializeWeights(w[l]);
+			layers[l].weightInitializer().initializeWeights(w[l]);
 		}
 
 	}
@@ -326,7 +339,9 @@ public class NeuralNet {
 			delta[l][j] = (d[j] - y[l][j]) * g.diff(u[l][j]);
 			// update weights
 			for (int i = 0; i < w[l][j].length; i++) {
-				w[l][j][i] = w[l][j][i] + alpha * (w[l][j][i] - w0[l][j][i]) + eta * delta[l][j] * y[l - 1][i] - eta * lambda * w[l][j][i];
+				double momentum = alpha * (w[l][j][i] - w0[l][j][i]);
+				double weightDecay = eta * lambda * w[l][j][i];
+				w[l][j][i] = w[l][j][i] + momentum + eta * delta[l][j] * y[l - 1][i] - weightDecay;
 			}
 		}
 
@@ -341,7 +356,9 @@ public class NeuralNet {
 				delta[l][j] = -z * g.diff(u[l][j]);
 				// update weights
 				for (int i = 0; i < w[l][j].length; i++) {
-					w[l][j][i] = w[l][j][i] + alpha * (w[l][j][i] - w0[l][j][i]) + eta * delta[l][j] * y[l - 1][i] - eta * lambda * w[l][j][i];
+					double momentum = alpha * (w[l][j][i] - w0[l][j][i]);
+					double weightDecay = eta * lambda * w[l][j][i];
+					w[l][j][i] = w[l][j][i] + momentum + eta * delta[l][j] * y[l - 1][i] - weightDecay;
 				}
 			}
 		}
@@ -357,40 +374,6 @@ public class NeuralNet {
 			e = e + 0.5 * (d[j] - y[l][j]) * (d[j] - y[l][j]);
 		}
 		return e;
-	}
-
-
-	private double computeMeanSquareError(double[][][] w, double[][] u, double[][] y, Instance[] examples, double[] sampleError) {
-		for (int i = 0; i < examples.length; i++) {
-			feedForward(this.layers(), w, u, y, examples[i].features);
-			sampleError[i] = computeError(w, examples[i].target, y);
-		}
-		double mse = (1 / (double) examples.length) * Vector.sigma(sampleError);
-		return mse;
-	}
-
-
-	private double computeL2NetWeight(double[][][] w, double lambda) {
-		double c = 0;
-		for (int l = 1; l < w.length; l++) {
-			for (int j = 0; j < w[l].length; j++) {
-				for (int i = 0; i < w[l][j].length; i++) {
-					c = c + (w[l][j][i] * w[l][j][i]);
-				}
-			}
-		}
-		return (lambda / 2) * c;
-	}
-
-
-	private double computeLayerWeight(double[][][] w, int l, double lambda) {
-		double c = 0;
-		for (int j = 0; j < w[l].length; j++) {
-			for (int i = 0; i < w[l][j].length; i++) {
-				c = c + w[l][j][i];
-			}
-		}
-		return lambda * c;
 	}
 
 
@@ -419,10 +402,12 @@ public class NeuralNet {
 	private double[][][] copyWeight(double[][][] w) {
 		double[][][] cpy = new double[w.length][][];
 		for (int i = 0; i < w.length; i++) {
-			if (w[i] == null) continue;
+			if (w[i] == null)
+				continue;
 			cpy[i] = new double[w[i].length][];
 			for (int j = 0; j < w[i].length; j++) {
-				if (w[i][j] == null) continue;
+				if (w[i][j] == null)
+					continue;
 				cpy[i][j] = new double[w[i][j].length];
 				for (int k = 0; k < w[i][j].length; k++) {
 					cpy[i][j][k] = w[i][j][k];
@@ -430,6 +415,81 @@ public class NeuralNet {
 			}
 		}
 		return cpy;
+	}
+	
+	
+	private static double[] threshold(double[] values) {
+		double[] t = new double[values.length];
+		int max = 0;
+		for (int i = 0; i < values.length; i++) {
+			if (values[i] > values[max]) {
+				max = i;
+			}
+		}
+		t[max] = 1;
+		return t;
+	}
+
+
+	private double computeAccuracy(Instance[] tune) {
+		int correct = 0;
+
+		for (Instance t : tune) {
+			double[] out = this.predict(t.features);
+
+			out = threshold(out);
+			// Trace.log("([", Format.matrix(t.target, 0),
+			// "],[",Format.matrix(out,0), "])");
+
+			boolean match = true;
+			for (int i = 0; i < t.target.length; i++) {
+				if (t.target[i] != out[i]) {
+					match = false;
+					break;
+				}
+			}
+
+			if (match) {
+				correct++;
+			}
+
+			// Trace.log("([", Format.matrix(threshold(t.target), 0),
+			// "],[",
+			// Format.matrix(t.target,0), "])");
+		}
+
+		double acc = ((double) correct) / tune.length;
+		return acc;
+//		int correctCount = 0;
+//		
+//		for (Instance x:tune) {
+//			
+//			double[] out = predict(x.features);
+//			filterOutput(out);
+//			
+//			boolean correct = true;
+//			for (int i=0; i<x.target.length; i++) {
+//				if (x.target[i]!=out[i]) {
+//					correct = false;
+//					break;
+//				}
+//			}
+//			
+//			if (correct) correctCount++;
+//			
+//		}
+//		
+//		return ((double) correctCount) / (double) tune.length;
+	}
+
+
+	private void filterOutput(double[] out) {
+		int max = 0;
+		for (int i = 1; i < out.length; i++) {
+			if (out[i] > out[max]) max = i;
+			out[i] = 0;
+		}
+		out[max] = 1.0;
 	}
 
 
