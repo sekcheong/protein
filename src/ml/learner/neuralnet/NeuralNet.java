@@ -8,9 +8,6 @@ import java.util.Random;
 import ml.data.Instance;
 import ml.learner.neuralnet.functions.Function;
 import ml.math.Vector;
-import ml.utils.Format;
-import ml.utils.tracing.Trace;
-
 
 public class NeuralNet {
 
@@ -46,7 +43,8 @@ public class NeuralNet {
 	private Random _random = new Random();
 
 
-	public NeuralNet() {}
+	public NeuralNet() {
+	}
 
 
 	public double[][][] weights() {
@@ -66,16 +64,6 @@ public class NeuralNet {
 
 	public void bias(double bias) {
 		_bias = bias;
-	}
-
-
-	public void tune(Instance[] tuneSet) {
-		_tune = tuneSet;
-	}
-
-
-	public Instance[] tune() {
-		return _tune;
 	}
 
 
@@ -163,9 +151,8 @@ public class NeuralNet {
 		// The dropout mask
 
 		_m = new double[_w.length][];
-		
+
 		double[][][] savedW;
-		
 
 		Instance[] trainCopy = new Instance[train.length];
 		for (int i = 0; i < train.length; i++) {
@@ -176,8 +163,8 @@ public class NeuralNet {
 
 		queueCurrentWeight(_w);
 
-//		Trace.log("W=[");
-//		Trace.log(Format.matrix(_w), "]");
+		// Trace.log("W=[");
+		// Trace.log(Format.matrix(_w), "]");
 
 		while (true) {
 
@@ -185,7 +172,7 @@ public class NeuralNet {
 
 			preAccuracy = accuracy;
 			savedW = copyWeights(_w);
-			
+
 			for (Instance s : trainCopy) {
 
 				feedForward(layers, _w, _m, _u, _y, s.features);
@@ -193,20 +180,20 @@ public class NeuralNet {
 
 			}
 
-			//currMSE = computeMeanSquaredError(trainCopy);
+			// currMSE = computeMeanSquaredError(trainCopy);
 
 			_epoch = _epoch + 1;
 
-			//Trace.log("Epoch: ", _epoch);
-			
+			// Trace.log("Epoch: ", _epoch);
+
 			if (_epoch >= maxEpoch) {
-				//Trace.log("Epoch topped out:", maxEpoch);
+				// Trace.log("Epoch topped out:", maxEpoch);
 				break;
 			}
-			
+
 			accuracy = computeAccuracy(tune);
-			//Trace.log( Format.sprintf("%2.4f", accuracy));
-			if ((preAccuracy-accuracy)>epsilon) {
+			// Trace.log( Format.sprintf("%2.4f", accuracy));
+			if ((preAccuracy - accuracy) > epsilon) {
 				_w = savedW;
 				break;
 			}
@@ -417,12 +404,10 @@ public class NeuralNet {
 	private double[][][] copyWeights(double[][][] w) {
 		double[][][] cpy = new double[w.length][][];
 		for (int i = 0; i < w.length; i++) {
-			if (w[i] == null)
-				continue;
+			if (w[i] == null) continue;
 			cpy[i] = new double[w[i].length][];
 			for (int j = 0; j < w[i].length; j++) {
-				if (w[i][j] == null)
-					continue;
+				if (w[i][j] == null) continue;
 				cpy[i][j] = new double[w[i][j].length];
 				for (int k = 0; k < w[i][j].length; k++) {
 					cpy[i][j][k] = w[i][j][k];
@@ -447,14 +432,14 @@ public class NeuralNet {
 
 
 	private double computeAccuracy(Instance[] tune) {
-		
+
 		int correct = 0;
 
 		for (Instance t : tune) {
 			double[] out = this.predict(t.features);
 
 			double[] out2 = threshold(out);
-			//Trace.log("([", Format.matrix(t.target, 0), "],[", Format.matrix(out, 4), "], [", Format.matrix(out2, 0), "])");
+			// Trace.log("([", Format.matrix(t.target, 0), "],[", Format.matrix(out, 4), "], [", Format.matrix(out2, 0), "])");
 
 			boolean match = true;
 			for (int i = 0; i < t.target.length; i++) {
@@ -471,7 +456,7 @@ public class NeuralNet {
 		}
 
 		double acc = ((double) correct) / tune.length;
-		
+
 		return acc;
 	}
 
@@ -506,13 +491,13 @@ public class NeuralNet {
 					y[l][j] = g.eval(z);
 				}
 			}
-			
+
 			// if l is hidden layer set the bias
 			if (l < w.length - 1) {
 				y[l][0] = _bias;
 			}
 		}
-		
+
 		return y[y.length - 1];
 	}
 

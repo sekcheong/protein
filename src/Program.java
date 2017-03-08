@@ -9,8 +9,8 @@ import ml.learner.neuralnet.NeuralNet;
 import ml.learner.neuralnet.functions.*;
 import ml.learner.neuralnet.initializers.*;
 import ml.utils.tracing.*;
+import ml.utils.Console;
 import ml.utils.Format;
-
 
 public class Program {
 
@@ -155,7 +155,7 @@ public class Program {
 				.activationFunction(htan)
 				.weightInitializer(weightInit);
 
-		net.train(examples, 0.0025, 500, 0.00000005, 0.85, 0.00008);
+		net.train(examples, examples, 0.0025, 500, 0.00005, 0.85, 0.00008);
 
 		for (Instance t : m) {
 			double[] out = net.predict(t.features);
@@ -194,7 +194,7 @@ public class Program {
 				.activationFunction(sigmoid)
 				.weightInitializer(weightInit);
 
-		net.addLayer(4)
+		net.addLayer(5)
 				.activationFunction(sigmoid)
 				.weightInitializer(weightInit);
 
@@ -202,7 +202,7 @@ public class Program {
 				.activationFunction(sigmoid)
 				.weightInitializer(weightInit);
 
-		net.train(m, 0.5, 3000, 0.000000005, 0.7, 0.00008);
+		net.train(m, m, 0.5, 35000, 0.0000000005, 0.75, 0.0000);
 
 		for (Instance t : m) {
 			double[] out = net.predict(t.features);
@@ -224,7 +224,7 @@ public class Program {
 	}
 
 
-	private static void proteinSecondary(String trainFile, String testFile, int[] hiddenUnits) {
+	private static void proteinSecondary(String trainFile, String testFile, int hiddenUnits, double eta, int maxEpoch, double epsilon, double alpha, double lambda) {
 		DataReader reader = null;
 
 		try {
@@ -235,7 +235,7 @@ public class Program {
 			List<List<Amino>> val = reader.Read();
 
 			DataSet dataSet = new DataSet(val, 17);
-			DataSet[] subSets = dataSet.Split(0.8);
+			DataSet[] subSets = dataSet.Split(0.7);
 
 			Instance[] train = subSets[0].instances();
 			Instance[] tune = subSets[1].instances();
@@ -264,62 +264,51 @@ public class Program {
 
 			Function sigmoid = new Sigmoid();
 			Function linear = new Linear();
+			
 			WeightInitializer weightInit = new DefaultWeightInitializer();
 
 			int inputs = train[0].features.length;
 			int outputs = train[0].target.length;
 
-			for (int hu : hiddenUnits) {
+			NeuralNet net = new NeuralNet();
 
-				NeuralNet net = new NeuralNet();
+			net.addLayer(inputs)
+					.activationFunction(linear)
+					.weightInitializer(weightInit);
 
-				net.tune(tune);
+			net.addLayer(hiddenUnits)
+					.activationFunction(linear)
+					.weightInitializer(weightInit);
 
-				net.addLayer(inputs)
-						.activationFunction(linear)
-						.weightInitializer(weightInit);
+			net.addLayer(outputs)
+					.activationFunction(sigmoid)
+					.weightInitializer(weightInit);
 
-				net.addLayer(hu)
-						.activationFunction(linear)
-						.weightInitializer(weightInit);
+			watch = StopWatch.start();
 
-				net.addLayer(hu)
-						.activationFunction(linear)
-						.weightInitializer(weightInit);
+			net.train(train, tune, eta, maxEpoch, epsilon, alpha, lambda);
 
-				net.addLayer(outputs)
-						.activationFunction(sigmoid)
-						.weightInitializer(weightInit);
+			watch.stop();
+			
+			int correct = 0;
+			for (Instance t : test) {
+				double[] out = net.predict(t.features);
 
-				watch = StopWatch.start();
-
-				net.train(train, tune, 0.03, 100, 0.006, 0.75, 0.00005);
-
-				watch.stop();
-
-				int correct = 0;
-				for (Instance t : test) {
-					double[] out = net.predict(t.features);
-
-					out = threshold(out);
-					// Trace.log("([", Format.matrix(t.target, 0), "],[", Format.matrix(out, 0), "]");
-
-					boolean match = true;
-					for (int i = 0; i < t.target.length; i++) {
-						if (t.target[i] != out[i]) {
-							match = false;
-						}
+				out = threshold(out);
+				
+				boolean match = true;
+				for (int i = 0; i < t.target.length; i++) {
+					if (t.target[i] != out[i]) {
+						match = false;
 					}
-					if (match) {
-						correct++;
-					}
-
-					// Trace.log("([", Format.matrix(threshold(t.target), 0),"],[",Format.matrix(t.target,0), "])");
+				}
+				if (match) {
+					correct++;
 				}
 
 				double acc = ((double) correct) / test.length;
-				Trace.enabled = true;
-				Trace.log(hu, ", ", Format.sprintf("%2.4f", acc), ", ", watch.elapsedTime(), ", ", net.epoch());
+				
+				Trace.log(hiddenUnits, ", ", Format.sprintf("%2.4f", acc), ", ", watch.elapsedTime(), ", ", net.epoch());
 			}
 		}
 		catch (Exception ex) {
@@ -331,14 +320,53 @@ public class Program {
 
 	public static void main(String[] args) {
 
-		int[] hu = new int[] { 1, 2, 3, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110,
-				120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220,
-				230, 240, 250, 300, 400, 500, 600, 700, 800, 900, 1000 };
+		// int[] hu = new int[] { 1, 2, 3, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240, 250, 300, 400, 500, 600,
+		// 700, 800, 900, 1000 };
 
-		proteinSecondary(args[0], args[1], hu);
+		int hiddenUnits = 120;
+		double eta = 0.05;
+		int maxEpoch = 100;
+		double epsilon = 0.03;
+		double alpha = 0.75;
+		double lambda = 0.00008;
+		String trainFile;
+		String testFile;
+
+		try {
+			trainFile = args[0];
+			testFile = args[1];
+
+			if (args.length > 2) {
+				hiddenUnits = Integer.parseInt(args[2]);
+			}
+
+			if (args.length > 3) {
+				eta = Double.parseDouble(args[3]);
+			}
+
+			if (args.length > 4) {
+				maxEpoch = Integer.parseInt(args[4]);
+			}
+
+			if (args.length > 5) {
+				epsilon = Double.parseDouble(args[5]);
+			}
+
+			if (args.length > 6) {
+				alpha = Double.parseDouble(args[6]);
+			}
+
+			if (args.length > 7) {
+				lambda = Double.parseDouble(args[7]);
+			}
+		}
+		catch (Exception ex) {
+			Console.writeLine("Invalid parameters.");
+		}
+
+		// proteinSecondary(args[0], args[1], hu);
 		// stepByStepExamples();
 		// xorExamples(3000);
-
 		// sineExamples(10000);
 	}
 

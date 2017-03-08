@@ -153,7 +153,7 @@ public class DataSet {
 			// AminoAcid.secondaryLabel(second));
 			Amino acid = src.remove(0);
 			if (acid.primary() != first || acid.secondary() != second) {
-				Trace.Error("Corrupted");
+				Trace.TraceError("corrupted");
 				return false;
 			}
 		}

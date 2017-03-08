@@ -2,19 +2,8 @@ package ml.utils.tracing;
 
 public class Trace {
 
-	public static boolean enabled = true;
-
-
-	public static void Write(String format, Object... args) {
-		if (!Trace.enabled) return;
+	public static void printf(String format, Object... args) {
 		System.out.printf((String) format, args);
-	}
-
-
-	public static void WriteLine(String format, Object... args) {
-		if (!Trace.enabled) return;
-		Trace.Write(format, args);
-		System.out.println();
 	}
 
 
@@ -24,7 +13,7 @@ public class Trace {
 
 
 	public static void log(Object msg, Object... moreMsgs) {
-		if (!Trace.enabled) return;
+
 		System.out.print(msg);
 		for (Object s : moreMsgs) {
 			System.out.print(s);
@@ -33,16 +22,15 @@ public class Trace {
 	}
 
 
-	public static void Error(Object msg) {
-		Error(msg, new Object[0]);
+	public static void traceError(Object msg) {
+		TraceError(msg, new Object[0]);
 	}
 
 
-	public static void Error(Object msg, Object... moreMsgs) {
-		if (!Trace.enabled) return;
-		System.out.print(msg);
+	public static void TraceError(Object msg, Object... moreMsgs) {
+		System.err.print(msg);
 		for (Object s : moreMsgs) {
-			System.out.print(s);
+			System.err.print(s);
 		}
 		System.err.println();
 	}

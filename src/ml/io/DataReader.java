@@ -65,7 +65,7 @@ public class DataReader {
 					protein.add(amino);
 				}
 				catch (Exception ex) {
-					Console.Error("Unable to process sequence at line ", lineNo, ":", line);
+					Console.writeLine("Unable to process sequence at line ", lineNo, ":", line);
 				}
 			}
 		}		
