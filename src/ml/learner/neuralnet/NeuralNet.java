@@ -41,17 +41,16 @@ public class NeuralNet {
 	private Random _random = new Random();
 
 
-	public NeuralNet() {
-	}
+	public NeuralNet() { }
 
 
 	public double[][][] weights() {
-		return _w;
+		return copyWeights(_w);
 	}
 
 
 	public void weights(double[][][] weights) {
-		_w = weights;
+		_w = copyWeights(weights);
 	}
 
 
@@ -106,17 +105,17 @@ public class NeuralNet {
 
 
 	public void train(Instance[] train, double eta, int maxEpoch, double epsilon) {
-		train(train, null, eta, maxEpoch, epsilon, 0, 0);
+		train(train, train, eta, maxEpoch, epsilon, 0, 0);
 	}
 
 
 	public void train(Instance[] train, double eta, int maxEpoch, double epsilon, double alpha) {
-		train(train, null, eta, maxEpoch, epsilon, alpha, 0);
+		train(train, train, eta, maxEpoch, epsilon, alpha, 0);
 	}
 
 
 	public void train(Instance[] train, double eta, int maxEpoch, double epsilon, double alpha, double lambda) {
-		train(train, null, eta, maxEpoch, epsilon, alpha, lambda);
+		train(train, train, eta, maxEpoch, epsilon, alpha, lambda);
 	}
 
 
@@ -344,8 +343,7 @@ public class NeuralNet {
 				for (int i = 0; i < w[l][j].length; i++) {
 					double momentum = alpha * (w[l][j][i] - w0[l][j][i]);
 					double weightDecay = eta * lambda * w[l][j][i];
-					w[l][j][i] = w[l][j][i] + momentum + eta * delta[l][j] * y[l - 1][i] - weightDecay;
-					// w[l][j][i] = w[l][j][i] * m[l-1][i];
+					w[l][j][i] = w[l][j][i] + momentum + eta * delta[l][j] * y[l - 1][i] - weightDecay;					
 				}
 			}
 		}
@@ -436,8 +434,7 @@ public class NeuralNet {
 		for (Instance t : tune) {
 			double[] out = this.predict(t.features);
 
-			double[] out2 = threshold(out);
-			// Trace.log("([", Format.matrix(t.target, 0), "],[", Format.matrix(out, 4), "], [", Format.matrix(out2, 0), "])");
+			double[] out2 = threshold(out);			
 
 			boolean match = true;
 			for (int i = 0; i < t.target.length; i++) {
@@ -449,8 +446,7 @@ public class NeuralNet {
 			if (match) {
 				correct++;
 			}
-
-			// Trace.log("([", Format.matrix(threshold(t.target), 0),"],[",Format.matrix(t.target,0), "])");
+			
 		}
 
 		double acc = ((double) correct) / tune.length;
@@ -458,15 +454,6 @@ public class NeuralNet {
 		return acc;
 	}
 
-
-	// private void filterOutput(double[] out) {
-	// int max = 0;
-	// for (int i = 1; i < out.length; i++) {
-	// if (out[i] > out[max]) max = i;
-	// out[i] = 0;
-	// }
-	// out[max] = 1.0;
-	// }
 
 	private double[] predict(Layer[] layers, double[][][] w, double[][] m, double[][] u, double[][] y, double[] x) {
 		Function g = layers[1].activationFunction();
