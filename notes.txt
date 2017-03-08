@@ -286,6 +286,209 @@ net.train(train, 0.5, 50, 0.05, 0.25);
 800, 0.6302647412755716, 95.726, 2
 900, 0.6425992779783394, 100.968, 2
 1000, 0.6380866425992779, 115.414, 2
+///////////
 
+
+	private static void xorExamples(int epochs) {
+
+		Instance[] m = new Instance[4];
+
+		m[0] = new Instance();
+		m[0].features = new double[] { 0, 0 };
+		m[0].target = new double[] { 0 };
+
+		m[1] = new Instance();
+		m[1].features = new double[] { 0, 1 };
+		m[1].target = new double[] { 1 };
+
+		m[2] = new Instance();
+		m[2].features = new double[] { 1, 0 };
+		m[2].target = new double[] { 1 };
+
+		m[3] = new Instance();
+		m[3].features = new double[] { 1, 1 };
+		m[3].target = new double[] { 0 };
+
+		NeuralNet net = new NeuralNet();
+
+		Function sigmoid = new Sigmoid();
+		WeightInitializer weightInit = new DefaultWeightInitializer();
+
+		net.addLayer(2)
+				.activationFunction(sigmoid)
+				.weightInitializer(weightInit);
+
+		net.addLayer(5)
+				.activationFunction(sigmoid)
+				.weightInitializer(weightInit);
+
+		net.addLayer(1)
+				.activationFunction(sigmoid)
+				.weightInitializer(weightInit);
+
+		net.train(m, m, 0.5, 35000, 0.0000000005, 0.75, 0.0000);
+
+		for (Instance t : m) {
+			double[] out = net.predict(t.features);
+			Trace.log("[", Format.matrix(t.features, 4), "]=[", Format.matrix(out, 4), "]");
+		}
+	}
+	
+	
+
+public class Program {
+
+	private static Instance[] makeExamples() {
+		Instance[] examples = new Instance[4];
+		Instance x;
+		x = new Instance(3, 2);
+		x.features[0] = 0.2;
+		x.features[1] = 0.9;
+		x.features[2] = 0.4;
+		x.target[0] = 0.7;
+		x.target[1] = 0.3;
+		examples[0] = x;
+
+		x = new Instance(3, 2);
+		x.features[0] = 0.1;
+		x.features[1] = 0.3;
+		x.features[2] = 0.5;
+		x.target[0] = 0.6;
+		x.target[1] = 0.4;
+		examples[1] = x;
+
+		x = new Instance(3, 2);
+		x.features[0] = 0.9;
+		x.features[1] = 0.7;
+		x.features[2] = 0.8;
+		x.target[0] = 0.9;
+		x.target[1] = 0.5;
+		examples[2] = x;
+
+		x = new Instance(3, 2);
+		x.features[0] = 0.6;
+		x.features[1] = 0.4;
+		x.features[2] = 0.3;
+		x.target[0] = 0.2;
+		x.target[1] = 0.8;
+		examples[3] = x;
+		return examples;
+	}
+
+
+	private static Instance[] makeSimpleExamples() {
+		Instance[] examples = new Instance[1];
+		Instance x;
+		x = new Instance();
+		x.features = new double[] { 0.3, 0.7 };
+		x.target = new double[] { 1 };
+		examples[0] = x;
+		return examples;
+	}
+
+
+	private static void stepByStepExamples() {
+		NeuralNet net = new NeuralNet();
+
+		Function sigmoid = new Sigmoid();
+		WeightInitializer weightInit = new DefaultWeightInitializer();
+
+		net.addLayer(2)
+				.activationFunction(sigmoid)
+				.weightInitializer(weightInit);
+
+		net.addLayer(2)
+				.activationFunction(sigmoid)
+				.weightInitializer(weightInit);
+
+		net.addLayer(2)
+				.activationFunction(sigmoid)
+				.weightInitializer(weightInit);
+
+		double[][][] w = new double[3][][];
+		w[0] = new double[2][2];
+		w[1] = new double[2][3];
+		w[2] = new double[2][3];
+
+		w[1][0][0] = .35;
+		w[1][0][1] = .15;
+		w[1][0][2] = .20;
+
+		w[1][1][0] = .35;
+		w[1][1][1] = .25;
+		w[1][1][2] = .30;
+
+		w[2][0][0] = .60;
+		w[2][0][1] = .40;
+		w[2][0][2] = .45;
+
+		w[2][1][0] = .60;
+		w[2][1][1] = .50;
+		w[2][1][2] = .55;
+
+		Instance[] o = new Instance[1];
+		o[0] = new Instance();
+		o[0].features = new double[] { .05, .10 };
+		o[0].target = new double[] { .01, .99 };
+
+		net.weights(w);
+		net.train(o, 0.5, 0, 0, 0.05, 100000);
+
+		double[] f = new double[] { 0.05, 0.1 };
+		double[] out = net.predict(f);
+		Trace.log("[", Format.matrix(f), "]=[", Format.matrix(out), "]");
+	}
+
+
+	private static void sineExamples(int epochs) {
+		double delta = Math.PI / 1000;
+		double r = 0;
+		List<Instance> m = new ArrayList<Instance>();
+
+		while (r < (2 * Math.PI)) {
+			Trace.log("sine(", r, ")=", Math.sin(r));
+			r = r + delta;
+			Instance x = new Instance();
+			x.features = new double[] { r };
+			x.target = new double[] { Math.sin(r) };
+			m.add(x);
+		}
+
+		NeuralNet net = new NeuralNet();
+		Function htan = new HyperbolicTangent();
+		WeightInitializer weightInit = new DefaultWeightInitializer();
+		Instance[] examples = m.toArray(new Instance[m.size()]);
+
+		net.addLayer(1)
+				.activationFunction(htan)
+				.weightInitializer(weightInit);
+
+		net.addLayer(100)
+				.activationFunction(htan)
+				.weightInitializer(weightInit);
+
+		net.addLayer(100)
+				.activationFunction(htan)
+				.weightInitializer(weightInit);
+
+		net.addLayer(100)
+				.activationFunction(htan)
+				.weightInitializer(weightInit);
+
+		net.addLayer(1)
+				.activationFunction(htan)
+				.weightInitializer(weightInit);
+
+		net.train(examples, examples, 0.0025, 500, 0.00005, 0.85, 0.00008);
+
+		for (Instance t : m) {
+			double[] out = net.predict(t.features);
+			Trace.log("(", Format.matrix(t.target, 4), ",", Format.matrix(out, 4), ")");
+		}
+
+	}
+
+	
+	
 
 

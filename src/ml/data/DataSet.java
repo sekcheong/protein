@@ -5,6 +5,7 @@ import java.util.List;
 
 import ml.utils.tracing.Trace;
 
+
 public class DataSet {
 
 	private List<List<Amino>> _dataSet;
@@ -172,29 +173,35 @@ public class DataSet {
 	}
 
 
-	public DataSet[] Split(double ratio) {
-		List<List<Amino>> src = new ArrayList<List<Amino>>(_proteins);
-		List<List<Amino>> dest = new ArrayList<List<Amino>>();
-		DataSet[] ret = new DataSet[2];
+	// put the 5th, 10th, 15th, …, 125th in your TUNE SET (counting from 1)
+	// put the 6th, 11th, 16th, …, 126th in your TEST SET (counting from 1)
+	// put the rest in your TRAIN set
 
-		int target = (int) (_size * ratio);
-		int size = 0;
-		// Trace.log("target:", target);
+	public DataSet[] Split() {
+		List<List<Amino>> tune = new ArrayList<List<Amino>>();
+		List<List<Amino>> test = new ArrayList<List<Amino>>();
+		List<List<Amino>> train = new ArrayList<List<Amino>>();
 
-		while (true) {
-			List<Amino> p = src.remove(0);
-			dest.add(p);
-			size = size + p.size();
-			if (size >= target) break;
+		DataSet[] ret = new DataSet[3];
+
+		int i = 1;
+		for (List<Amino> p : _proteins) {
+			if ((i % 5) == 0) {
+				tune.add(p);
+			}
+			else if ((i % 5) == 1 && (i > 5)) {
+				test.add(p);
+			}
+			else {
+				train.add(p);
+			}
+			i++;
 		}
 
 		try {
-			DataSet s1 = new DataSet(dest, this._windowSize);
-			DataSet s2 = new DataSet(src, this._windowSize);
-			ret[0] = s1;
-			ret[1] = s2;
-			// Trace.log("s1:", s1.size());
-			// Trace.log("s2:", s2.size());
+			ret[0] = new DataSet(train, this._windowSize);
+			ret[1] = new DataSet(tune, this._windowSize);
+			ret[2] = new DataSet(test, this._windowSize);
 		}
 		catch (Exception ex) {
 			ex.printStackTrace();

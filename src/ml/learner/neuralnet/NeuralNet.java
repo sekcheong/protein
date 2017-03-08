@@ -31,8 +31,6 @@ public class NeuralNet {
 
 	private double[][][][] _weightQueue;
 
-	private Instance[] _tune;
-
 	// the bias term
 	private double _bias = 1;
 
@@ -193,7 +191,7 @@ public class NeuralNet {
 
 			accuracy = computeAccuracy(tune);
 			// Trace.log( Format.sprintf("%2.4f", accuracy));
-			if ((preAccuracy - accuracy) > epsilon) {
+			if ((preAccuracy - accuracy) >= epsilon) {
 				_w = savedW;
 				break;
 			}

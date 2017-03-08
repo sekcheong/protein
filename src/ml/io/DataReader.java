@@ -9,52 +9,55 @@ import ml.data.Amino;
 import ml.utils.Console;
 import ml.utils.tracing.Trace;
 
+
 public class DataReader {
 
 	private BufferedReader _buffReader = null;
+
 
 	public DataReader(String fileName) throws Exception {
 		FileReader freader = new FileReader(fileName);
 		_buffReader = new BufferedReader(freader);
 	}
 
+
 	public List<List<Amino>> Read() throws Exception {
 
 		List<List<Amino>> proteins = new ArrayList<List<Amino>>();
 		List<Amino> protein = null;
-		
+
 		int lineNo = 0;
-		
+
 		while (true) {
-						
+
 			String line = _buffReader.readLine();
 			lineNo++;
-			
+
 			if (line == null) {
 				if (protein != null) {
 					proteins.add(protein);
 				}
 				break;
 			}
-			
+
 			line = line.trim();
-			
-			//skip comment line
+
+			// skip comment line
 			if (line.startsWith("#") || line.startsWith("//")) {
 				continue;
 			}
 
-			//starts of a new protein sequence
-			if (line.startsWith("<>")) {				
+			// starts of a new protein sequence
+			if (line.startsWith("<>")) {
 				if (protein != null) {
 					proteins.add(protein);
 				}
 				protein = new ArrayList<Amino>();
 				continue;
 			}
-			
-			//skip the end of protein mark
-			if (line.toUpperCase().startsWith("END")|| line.toUpperCase().startsWith("<END") || line.toUpperCase().startsWith("<END>")) {
+
+			// skip the end of protein mark
+			if (line.toUpperCase().startsWith("END") || line.toUpperCase().startsWith("<END") || line.toUpperCase().startsWith("<END>")) {
 				continue;
 			}
 
@@ -68,16 +71,16 @@ public class DataReader {
 					Console.writeLine("Unable to process sequence at line ", lineNo, ":", line);
 				}
 			}
-		}		
-		
+		}
+
 		int count = 0;
 		for (List<Amino> p : proteins) {
 			count += p.size();
 		}
-		
-		Trace.log("Total proteins:", proteins.size());
-		Trace.log("Total aminos  :", count);
-		
+
+		//.log("Total proteins:", proteins.size());
+		//Trace.log("Total aminos  :", count);
+
 		return proteins;
 	}
 }
