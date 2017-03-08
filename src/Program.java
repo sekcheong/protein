@@ -168,9 +168,9 @@ public class Program {
 		// Console.writeLine("Invalid parameters.");
 		// }
 
-		for (int i=1; i<=100; i=i+3) {
-			double[] acc = new double[10];
-			for (int j=0; j<10; j++) {
+		for (int i=1; i<=100; i++) {
+			double[] acc = new double[15];
+			for (int j=0; j<acc.length; j++) {
 				acc [j]= proteinSecondary(dataFile, i, eta, maxEpoch, epsilon, alpha, lambda);
 			}
 			double avg = ml.math.Vector.sigma(acc) / acc.length;
