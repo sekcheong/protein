@@ -11,6 +11,7 @@ import ml.utils.tracing.*;
 import ml.utils.Console;
 import ml.utils.Format;
 
+
 public class Tests {
 
 	private static double[] threshold(double[] values) {
@@ -83,14 +84,6 @@ public class Tests {
 		int inputs = train[0].features.length;
 		int outputs = train[0].target.length;
 
-		double[][][][] savedWeights;
-		double maxAccuracy = 0;
-		int max = 0;
-		int models = 5;
-
-		savedWeights = new double[models][][][];
-		double[] accuracys = new double[models];
-
 		NeuralNet net = new NeuralNet();
 
 		net.addLayer(inputs)
@@ -155,8 +148,8 @@ public class Tests {
 		}
 
 		int trails = 3;
-		
-		if (args.length>1) {
+
+		if (args.length > 1) {
 			try {
 				trails = Integer.parseInt(args[1]);
 			}
@@ -164,10 +157,10 @@ public class Tests {
 				Console.writeLine("Error:" + ex.getMessage());
 			}
 		}
-		
-		
+
 		Console.writeLine("%% Number of trails ", trails);
 		Console.writeLine("%% Test without regularizations");
+
 		int hiddenUnits = 9;
 		int maxEpoch = 100;
 
@@ -176,12 +169,45 @@ public class Tests {
 		double alpha = 0.0;
 		double lambda = 0.0;
 
-		experiment(args[0], hiddenUnits, maxEpoch, eta, epsilon, alpha, lambda , 5);
+		experiment(args[0], hiddenUnits, maxEpoch, eta, epsilon, alpha, lambda, trails);
 		Console.writeLine("");
+
+		eta = 0.01;
+		epsilon = 0.001;
+		alpha = 0.75;
+		lambda = 0.0;
+
+		Console.writeLine("%% Test hidden units");
+		for (int hu : new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 20, 25, 30, 40, 50, 70, 90, 110, 130, 150 }) {
+			experiment(args[0], hu, maxEpoch, eta, epsilon, alpha, lambda, trails);
+			Console.writeLine("");
+		}
+
+		eta = 0.01;
+		epsilon = 0.001;
+		alpha = 0.0;
+		lambda = 0.0;
 
 		Console.writeLine("%% Test momentum terms (alpha)");
 		for (double a : new double[] { 0.10, 0.15, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.75, 0.80, 0.85, 0.90, 0.95 }) {
-			experiment(args[0], hiddenUnits, maxEpoch, eta, epsilon, a, lambda, 5);
+			experiment(args[0], hiddenUnits, maxEpoch, eta, epsilon, a, lambda, trails);
+			Console.writeLine("");
+		}
+
+		Console.writeLine("%% Test weight decay (lambda)");
+		for (double l : new double[] { 0.000003, 0.000005, 0.00001, 0.00002, 0.00003, 0.00004, 0.00005, 0.00006, 0.00007, 0.00008, 0.00009, 0.001 }) {
+			experiment(args[0], hiddenUnits, maxEpoch, eta, epsilon, alpha, l, trails);
+			Console.writeLine("");
+		}
+
+		maxEpoch = 250;
+		eta = 0.01;
+		epsilon = 0.001;
+		alpha = 0.75;
+		lambda = 0.0;
+		Console.writeLine("%% Test learning rate (eta)");
+		for (double e : new double[] { 0.0005, 0.0007, 0.001, 0.002, 0.003, 0.004, 0.005, 0.006, 0.007, 0.008, 0.009, 0.01, 0.02, 0, 03, 0.04, 0.05 }) {
+			experiment(args[0], hiddenUnits, maxEpoch, e, epsilon, alpha, lambda, trails);
 			Console.writeLine("");
 		}
 	}
