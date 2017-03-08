@@ -1,6 +1,4 @@
 import java.util.List;
-import java.util.Vector;
-
 import ml.data.Amino;
 import ml.data.DataSet;
 import ml.data.Instance;
@@ -8,7 +6,6 @@ import ml.io.DataReader;
 import ml.learner.neuralnet.NeuralNet;
 import ml.learner.neuralnet.functions.*;
 import ml.learner.neuralnet.initializers.*;
-import ml.utils.tracing.*;
 import ml.utils.Console;
 import ml.utils.Format;
 
@@ -57,10 +54,11 @@ public class Lab2 {
 
 			Console.writeLine(getStructureName(t.target), "     ", getStructureName(out));
 		}
+		
 		double acc = ((double) correct) / test.length;
 		Console.writeLine("");
 		Console.writeLine("Total samples      :", test.length);
-		Console.writeLine("Corrected predicted:", correct);
+		Console.writeLine("Correct prediction :", correct);
 		Console.writeLine("Accuracy           :", Format.sprintf("%1.4f", acc * 100), "%");
 	}
 
@@ -89,16 +87,14 @@ public class Lab2 {
 	private static void predictSecondaryProtein(String dataFile) {
 
 		int hiddenUnits = 9;
+		int maxEpoch = 100;
 
-		double eta = 0.05;
+		double eta = 0.01;
+		double epsilon = 0.001;
+		double alpha = 0.90;
+		double lambda = 0.0;
 
-		int maxEpoch = 50;
-
-		double epsilon = 0.007;
-
-		double alpha = 0.725;
-
-		double lambda = 0.000008;
+		int repeat = 5;
 
 		DataReader reader = null;
 		Instance[] train = null;
@@ -123,7 +119,7 @@ public class Lab2 {
 		}
 
 		if (train.length < 3000) {
-			maxEpoch = 100;
+			maxEpoch = 300;
 		}
 
 		Function sigmoid = new Sigmoid();
@@ -137,10 +133,9 @@ public class Lab2 {
 		double[][][][] savedWeights;
 		double maxAccuracy = 0;
 		int max = 0;
-		int models = 5;
 
-		savedWeights = new double[models][][][];
-		double[] accuracys = new double[models];
+		savedWeights = new double[repeat][][][];
+		double[] accuracys = new double[repeat];
 
 		NeuralNet net = new NeuralNet();
 
@@ -157,7 +152,7 @@ public class Lab2 {
 				.weightInitializer(weightInit);
 
 		// train x models and take the most accurate one
-		for (int i = 0; i < models; i++) {
+		for (int i = 0; i < repeat; i++) {
 
 			net.train(train, tune, eta, maxEpoch, epsilon, alpha, lambda);
 
