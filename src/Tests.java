@@ -11,7 +11,6 @@ import ml.utils.tracing.*;
 import ml.utils.Console;
 import ml.utils.Format;
 
-
 public class Tests {
 
 	private static double[] threshold(double[] values) {
@@ -136,7 +135,7 @@ public class Tests {
 		avg = ml.math.Vector.sigma(accu) / accu.length;
 		avgTime = ml.math.Vector.sigma(time) / time.length;
 		Console.writeLine("");
-		Console.writeLine(avg * 100, ", ", min * 100, ", ", max * 100, ",", avgTime);
+		Console.writeLine(avg * 100, ", ", min * 100, ", ", max * 100, ",", avgTime, ",", hiddenUnits, ",", eta, ",", epsilon, ",", alpha, ",", lambda);
 	}
 
 
@@ -178,7 +177,7 @@ public class Tests {
 		lambda = 0.0;
 
 		Console.writeLine("%% Test hidden units");
-		for (int hu : new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 20, 25, 30, 40, 50, 70, 90, 110, 130, 150 }) {
+		for (int hu : new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 20, 25, 30, 40, 50, 70, 90, 110, 130, 150, 160, 170, 180, 190, 200 }) {
 			experiment(args[0], hu, maxEpoch, eta, epsilon, alpha, lambda, trails);
 			Console.writeLine("");
 		}
@@ -189,7 +188,7 @@ public class Tests {
 		lambda = 0.0;
 
 		Console.writeLine("%% Test momentum terms (alpha)");
-		for (double a : new double[] { 0.10, 0.15, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.75, 0.80, 0.85, 0.90, 0.95 }) {
+		for (double a : new double[] { 0.05, 0.10, 0.15, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.75, 0.80, 0.85, 0.90, 0.95 }) {
 			experiment(args[0], hiddenUnits, maxEpoch, eta, epsilon, a, lambda, trails);
 			Console.writeLine("");
 		}
@@ -206,7 +205,7 @@ public class Tests {
 		alpha = 0.75;
 		lambda = 0.0;
 		Console.writeLine("%% Test learning rate (eta)");
-		for (double e : new double[] { 0.0005, 0.0007, 0.001, 0.002, 0.003, 0.004, 0.005, 0.006, 0.007, 0.008, 0.009, 0.01, 0.02, 0.03, 0.04, 0.05 }) {
+		for (double e : new double[] { 0.0005, 0.0007, 0.001, 0.002, 0.003, 0.004, 0.005, 0.006, 0.007, 0.008, 0.009, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09 }) {
 			experiment(args[0], hiddenUnits, maxEpoch, e, epsilon, alpha, lambda, trails);
 			Console.writeLine("");
 		}
