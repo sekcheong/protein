@@ -177,11 +177,12 @@ public class Tests {
 		lambda = 0.0;
 
 		Console.writeLine("%% Test hidden units");
-		for (int hu : new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 20, 25, 30, 40, 50, 70, 90, 110, 130, 150, 160, 170, 180, 190, 200 }) {
+		for (int hu : new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 20, 25, 30, 40, 50, 70, 90, 100, 110, 130, 150, 160, 170, 180, 190, 200, 250, 300, 350, 400, 450, 500 }) {
 			experiment(args[0], hu, maxEpoch, eta, epsilon, alpha, lambda, trails);
 			Console.writeLine("");
 		}
 
+		
 		eta = 0.01;
 		epsilon = 0.001;
 		alpha = 0.0;
@@ -199,6 +200,7 @@ public class Tests {
 			Console.writeLine("");
 		}
 
+		
 		maxEpoch = 250;
 		eta = 0.01;
 		epsilon = 0.001;
