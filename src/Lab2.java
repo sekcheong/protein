@@ -87,9 +87,9 @@ public class Lab2 {
 	private static void predictSecondaryProtein(String dataFile) {
 
 		int hiddenUnits = 9;
-		int maxEpoch = 100;
+		int maxEpoch = 250;
 
-		double eta = 0.01;
+		double eta = 0.009;
 		double epsilon = 0.001;
 		double alpha = 0.90;
 		double lambda = 0.0;
@@ -119,7 +119,7 @@ public class Lab2 {
 		}
 
 		if (train.length < 3000) {
-			maxEpoch = 300;
+			maxEpoch = 350;
 		}
 
 		Function sigmoid = new Sigmoid();
