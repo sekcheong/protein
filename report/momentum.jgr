@@ -1,0 +1,28 @@
+
+newgraph
+xaxis size 3 min 0 max 1 mhash 4 label : Momentum
+yaxis size 3 min 0 max 100  mhash 4 label : Accuracy
+
+title : Momentum vs. Accuracy
+
+
+newcurve marktype none linetype solid label 
+  pts 
+0		56.7616099071207
+0.05	56.96388029
+0.1		57.374613
+0.15	57.04747162
+0.25	56.64602683
+0.3		57.30340557
+0.35	57.71001032
+0.4		56.70175439
+0.45	57.0619195
+0.5		57.99380805
+0.55	59.00928793
+0.6		56.78844169
+0.65	59.07017544
+0.75	62.23219814
+0.8		60.79566563
+0.85	62.12590299
+0.9		61.56037152
+0.95	60.91434469
