@@ -92,7 +92,7 @@ public class Lab2 {
 		double eta = 0.009;
 		double epsilon = 0.001;
 		double alpha = 0.90;
-		double lambda = 0.0;
+		double lambda = 0.00006;
 
 		int repeat = 5;
 

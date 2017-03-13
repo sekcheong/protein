@@ -2,8 +2,6 @@ newgraph
 xaxis size 3 min 0.0005 max 0.09 label : Learning Rate
 yaxis size 3 min 56 max 64 hash 1 mhash 8 label : Accuracy
 
-title : Learning Rate vs. Accuracy
-
 
 newcurve marktype none linetype solid label 
   pts 

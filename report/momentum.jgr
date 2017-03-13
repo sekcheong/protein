@@ -1,10 +1,7 @@
 
 newgraph
 xaxis size 3 min 0 max 1 mhash 4 label : Momentum
-yaxis size 3 min 0 max 100  mhash 4 label : Accuracy
-
-title : Momentum vs. Accuracy
-
+yaxis size 3 min 56 max 64 hash 1 mhash 8 label : Accuracy
 
 newcurve marktype none linetype solid label 
   pts 

@@ -2,9 +2,6 @@ newgraph
 xaxis size 3 min 1 max 100 hash 9 mhash 4 label :  Hidden units
 yaxis size 3 min 56 max 64 hash 1 mhash 8 label : Accuracy
 
-title : Hidden units vs. Accuracy
-
-
 newcurve marktype none linetype solid label 
   pts 
 1	57.86480908

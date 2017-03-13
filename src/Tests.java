@@ -196,7 +196,7 @@ public class Tests {
 		}
 
 		Console.writeLine("%% Test weight decay (lambda)");
-		for (double l : new double[] { 0.000003, 0.000005, 0.00001, 0.00002, 0.00003, 0.00004, 0.00005, 0.00006, 0.00007, 0.00008, 0.00009, 0.0010 }) {
+		for (double l : new double[] { 0.000001, 0.000002, 0.000003, 0.000005, 0.00001, 0.00002, 0.00003, 0.00004, 0.00005, 0.00006, 0.00007, 0.00008, 0.00009, 0.0010 }) {
 			experiment(args[0], hiddenUnits, maxEpoch, eta, epsilon, alpha, l, trails);
 			Console.writeLine("");
 		}
@@ -206,7 +206,7 @@ public class Tests {
 		eta = 0.01;
 		epsilon = 0.001;
 		alpha = 0.75;
-		lambda = 0.0;
+		lambda = 0; //0.000060;
 		Console.writeLine("%% Test learning rate (eta)");
 
 		for (double e : new double[] { 0.0005, 0.0007, 0.001, 0.002, 0.003, 0.004, 0.005, 0.006, 0.007, 0.008, 0.009, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09 }) {
